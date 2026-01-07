@@ -19,7 +19,7 @@
 }
 
 .day {
-  border-radius: 3px;
+  border-radius: clamp(2px, 1vmin, 8px);
   display: flex;
   flex-direction: column;
   align-items: center;
