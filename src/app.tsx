@@ -29,21 +29,21 @@ function formatDate(date: Date): string {
 }
 
 function calculateGrid(totalDays: number, width: number, height: number): { cols: number; rows: number } {
-  // Calculate ideal cell size to make cells as square as possible
-  // while fitting all days on screen
+  // Minimize empty slots (dead space), with tie-breaker for squarest cells
   let bestCols = 1
   let bestRows = totalDays
-  let bestCellSize = 0
+  let bestEmpty = totalDays - 1
+  let bestAspectDiff = Infinity
 
   for (let cols = 1; cols <= totalDays; cols++) {
     const rows = Math.ceil(totalDays / cols)
-    const cellWidth = width / cols
-    const cellHeight = height / rows
-    // Use the smaller dimension to ensure cells fit
-    const cellSize = Math.min(cellWidth, cellHeight)
+    const empty = cols * rows - totalDays
+    const cellAspect = (width / cols) / (height / rows)
+    const aspectDiff = Math.abs(cellAspect - 1)
 
-    if (cellSize > bestCellSize) {
-      bestCellSize = cellSize
+    if (empty < bestEmpty || (empty === bestEmpty && aspectDiff < bestAspectDiff)) {
+      bestEmpty = empty
+      bestAspectDiff = aspectDiff
       bestCols = cols
       bestRows = rows
     }
