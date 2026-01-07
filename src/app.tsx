@@ -165,7 +165,6 @@ export function App() {
       </div>
       <div class="info">
         <span>Week {currentWeek}, Day {currentDayInWeek}</span>
-        <span>{daysPassed} / {totalDays} days</span>
         <span>{progressPercent}%</span>
         <span>{timeRemaining}</span>
       </div>
