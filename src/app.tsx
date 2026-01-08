@@ -609,8 +609,8 @@ function WeeklyView({
           <div
             class="weekly-grid"
             style={{
-              gridTemplateColumns: `repeat(7, 1fr)`,
-              gridTemplateRows: `repeat(${totalWeeks}, 1fr)`,
+              gridTemplateColumns: `repeat(7, ${cellSize}px)`,
+              gridTemplateRows: `repeat(${totalWeeks}, ${cellSize}px)`,
               gap: `${gap}px`,
             }}
           >
