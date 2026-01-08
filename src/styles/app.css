@@ -79,6 +79,67 @@ body {
   --shadow-backdrop: rgba(0, 0, 0, 0.4);
 }
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Surfaces */
+    --color-background: #121212;
+    --color-surface: #1e1e1e;
+    --color-border: #38383a;
+
+    /* Text - inverted for dark backgrounds */
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #ebebf5;
+    --color-text-tertiary: #8e8e93;
+    --color-text-on-color: #ffffff;
+
+    /* Passed days - slightly brighter greens for dark mode */
+    --color-passed-odd: #63c17f;
+    --color-passed-even: #4fa86a;
+    --color-milestone-passed: #3d8a55;
+
+    /* Future days - subtle elevation from background */
+    --color-future-odd: #1c1c1e;
+    --color-future-odd-border: #38383a;
+    --color-future-even: #2c2c2e;
+    --color-future-even-border: #48484a;
+
+    /* Uncolored milestones */
+    --color-milestone-future: #3a3a3c;
+    --color-milestone-future-border: #48484a;
+
+    /* Milestone colors - increased vibrancy for dark mode */
+    --color-pink: #ff6b9d;
+    --color-purple: #a855f7;
+    --color-orange: #ffb340;
+    --color-teal: #22d3ee;
+    --color-blue: #3b82f6;
+    --color-red: #f87171;
+    --color-gold: #fbbf24;
+    --color-salmon: #fda4af;
+
+    /* Milestone text - dark text on bright colors */
+    --color-pink-text: #1c1c1e;
+    --color-purple-text: #f3e8f8;
+    --color-orange-text: #1c1c1e;
+    --color-teal-text: #1c1c1e;
+    --color-blue-text: #e3f2fd;
+    --color-red-text: #1c1c1e;
+    --color-gold-text: #1c1c1e;
+    --color-salmon-text: #1c1c1e;
+
+    /* Shadows - more subtle in dark mode */
+    --shadow-subtle: rgba(0, 0, 0, 0.3);
+    --shadow-text: rgba(0, 0, 0, 0.4);
+    --shadow-medium: rgba(0, 0, 0, 0.5);
+    --shadow-strong: rgba(0, 0, 0, 0.6);
+    --shadow-backdrop: rgba(0, 0, 0, 0.7);
+  }
+
+  body {
+    background: #121212;
+  }
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
 }
