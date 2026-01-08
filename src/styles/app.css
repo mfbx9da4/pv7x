@@ -81,6 +81,10 @@ body {
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* Primary accent - brighter for dark mode */
+    --color-primary: #7dcea0;
+    --color-primary-light: #a8e6c3;
+
     /* Surfaces */
     --color-background: #1c1c1e;
     --color-surface: #2c2c2e;
