@@ -56,9 +56,12 @@ export function App() {
       }
     }
     updateSizes()
+    // Periodic recalc for standalone PWA mode where initial size can be wrong
+    const interval = setInterval(updateSizes, 500)
     window.addEventListener('resize', updateSizes)
     window.visualViewport?.addEventListener('resize', updateSizes)
     return () => {
+      clearInterval(interval)
       window.removeEventListener('resize', updateSizes)
       window.visualViewport?.removeEventListener('resize', updateSizes)
     }
