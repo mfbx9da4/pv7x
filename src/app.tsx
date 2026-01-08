@@ -490,11 +490,14 @@ function WeeklyView({
 
   if (isLandscape) {
     // Landscape: days are rows (vertical), weeks are columns (horizontal)
+    // Months on TOP, week numbers on BOTTOM
+    const gridWidth = totalWeeks * cellSize + (totalWeeks - 1) * gap
+
     return (
       <div class="weekly-view landscape">
         <div class="weekly-body">
           {/* Day labels column */}
-          <div class="weekly-day-labels" style={{ gap: `${gap}px`, marginTop: `${labelSize + 4}px` }}>
+          <div class="weekly-day-labels" style={{ gap: `${gap}px`, marginTop: `${(labelSize + 4) * 2}px` }}>
             {usedDayLabels.map((label, i) => (
               <span
                 key={i}
@@ -506,21 +509,36 @@ function WeeklyView({
             ))}
           </div>
 
-          {/* Grid with week labels */}
+          {/* Grid with labels */}
           <div class="weekly-grid-wrapper">
-            {/* Week labels row */}
-            <div class="weekly-week-labels" style={{ height: `${(labelSize + 4) * (weekLabels.some(l => l.month) ? 2 : 1)}px` }}>
-              {weekLabels.map((label, i) => (
+            {/* Month labels row (TOP) */}
+            <div class="weekly-month-labels-row" style={{ height: `${labelSize + 4}px`, width: `${gridWidth}px` }}>
+              {weekLabels.filter(l => l.month).map((label, i) => (
                 <span
                   key={i}
-                  class="weekly-week-label"
+                  class="weekly-month-label"
                   style={{
                     left: `${label.position * (cellSize + gap)}px`,
                     fontSize: `${labelSize}px`,
                   }}
                 >
-                  {label.month && <span class="week-label-month">{label.month}</span>}
-                  <span class="week-label-num">{label.weekNum}</span>
+                  {label.month}
+                </span>
+              ))}
+            </div>
+
+            {/* Week numbers row (BOTTOM, just above grid) */}
+            <div class="weekly-week-nums-row" style={{ height: `${labelSize + 4}px`, width: `${gridWidth}px` }}>
+              {weekLabels.map((label, i) => (
+                <span
+                  key={i}
+                  class="weekly-week-num"
+                  style={{
+                    left: `${label.position * (cellSize + gap)}px`,
+                    fontSize: `${labelSize}px`,
+                  }}
+                >
+                  {label.weekNum}
                 </span>
               ))}
             </div>
@@ -568,13 +586,16 @@ function WeeklyView({
     )
   } else {
     // Portrait: days are columns (horizontal), weeks are rows (vertical)
+    // Week numbers on LEFT, months on RIGHT
     const gridHeight = totalWeeks * cellSize + (totalWeeks - 1) * gap
+    const weekNumWidth = 20
+    const monthWidth = 28
 
     return (
       <div class="weekly-view portrait">
         <div class="weekly-body-portrait">
-          {/* Empty corner cell */}
-          <div class="weekly-corner" style={{ width: `${labelSpace}px`, height: `${labelSize + 4}px` }} />
+          {/* Empty corner left */}
+          <div class="weekly-corner" style={{ width: `${weekNumWidth}px`, height: `${labelSize + 4}px` }} />
 
           {/* Day labels row */}
           <div class="weekly-day-labels-row" style={{ gap: `${gap}px`, height: `${labelSize + 4}px` }}>
@@ -589,18 +610,22 @@ function WeeklyView({
             ))}
           </div>
 
-          {/* Week labels column */}
-          <div class="weekly-week-labels-col" style={{ width: `${labelSpace}px`, height: `${gridHeight}px` }}>
+          {/* Empty corner right */}
+          <div class="weekly-corner" style={{ width: `${monthWidth}px`, height: `${labelSize + 4}px` }} />
+
+          {/* Week numbers column (LEFT) */}
+          <div class="weekly-week-nums-col" style={{ width: `${weekNumWidth}px`, height: `${gridHeight}px` }}>
             {weekLabels.map((label, i) => (
               <span
                 key={i}
-                class="weekly-week-label"
+                class="weekly-week-num"
                 style={{
                   top: `${label.position * (cellSize + gap)}px`,
+                  height: `${cellSize}px`,
                   fontSize: `${labelSize}px`,
                 }}
               >
-                {label.month ? `${label.month} ${label.weekNum}` : label.weekNum}
+                {label.weekNum}
               </span>
             ))}
           </div>
@@ -632,6 +657,23 @@ function WeeklyView({
                 )
               )
             )}
+          </div>
+
+          {/* Month labels column (RIGHT) */}
+          <div class="weekly-month-labels-col" style={{ width: `${monthWidth}px`, height: `${gridHeight}px` }}>
+            {weekLabels.filter(l => l.month).map((label, i) => (
+              <span
+                key={i}
+                class="weekly-month-label"
+                style={{
+                  top: `${label.position * (cellSize + gap)}px`,
+                  height: `${cellSize}px`,
+                  fontSize: `${labelSize}px`,
+                }}
+              >
+                {label.month}
+              </span>
+            ))}
           </div>
         </div>
       </div>
