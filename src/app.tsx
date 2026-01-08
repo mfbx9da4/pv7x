@@ -307,7 +307,7 @@ export function App() {
           {days.map((day) => (
             <div
               key={day.index}
-              class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${day.annotation ? 'has-annotation' : ''}`}
+              class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${day.annotation ? 'has-annotation' : ''} ${tooltip?.day.index === day.index ? 'selected' : ''}`}
               style={day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : undefined}
               onPointerDown={(e) => handleDayPointerDown(e as unknown as PointerEvent, day)}
             >
@@ -335,6 +335,7 @@ export function App() {
           windowSize={windowSize}
           isLandscape={isLandscape}
           onDayPointerDown={handleDayPointerDown}
+          selectedDayIndex={tooltip?.day.index ?? null}
         />
       )}
       <div class="info">
@@ -385,11 +386,13 @@ function WeeklyView({
   windowSize,
   isLandscape,
   onDayPointerDown,
+  selectedDayIndex,
 }: {
   days: DayInfo[]
   windowSize: { width: number; height: number }
   isLandscape: boolean
   onDayPointerDown: (e: PointerEvent, day: DayInfo) => void
+  selectedDayIndex: number | null
 }) {
   const labelSpace = 42 // space for week labels like "Dec 12"
 
@@ -545,7 +548,7 @@ function WeeklyView({
                 return day ? (
                   <div
                     key={`${weekIndex}-${dayOfWeek}`}
-                    class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''}`}
+                    class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
                     style={{
                       gridColumn: weekIndex + 1,
                       gridRow: dayOfWeek + 1,
@@ -621,7 +624,7 @@ function WeeklyView({
                 day ? (
                   <div
                     key={`${weekIndex}-${dayOfWeek}`}
-                    class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''}`}
+                    class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
                     style={day.color ? { background: `var(--color-${day.color})` } : undefined}
                     onPointerDown={(e) => onDayPointerDown(e as unknown as PointerEvent, day)}
                   />

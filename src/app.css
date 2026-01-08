@@ -260,6 +260,11 @@
   cursor: pointer;
 }
 
+.day:active,
+.day.selected {
+  opacity: 0.6;
+}
+
 /* Tooltip */
 .day-tooltip {
   position: fixed;
@@ -601,6 +606,11 @@
   cursor: pointer;
   transition: transform 0.1s ease-out, opacity 0.1s ease-out;
   aspect-ratio: 1;
+}
+
+.weekly-cell:active:not(.empty),
+.weekly-cell.selected {
+  opacity: 0.6;
 }
 
 .weekly-cell.empty {
