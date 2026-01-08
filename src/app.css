@@ -437,26 +437,39 @@
   flex-direction: column;
 }
 
-/* Month labels - landscape (horizontal row at top) */
-.weekly-month-labels {
+/* Week labels - landscape (horizontal row at top) */
+.weekly-week-labels {
   position: relative;
 }
 
-.weekly-month-labels .weekly-month-label {
+.weekly-week-labels .weekly-week-label {
   position: absolute;
   top: 0;
   color: var(--color-text-tertiary);
   font-weight: 500;
   white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
 }
 
-/* Month labels - portrait (vertical column on left) */
-.weekly-month-labels-col {
+.week-label-month {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.week-label-num {
+  font-weight: 400;
+}
+
+/* Week labels - portrait (vertical column on left) */
+.weekly-week-labels-col {
   position: relative;
   flex-shrink: 0;
 }
 
-.weekly-month-labels-col .weekly-month-label {
+.weekly-week-labels-col .weekly-week-label {
   position: absolute;
   right: 4px;
   color: var(--color-text-tertiary);

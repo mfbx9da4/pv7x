@@ -389,7 +389,7 @@ function WeeklyView({
   isLandscape: boolean
   onDayPointerDown: (e: PointerEvent, day: DayInfo) => void
 }) {
-  const labelSpace = 24 // space for day labels (used in JSX)
+  const labelSpace = 42 // space for week labels like "Dec 12"
 
   // Calculate how many weeks we have
   // First, figure out the day of week for the start date
@@ -400,27 +400,48 @@ function WeeklyView({
   // Calculate total weeks needed (including partial weeks at start and end)
   const totalWeeks = Math.ceil((startDayOfWeek + totalDays) / 7)
 
-  // Calculate month labels with their positions
-  const monthLabels = useMemo(() => {
-    const labels: { month: string; position: number }[] = []
-    let lastMonth = -1
+  // Calculate week labels with week numbers and month when a new month starts
+  const weekLabels = useMemo(() => {
+    const labels: { weekNum: number; month?: string; position: number }[] = []
+    const monthStarts: Set<number> = new Set()
 
+    // First pass: find which weeks have month starts
+    let lastMonth = -1
     for (let i = 0; i < totalDays; i++) {
       const date = addDays(CONFIG.startDate, i)
       const month = date.getMonth()
-
       if (month !== lastMonth) {
-        // Calculate week index for this day
         const weekIndex = Math.floor((startDayOfWeek + i) / 7)
-        labels.push({
-          month: MONTHS[month],
-          position: weekIndex,
-        })
+        monthStarts.add(weekIndex)
         lastMonth = month
       }
     }
+
+    // Second pass: create labels for all weeks
+    lastMonth = -1
+    for (let week = 0; week < totalWeeks; week++) {
+      // Find the first valid day in this week to get the month
+      let monthForWeek: string | undefined
+      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
+        const dayIndex = week * 7 + dayOfWeek - startDayOfWeek
+        if (dayIndex >= 0 && dayIndex < totalDays) {
+          const date = addDays(CONFIG.startDate, dayIndex)
+          const month = date.getMonth()
+          if (month !== lastMonth && monthStarts.has(week)) {
+            monthForWeek = MONTHS[month]
+            lastMonth = month
+          }
+          break
+        }
+      }
+      labels.push({
+        weekNum: week + 1,
+        month: monthForWeek,
+        position: week,
+      })
+    }
     return labels
-  }, [totalDays, startDayOfWeek])
+  }, [totalDays, startDayOfWeek, totalWeeks])
 
   // Calculate cell size to fit all cells
   const { cellSize, labelSize, gap } = useMemo(() => {
@@ -497,20 +518,21 @@ function WeeklyView({
             ))}
           </div>
 
-          {/* Grid with month labels */}
+          {/* Grid with week labels */}
           <div class="weekly-grid-wrapper">
-            {/* Month labels row */}
-            <div class="weekly-month-labels" style={{ height: `${labelSize + 4}px` }}>
-              {monthLabels.map((label, i) => (
+            {/* Week labels row */}
+            <div class="weekly-week-labels" style={{ height: `${(labelSize + 4) * (weekLabels.some(l => l.month) ? 2 : 1)}px` }}>
+              {weekLabels.map((label, i) => (
                 <span
                   key={i}
-                  class="weekly-month-label"
+                  class="weekly-week-label"
                   style={{
                     left: `${label.position * (cellSize + gap)}px`,
                     fontSize: `${labelSize}px`,
                   }}
                 >
-                  {label.month}
+                  {label.month && <span class="week-label-month">{label.month}</span>}
+                  <span class="week-label-num">{label.weekNum}</span>
                 </span>
               ))}
             </div>
@@ -579,18 +601,18 @@ function WeeklyView({
             ))}
           </div>
 
-          {/* Month labels column */}
-          <div class="weekly-month-labels-col" style={{ width: `${labelSpace}px`, height: `${gridHeight}px` }}>
-            {monthLabels.map((label, i) => (
+          {/* Week labels column */}
+          <div class="weekly-week-labels-col" style={{ width: `${labelSpace}px`, height: `${gridHeight}px` }}>
+            {weekLabels.map((label, i) => (
               <span
                 key={i}
-                class="weekly-month-label"
+                class="weekly-week-label"
                 style={{
                   top: `${label.position * (cellSize + gap)}px`,
                   fontSize: `${labelSize}px`,
                 }}
               >
-                {label.month}
+                {label.month ? `${label.month} ${label.weekNum}` : label.weekNum}
               </span>
             ))}
           </div>
