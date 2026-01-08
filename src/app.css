@@ -106,13 +106,22 @@
 
 /* Milestone days - background color applied inline via style attribute */
 
-.day.today {
-  animation: pulse-bg 4s ease-in-out infinite;
+.day.today.odd-week {
+  animation: pulse-bg-odd 4s ease-in-out infinite;
 }
 
-@keyframes pulse-bg {
-  0%, 100% { background: var(--color-passed-odd); }
-  50% { background: var(--color-blue); }
+.day.today.even-week {
+  animation: pulse-bg-even 4s ease-in-out infinite;
+}
+
+@keyframes pulse-bg-odd {
+  0%, 100% { background: var(--color-passed-odd); border: 1px solid var(--color-passed-odd); }
+  50% { background: var(--color-future-odd); border: 1px solid var(--color-future-odd-border); }
+}
+
+@keyframes pulse-bg-even {
+  0%, 100% { background: var(--color-passed-odd); border: 1px solid var(--color-passed-odd); }
+  50% { background: var(--color-future-even); border: 1px solid var(--color-future-even-border); }
 }
 
 .date-label {
@@ -525,8 +534,12 @@
   border: 1px solid var(--color-future-even-border);
 }
 
-.weekly-cell.today {
-  animation: pulse-bg 4s ease-in-out infinite;
+.weekly-cell.today.odd-week {
+  animation: pulse-bg-odd 4s ease-in-out infinite;
+}
+
+.weekly-cell.today.even-week {
+  animation: pulse-bg-even 4s ease-in-out infinite;
 }
 
 .weekly-cell.pressing {
