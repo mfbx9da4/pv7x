@@ -1,3 +1,4 @@
+import { useMemo } from 'preact/hooks'
 import type { DayInfo } from './types'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -12,17 +13,32 @@ function addDays(date: Date, days: number): Date {
   return result
 }
 
-type FillViewProps = {
-  days: DayInfo[]
-  cols: number
-  rows: number
-  cellSize: number
-  fontSize: number
-  showAnnotationDate: boolean
-  selectedDayIndex: number | null
-  startDate: Date
-  annotationEmojis: Record<string, string>
-  onDayPointerDown: (e: PointerEvent, day: DayInfo) => void
+function calculateGrid(totalDays: number, width: number, height: number): { cols: number; rows: number } {
+  const MIN_ASPECT = 0.5
+  const MAX_ASPECT = 2.0
+
+  let bestCols = 1
+  let bestRows = totalDays
+  let bestEmpty = totalDays - 1
+  let bestAspectDiff = Infinity
+
+  for (let cols = 1; cols <= totalDays; cols++) {
+    const rows = Math.ceil(totalDays / cols)
+    const cellAspect = (width / cols) / (height / rows)
+
+    if (cellAspect < MIN_ASPECT || cellAspect > MAX_ASPECT) continue
+
+    const empty = cols * rows - totalDays
+    const aspectDiff = Math.abs(cellAspect - 1)
+
+    if (empty < bestEmpty || (empty === bestEmpty && aspectDiff < bestAspectDiff)) {
+      bestEmpty = empty
+      bestAspectDiff = aspectDiff
+      bestCols = cols
+      bestRows = rows
+    }
+  }
+  return { cols: bestCols, rows: bestRows }
 }
 
 function getAnnotationDisplay(
@@ -40,18 +56,45 @@ function getAnnotationDisplay(
   return annotationEmojis[text] || text
 }
 
+type FillViewProps = {
+  days: DayInfo[]
+  windowSize: { width: number; height: number }
+  showAnnotationDate: boolean
+  selectedDayIndex: number | null
+  startDate: Date
+  annotationEmojis: Record<string, string>
+  onDayPointerDown: (e: PointerEvent, day: DayInfo) => void
+}
+
 export function FillView({
   days,
-  cols,
-  rows,
-  cellSize,
-  fontSize,
+  windowSize,
   showAnnotationDate,
   selectedDayIndex,
   startDate,
   annotationEmojis,
   onDayPointerDown,
 }: FillViewProps) {
+  const totalDays = days.length
+  const availableWidth = windowSize.width - 20
+  const availableHeight = windowSize.height
+
+  const { cols, rows } = useMemo(
+    () => calculateGrid(totalDays, availableWidth, availableHeight),
+    [totalDays, availableWidth, availableHeight]
+  )
+
+  const cellSize = useMemo(() => {
+    const cellWidth = availableWidth / cols
+    const cellHeight = availableHeight / rows
+    return Math.min(cellWidth, cellHeight)
+  }, [availableWidth, availableHeight, cols, rows])
+
+  const fontSize = useMemo(() => {
+    const base = cellSize * 0.16
+    return Math.max(7, Math.min(base, 13))
+  }, [cellSize])
+
   return (
     <div
       class="grid"

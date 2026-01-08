@@ -1,52 +1,20 @@
 import { useMemo, useState, useEffect, useCallback } from 'preact/hooks'
 import { haptic } from 'ios-haptics'
 import { FillView } from './FillView'
+import { WeeklyView } from './WeeklyView'
 import { InfoBar, VersionPopover, useVersionTap } from './InfoBar'
 import { Tooltip } from './Tooltip'
 import { useViewMode } from './useViewMode'
+import { CONFIG, ANNOTATION_EMOJIS, ANNOTATION_DESCRIPTIONS } from './config'
 import type { DayInfo } from './types'
 import './app.css'
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 type TooltipState = {
   day: DayInfo
   position: { x: number; y: number }
 } | null
-
-// ============================================
-// CUSTOM DATA - Edit this section to customize
-// ============================================
-const CONFIG = {
-  startDate: new Date(2025, 10, 20),  // November 20, 2025
-  dueDate: new Date(2026, 7, 20),     // August 20, 2026
-  todayEmoji: '📍',
-  milestones: [
-    { date: new Date(2025, 10, 20), label: 'Start', emoji: '🌱' },
-    { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🕵️‍♀️', color: 'pink' },
-    { date: new Date(2025, 11, 28), label: 'Hospital Scan', emoji: '🏥', description: 'Confirmed heartbeat and normal implantation' },
-    { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
-    { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues' },
-    { date: new Date(2026, 1, 5), label: 'Announce!', emoji: '📢', color: 'purple', description: 'Start of second trimester' },
-    { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', color: 'orange' },
-    { date: new Date(2026, 4, 28), label: 'Third Trimester', emoji: '🤰', color: 'teal', description: 'Start of third trimester (week 28)' },
-    { date: new Date(2026, 5, 7), label: 'Dan & Bex Wedding', emoji: '💒', color: 'gold' },
-    { date: new Date(2026, 7, 13), label: 'C Section', emoji: '🥗', color: 'blue', description: 'Potential scheduled date of Caesarean section birth' },
-    { date: new Date(2026, 7, 20), label: 'Due', emoji: '👶', color: 'red' },
-  ],
-}
-// ============================================
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-// Build emoji lookup from config
-const ANNOTATION_EMOJIS: Record<string, string> = {
-  Today: CONFIG.todayEmoji,
-  ...Object.fromEntries(CONFIG.milestones.map(m => [m.label, m.emoji]))
-}
-
-// Build description lookup from config
-const ANNOTATION_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
-  CONFIG.milestones.filter(m => m.description).map(m => [m.label, m.description!])
-)
 
 function getDaysBetween(start: Date, end: Date): number {
   const msPerDay = 1000 * 60 * 60 * 24
@@ -61,37 +29,6 @@ function addDays(date: Date, days: number): Date {
 
 function formatDate(date: Date): string {
   return `${date.getDate()} ${MONTHS[date.getMonth()]}`
-}
-
-function calculateGrid(totalDays: number, width: number, height: number): { cols: number; rows: number } {
-  // Minimize empty slots (dead space), with tie-breaker for squarest cells
-  // Aspect ratio must be between 0.5 and 2.0 (not too tall/thin)
-  const MIN_ASPECT = 0.5
-  const MAX_ASPECT = 2.0
-
-  let bestCols = 1
-  let bestRows = totalDays
-  let bestEmpty = totalDays - 1
-  let bestAspectDiff = Infinity
-
-  for (let cols = 1; cols <= totalDays; cols++) {
-    const rows = Math.ceil(totalDays / cols)
-    const cellAspect = (width / cols) / (height / rows)
-
-    // Skip configurations with extreme aspect ratios
-    if (cellAspect < MIN_ASPECT || cellAspect > MAX_ASPECT) continue
-
-    const empty = cols * rows - totalDays
-    const aspectDiff = Math.abs(cellAspect - 1)
-
-    if (empty < bestEmpty || (empty === bestEmpty && aspectDiff < bestAspectDiff)) {
-      bestEmpty = empty
-      bestAspectDiff = aspectDiff
-      bestCols = cols
-      bestRows = rows
-    }
-  }
-  return { cols: bestCols, rows: bestRows }
 }
 
 const getViewportSize = () => ({
@@ -170,22 +107,6 @@ export function App() {
     return lookup
   }, [])
 
-  const availableWidth = windowSize.width - 20 // padding
-  const availableHeight = windowSize.height
-
-  const { cols, rows } = useMemo(() => calculateGrid(totalDays, availableWidth, availableHeight), [totalDays, availableWidth, availableHeight])
-
-  const cellSize = useMemo(() => {
-    const cellWidth = availableWidth / cols
-    const cellHeight = availableHeight / rows
-    return Math.min(cellWidth, cellHeight)
-  }, [availableWidth, availableHeight, cols, rows])
-
-  const fontSize = useMemo(() => {
-    const base = cellSize * 0.16
-    return Math.max(7, Math.min(base, 13))
-  }, [cellSize])
-
   const days = useMemo(() => {
     return Array.from({ length: totalDays }, (_, i) => {
       const date = addDays(CONFIG.startDate, i)
@@ -236,10 +157,7 @@ export function App() {
       {viewMode === 'fill' ? (
         <FillView
           days={days}
-          cols={cols}
-          rows={rows}
-          cellSize={cellSize}
-          fontSize={fontSize}
+          windowSize={windowSize}
           showAnnotationDate={showAnnotationDate}
           selectedDayIndex={tooltip?.day.index ?? null}
           startDate={CONFIG.startDate}
@@ -251,6 +169,7 @@ export function App() {
           days={days}
           windowSize={windowSize}
           isLandscape={isLandscape}
+          startDate={CONFIG.startDate}
           onDayPointerDown={handleDayPointerDown}
           selectedDayIndex={tooltip?.day.index ?? null}
         />
@@ -279,273 +198,5 @@ export function App() {
       )}
     </div>
   )
-}
-
-const DAY_LABELS = ['Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed']
-const DAY_LABELS_SHORT = ['T', 'F', 'S', 'S', 'M', 'T', 'W']
-
-function WeeklyView({
-  days,
-  windowSize,
-  isLandscape,
-  onDayPointerDown,
-  selectedDayIndex,
-}: {
-  days: DayInfo[]
-  windowSize: { width: number; height: number }
-  isLandscape: boolean
-  onDayPointerDown: (e: PointerEvent, day: DayInfo) => void
-  selectedDayIndex: number | null
-}) {
-  const labelSpace = 42 // space for week labels like "Dec 12"
-
-  // Calculate how many weeks we have
-  // First, figure out the day of week for the start date
-  // Convert to Thursday-first: (getDay() + 3) % 7 makes Thursday = 0, Wednesday = 6
-  const startDayOfWeek = (CONFIG.startDate.getDay() + 3) % 7
-  const totalDays = days.length
-
-  // Calculate total weeks needed (including partial weeks at start and end)
-  const totalWeeks = Math.ceil((startDayOfWeek + totalDays) / 7)
-
-  // Calculate week labels with week numbers and month when a new month starts
-  const weekLabels = useMemo(() => {
-    // First, build a map of weekIndex -> month name for weeks where a new month starts
-    const monthStartsInWeek: Map<number, string> = new Map()
-    let lastMonth = -1
-
-    for (let i = 0; i < totalDays; i++) {
-      const date = addDays(CONFIG.startDate, i)
-      const month = date.getMonth()
-      if (month !== lastMonth) {
-        const weekIndex = Math.floor((startDayOfWeek + i) / 7)
-        // Only set if not already set (keep the first month that starts in this week)
-        if (!monthStartsInWeek.has(weekIndex)) {
-          monthStartsInWeek.set(weekIndex, MONTHS[month])
-        }
-        lastMonth = month
-      }
-    }
-
-    // Create labels for all weeks
-    const labels: { weekNum: number; month?: string; position: number }[] = []
-    for (let week = 0; week < totalWeeks; week++) {
-      labels.push({
-        weekNum: week + 1,
-        month: monthStartsInWeek.get(week),
-        position: week,
-      })
-    }
-    return labels
-  }, [totalDays, startDayOfWeek, totalWeeks])
-
-  // Calculate cell size to fit all cells
-  const { cellSize, labelSize, gap } = useMemo(() => {
-    const padding = 10
-    const monthLabelSpace = 16 // space for month labels
-    const gapSize = 2
-
-    let availableWidth: number
-    let availableHeight: number
-    let numCols: number
-    let numRows: number
-
-    if (isLandscape) {
-      // Landscape: weeks horizontal, days vertical
-      availableWidth = windowSize.width - padding * 2 - labelSpace
-      availableHeight = windowSize.height - 80 - padding * 2 - monthLabelSpace
-      numCols = totalWeeks
-      numRows = 7
-    } else {
-      // Portrait: days horizontal, weeks vertical
-      availableWidth = windowSize.width - padding * 2 - labelSpace
-      availableHeight = windowSize.height - 80 - padding * 2 - monthLabelSpace
-      numCols = 7
-      numRows = totalWeeks
-    }
-
-    const maxCellWidth = (availableWidth - gapSize * (numCols - 1)) / numCols
-    const maxCellHeight = (availableHeight - gapSize * (numRows - 1)) / numRows
-    const size = Math.min(maxCellWidth, maxCellHeight)
-
-    return {
-      cellSize: Math.max(size, 8), // minimum 8px
-      labelSize: Math.max(8, Math.min(11, size * 0.4)),
-      gap: gapSize,
-    }
-  }, [windowSize, isLandscape, totalWeeks])
-
-  // Build the grid data: array of weeks, each containing array of days (or null for empty cells)
-  const weekData = useMemo(() => {
-    const weeks: (DayInfo | null)[][] = []
-
-    for (let week = 0; week < totalWeeks; week++) {
-      const weekDays: (DayInfo | null)[] = []
-      for (let dayOfWeek = 0; dayOfWeek < 7; dayOfWeek++) {
-        const dayIndex = week * 7 + dayOfWeek - startDayOfWeek
-        if (dayIndex >= 0 && dayIndex < totalDays) {
-          weekDays.push(days[dayIndex])
-        } else {
-          weekDays.push(null)
-        }
-      }
-      weeks.push(weekDays)
-    }
-    return weeks
-  }, [days, totalWeeks, startDayOfWeek, totalDays])
-
-  const usedDayLabels = cellSize < 20 ? DAY_LABELS_SHORT : DAY_LABELS
-
-  if (isLandscape) {
-    // Landscape: days are rows (vertical), weeks are columns (horizontal)
-    // Week numbers on TOP, months on BOTTOM (under grid)
-    const gridWidth = totalWeeks * cellSize + (totalWeeks - 1) * gap
-
-    return (
-      <div class="weekly-view landscape">
-        <div class="weekly-body">
-          {/* Day labels column */}
-          <div class="weekly-day-labels" style={{ gap: `${gap}px`, marginTop: `${labelSize + 4}px` }}>
-            {usedDayLabels.map((label, i) => (
-              <span
-                key={i}
-                class="weekly-day-label"
-                style={{ height: `${cellSize}px`, fontSize: `${labelSize}px` }}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-
-          {/* Grid with labels */}
-          <div class="weekly-grid-wrapper">
-            {/* Week numbers row (TOP) */}
-            <div class="weekly-week-nums-row" style={{ height: `${labelSize + 4}px`, width: `${gridWidth}px` }}>
-              {weekLabels.map((label, i) => (
-                <span
-                  key={i}
-                  class="weekly-week-num"
-                  style={{
-                    left: `${label.position * (cellSize + gap) + cellSize / 2}px`,
-                    fontSize: `${labelSize}px`,
-                  }}
-                >
-                  {label.weekNum}
-                </span>
-              ))}
-            </div>
-
-            {/* Grid */}
-            <div
-              class="weekly-grid"
-              style={{
-                gridTemplateColumns: `repeat(${totalWeeks}, ${cellSize}px)`,
-                gridTemplateRows: `repeat(7, ${cellSize}px)`,
-                gap: `${gap}px`,
-              }}
-            >
-            {/* Render by column (week), then row (day of week) */}
-            {Array.from({ length: 7 }, (_, dayOfWeek) =>
-              weekData.map((week, weekIndex) => {
-                const day = week[dayOfWeek]
-                return day ? (
-                  <div
-                    key={`${weekIndex}-${dayOfWeek}`}
-                    class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
-                    style={{
-                      gridColumn: weekIndex + 1,
-                      gridRow: dayOfWeek + 1,
-                      ...(day.color ? { background: `var(--color-${day.color})` } : {}),
-                    }}
-                    onPointerDown={(e) => onDayPointerDown(e as unknown as PointerEvent, day)}
-                  />
-                ) : (
-                  <div
-                    key={`${weekIndex}-${dayOfWeek}`}
-                    class="weekly-cell empty"
-                    style={{
-                      gridColumn: weekIndex + 1,
-                      gridRow: dayOfWeek + 1,
-                    }}
-                  />
-                )
-              })
-            )}
-          </div>
-
-            {/* Month labels row (BOTTOM) */}
-            <div class="weekly-month-labels-row" style={{ height: `${labelSize + 4}px`, width: `${gridWidth}px` }}>
-              {weekLabels.filter(l => l.month).map((label, i) => (
-                <span
-                  key={i}
-                  class="weekly-month-label"
-                  style={{
-                    left: `${label.position * (cellSize + gap) + cellSize / 2}px`,
-                    fontSize: `${labelSize}px`,
-                  }}
-                >
-                  {label.month}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  } else {
-    // Portrait: days are columns (horizontal), weeks are rows (vertical)
-    // Week numbers on LEFT, months on RIGHT
-    // Use a single unified grid for automatic alignment
-
-    // Build a map of week index to month name for quick lookup
-    const monthByWeek = new Map(weekLabels.filter(l => l.month).map(l => [l.position, l.month]))
-
-    return (
-      <div class="weekly-view portrait">
-        <div
-          class="weekly-unified-grid"
-          style={{
-            gap: `${gap}px`,
-            fontSize: `${labelSize}px`,
-            gridTemplateColumns: 'auto repeat(7, 1fr) auto',
-            gridTemplateRows: `auto ${'1fr '.repeat(totalWeeks).trim()}`,
-            aspectRatio: `7 / ${totalWeeks}`,
-          }}
-        >
-          {/* Header row: empty corner, day labels, empty corner */}
-          <div class="weekly-corner" />
-          {usedDayLabels.map((label, i) => (
-            <div key={`day-${i}`} class="weekly-day-label">{label}</div>
-          ))}
-          <div class="weekly-corner" />
-
-          {/* Data rows: week num, 7 day cells, month label */}
-          {weekData.map((week, weekIndex) => (
-            <>
-              <div key={`week-${weekIndex}`} class="weekly-week-num">{weekIndex + 1}</div>
-              {week.map((day, dayOfWeek) =>
-                day ? (
-                  <div
-                    key={`${weekIndex}-${dayOfWeek}`}
-                    class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
-                    style={day.color ? { background: `var(--color-${day.color})` } : undefined}
-                    onPointerDown={(e) => onDayPointerDown(e as unknown as PointerEvent, day)}
-                  />
-                ) : (
-                  <div
-                    key={`${weekIndex}-${dayOfWeek}`}
-                    class="weekly-cell empty"
-                  />
-                )
-              )}
-              <div key={`month-${weekIndex}`} class="weekly-month-label">
-                {monthByWeek.get(weekIndex) || ''}
-              </div>
-            </>
-          ))}
-        </div>
-      </div>
-    )
-  }
 }
 
