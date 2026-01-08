@@ -20,6 +20,7 @@
   --color-teal: #00a896;
   --color-blue: #2d9cdb;
   --color-red: #e05550;
+  --color-gold: #d4a83c;
 
   /* Milestone text colors (light tinted shades for text on colored backgrounds) */
   --color-pink-text: #ffeef3;
@@ -28,6 +29,7 @@
   --color-teal-text: #e0f7f4;
   --color-blue-text: #e3f2fd;
   --color-red-text: #ffebee;
+  --color-gold-text: #4a3c00;
 
   /* Surfaces */
   --color-background: #f2f2f7;
