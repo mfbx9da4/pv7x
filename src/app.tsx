@@ -555,7 +555,6 @@ function CalendarView({
     )
   } else {
     // Portrait: days are columns (horizontal), weeks are rows (vertical)
-    const gridWidth = totalWeeks > 0 ? 7 * cellSize + 6 * gap : 0
     const gridHeight = totalWeeks * cellSize + (totalWeeks - 1) * gap
 
     return (
