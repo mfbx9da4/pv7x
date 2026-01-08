@@ -115,6 +115,7 @@ export function FillScreenView({
           key={day.index}
           class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${day.annotation ? 'has-annotation' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
           style={day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : undefined}
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => onDayClick(e as unknown as MouseEvent, day)}
         >
           {day.annotation ? (
