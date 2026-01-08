@@ -218,11 +218,7 @@
   user-select: none;
   -webkit-user-select: none;
   padding: 1px;
-}
-
-.day.has-annotation {
   cursor: pointer;
-  touch-action: manipulation;
 }
 
 /* Tooltip */

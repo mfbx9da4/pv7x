@@ -168,9 +168,6 @@ export function App() {
   }, [])
 
   const handlePointerDown = useCallback((e: PointerEvent, day: DayInfo) => {
-    // Only allow long press/double-tap on days with annotations
-    if (!day.annotation) return
-
     e.stopPropagation()
     cancelPress()
     setTooltip(null)
