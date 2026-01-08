@@ -375,8 +375,8 @@ export function App() {
   )
 }
 
-const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const DAY_LABELS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+const DAY_LABELS = ['Thu', 'Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed']
+const DAY_LABELS_SHORT = ['T', 'F', 'S', 'S', 'M', 'T', 'W']
 
 function WeeklyView({
   days,
@@ -393,8 +393,8 @@ function WeeklyView({
 
   // Calculate how many weeks we have
   // First, figure out the day of week for the start date
-  // Convert to Monday-first: (getDay() + 6) % 7 makes Monday = 0, Sunday = 6
-  const startDayOfWeek = (CONFIG.startDate.getDay() + 6) % 7
+  // Convert to Thursday-first: (getDay() + 3) % 7 makes Thursday = 0, Wednesday = 6
+  const startDayOfWeek = (CONFIG.startDate.getDay() + 3) % 7
   const totalDays = days.length
 
   // Calculate total weeks needed (including partial weeks at start and end)
@@ -650,7 +650,7 @@ function Tooltip({ day, position, windowSize }: {
 }) {
   const date = addDays(CONFIG.startDate, day.index)
   const weekNum = Math.floor(day.index / 7) + 1
-  const dayOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][(date.getDay() + 6) % 7]
+  const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
   const fullDate = `${dayOfWeek}, ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
   const color = getDayColor(day)
 
