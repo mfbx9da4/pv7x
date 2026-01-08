@@ -308,6 +308,14 @@
   margin-top: 4px;
 }
 
+.tooltip-description {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
 /* Version popover */
 .version-popover {
   position: fixed;

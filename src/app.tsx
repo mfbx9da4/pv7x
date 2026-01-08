@@ -29,7 +29,7 @@ const CONFIG = {
     { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🕵️‍♀️', style: 'discovery' },
     { date: new Date(2025, 11, 28), label: 'Hospital Scan', emoji: '🏥' },
     { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
-    { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸' },
+    { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues' },
     { date: new Date(2026, 1, 5), label: 'Announce!', emoji: '📢', style: 'announcement' },
     { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', style: 'engagement' },
     { date: new Date(2026, 7, 20), label: 'Due', emoji: '👶', style: 'due-date' },
@@ -44,6 +44,11 @@ const ANNOTATION_EMOJIS: Record<string, string> = {
   Today: CONFIG.todayEmoji,
   ...Object.fromEntries(CONFIG.milestones.map(m => [m.label, m.emoji]))
 }
+
+// Build description lookup from config
+const ANNOTATION_DESCRIPTIONS: Record<string, string> = Object.fromEntries(
+  CONFIG.milestones.filter(m => m.description).map(m => [m.label, m.description!])
+)
 
 function getAnnotationDisplay(text: string, cellSize: number, fontSize: number): string {
   // Estimate if longest word fits: each char ~0.55 * fontSize wide
@@ -408,6 +413,7 @@ function Tooltip({ day, position, windowSize }: {
   }
 
   const emoji = day.annotation ? ANNOTATION_EMOJIS[day.annotation] : null
+  const description = day.annotation ? ANNOTATION_DESCRIPTIONS[day.annotation] : null
 
   return (
     <div
@@ -423,6 +429,7 @@ function Tooltip({ day, position, windowSize }: {
         <div class="tooltip-date">{fullDate}</div>
         <div class="tooltip-week">Week {weekNum}, Day {(day.index % 7) + 1}</div>
         {day.annotation && <div class="tooltip-annotation" style={{ color }}>{day.annotation}</div>}
+        {description && <div class="tooltip-description">{description}</div>}
       </div>
     </div>
   )
