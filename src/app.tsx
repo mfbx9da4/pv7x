@@ -587,61 +587,34 @@ function WeeklyView({
   } else {
     // Portrait: days are columns (horizontal), weeks are rows (vertical)
     // Week numbers on LEFT, months on RIGHT
-    const gridHeight = totalWeeks * cellSize + (totalWeeks - 1) * gap
-    const weekNumWidth = 20
-    const monthWidth = 28
+    // Use a single unified grid for automatic alignment
+
+    // Build a map of week index to month name for quick lookup
+    const monthByWeek = new Map(weekLabels.filter(l => l.month).map(l => [l.position, l.month]))
 
     return (
       <div class="weekly-view portrait">
-        <div class="weekly-body-portrait">
-          {/* Empty corner left */}
-          <div class="weekly-corner" style={{ width: `${weekNumWidth}px`, height: `${labelSize + 4}px` }} />
+        <div
+          class="weekly-unified-grid"
+          style={{
+            gridTemplateColumns: `auto repeat(7, 1fr) auto`,
+            gridTemplateRows: `auto repeat(${totalWeeks}, 1fr)`,
+            gap: `${gap}px`,
+            fontSize: `${labelSize}px`,
+          }}
+        >
+          {/* Header row: empty corner, day labels, empty corner */}
+          <div class="weekly-corner" />
+          {usedDayLabels.map((label, i) => (
+            <div key={`day-${i}`} class="weekly-day-label">{label}</div>
+          ))}
+          <div class="weekly-corner" />
 
-          {/* Day labels row */}
-          <div class="weekly-day-labels-row" style={{ gap: `${gap}px`, height: `${labelSize + 4}px` }}>
-            {usedDayLabels.map((label, i) => (
-              <span
-                key={i}
-                class="weekly-day-label"
-                style={{ width: `${cellSize}px`, fontSize: `${labelSize}px` }}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-
-          {/* Empty corner right */}
-          <div class="weekly-corner" style={{ width: `${monthWidth}px`, height: `${labelSize + 4}px` }} />
-
-          {/* Week numbers column (LEFT) */}
-          <div class="weekly-week-nums-col" style={{ width: `${weekNumWidth}px`, height: `${gridHeight}px` }}>
-            {weekLabels.map((label, i) => (
-              <span
-                key={i}
-                class="weekly-week-num"
-                style={{
-                  top: `${label.position * (cellSize + gap)}px`,
-                  height: `${cellSize}px`,
-                  fontSize: `${labelSize}px`,
-                }}
-              >
-                {label.weekNum}
-              </span>
-            ))}
-          </div>
-
-          {/* Grid */}
-          <div
-            class="weekly-grid"
-            style={{
-              gridTemplateColumns: `repeat(7, ${cellSize}px)`,
-              gridTemplateRows: `repeat(${totalWeeks}, ${cellSize}px)`,
-              gap: `${gap}px`,
-            }}
-          >
-            {/* Render by row (week), then column (day of week) */}
-            {weekData.map((week, weekIndex) =>
-              week.map((day, dayOfWeek) =>
+          {/* Data rows: week num, 7 day cells, month label */}
+          {weekData.map((week, weekIndex) => (
+            <>
+              <div key={`week-${weekIndex}`} class="weekly-week-num">{weekIndex + 1}</div>
+              {week.map((day, dayOfWeek) =>
                 day ? (
                   <div
                     key={`${weekIndex}-${dayOfWeek}`}
@@ -655,26 +628,12 @@ function WeeklyView({
                     class="weekly-cell empty"
                   />
                 )
-              )
-            )}
-          </div>
-
-          {/* Month labels column (RIGHT) */}
-          <div class="weekly-month-labels-col" style={{ width: `${monthWidth}px`, height: `${gridHeight}px` }}>
-            {weekLabels.filter(l => l.month).map((label, i) => (
-              <span
-                key={i}
-                class="weekly-month-label"
-                style={{
-                  top: `${label.position * (cellSize + gap)}px`,
-                  height: `${cellSize}px`,
-                  fontSize: `${labelSize}px`,
-                }}
-              >
-                {label.month}
-              </span>
-            ))}
-          </div>
+              )}
+              <div key={`month-${weekIndex}`} class="weekly-month-label">
+                {monthByWeek.get(weekIndex) || ''}
+              </div>
+            </>
+          ))}
         </div>
       </div>
     )

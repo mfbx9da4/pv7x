@@ -428,6 +428,41 @@
   justify-content: center;
 }
 
+/* Unified grid for portrait - labels integrated into the grid */
+.weekly-unified-grid {
+  display: grid;
+  flex: 1;
+  align-content: center;
+  justify-content: center;
+}
+
+.weekly-unified-grid .weekly-day-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-tertiary);
+  font-weight: 500;
+  padding: 2px 0;
+}
+
+.weekly-unified-grid .weekly-week-num {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 4px;
+  color: var(--color-text-tertiary);
+  font-weight: 400;
+}
+
+.weekly-unified-grid .weekly-month-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 4px;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
 .weekly-corner {
   /* Empty top-left corner */
 }
