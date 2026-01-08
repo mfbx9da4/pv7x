@@ -32,6 +32,7 @@ const CONFIG = {
     { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues' },
     { date: new Date(2026, 1, 5), label: 'Announce!', emoji: '📢', style: 'announcement' },
     { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', style: 'engagement' },
+    { date: new Date(2026, 7, 13), label: 'C Section', emoji: '🥗', description: 'Potential scheduled date of Caesarean section birth' },
     { date: new Date(2026, 7, 20), label: 'Due', emoji: '👶', style: 'due-date' },
   ],
 }
