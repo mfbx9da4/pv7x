@@ -111,6 +111,7 @@ const LONG_PRESS_DURATION = 400
 const LONG_PRESS_MOVE_THRESHOLD = 10
 const VERSION_TAP_COUNT = 5
 const VERSION_TAP_TIMEOUT = 500
+const DOUBLE_TAP_TIMEOUT = 300
 
 export function App() {
   const [windowSize, setWindowSize] = useState(getViewportSize)
@@ -123,6 +124,7 @@ export function App() {
   const pressStart = useRef<{ x: number; y: number } | null>(null)
   const versionTapCount = useRef(0)
   const versionTapTimer = useRef<number | null>(null)
+  const lastTap = useRef<{ time: number; index: number } | null>(null)
 
   useEffect(() => {
     const handleResize = () => setWindowSize(getViewportSize())
@@ -159,12 +161,30 @@ export function App() {
   }, [])
 
   const handlePointerDown = useCallback((e: PointerEvent, day: DayInfo) => {
-    // Only allow long press on days with annotations
+    // Only allow long press/double-tap on days with annotations
     if (!day.annotation) return
 
     e.stopPropagation()
     cancelPress()
     setTooltip(null)
+
+    const now = Date.now()
+
+    // Check for double-tap
+    if (lastTap.current &&
+        lastTap.current.index === day.index &&
+        now - lastTap.current.time < DOUBLE_TAP_TIMEOUT) {
+      // Double-tap detected
+      lastTap.current = null
+      haptic()
+      setTooltip({
+        day,
+        position: { x: e.clientX, y: e.clientY }
+      })
+      return
+    }
+
+    lastTap.current = { time: now, index: day.index }
 
     pressStart.current = { x: e.clientX, y: e.clientY }
     setPressingIndex(day.index)
@@ -189,16 +209,6 @@ export function App() {
       cancelPress()
     }
   }, [cancelPress])
-
-  const handleDoubleClick = useCallback((e: MouseEvent, day: DayInfo) => {
-    if (!day.annotation) return
-    e.stopPropagation()
-    haptic()
-    setTooltip({
-      day,
-      position: { x: e.clientX, y: e.clientY }
-    })
-  }, [])
 
   const handlePointerUp = useCallback(() => {
     cancelPress()
@@ -315,7 +325,6 @@ export function App() {
             onPointerUp={handlePointerUp}
             onPointerCancel={cancelPress}
             onPointerLeave={cancelPress}
-            onDblClick={(e) => handleDoubleClick(e as unknown as MouseEvent, day)}
           >
             {day.annotation ? (
               cellSize >= 50 ? (
