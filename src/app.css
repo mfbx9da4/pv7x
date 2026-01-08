@@ -483,6 +483,7 @@
   color: var(--color-text-secondary);
   font-weight: 600;
   white-space: nowrap;
+  transform: translateX(-50%);
 }
 
 /* Week numbers - landscape (horizontal row below months) */
@@ -496,6 +497,7 @@
   color: var(--color-text-tertiary);
   font-weight: 400;
   white-space: nowrap;
+  transform: translateX(-50%);
 }
 
 /* Week numbers - portrait (vertical column on left) */

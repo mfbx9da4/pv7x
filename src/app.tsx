@@ -518,7 +518,7 @@ function WeeklyView({
                   key={i}
                   class="weekly-week-num"
                   style={{
-                    left: `${label.position * (cellSize + gap)}px`,
+                    left: `${label.position * (cellSize + gap) + cellSize / 2}px`,
                     fontSize: `${labelSize}px`,
                   }}
                 >
@@ -572,7 +572,7 @@ function WeeklyView({
                   key={i}
                   class="weekly-month-label"
                   style={{
-                    left: `${label.position * (cellSize + gap)}px`,
+                    left: `${label.position * (cellSize + gap) + cellSize / 2}px`,
                     fontSize: `${labelSize}px`,
                   }}
                 >
