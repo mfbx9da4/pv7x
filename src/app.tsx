@@ -5,10 +5,7 @@ import './app.css'
 type DayInfo = {
   index: number
   passed: boolean
-  isDiscovery: boolean
-  isAnnouncement: boolean
-  isEngagement: boolean
-  isDueDate: boolean
+  style?: string  // 'discovery' | 'announcement' | 'engagement' | 'due-date'
   isToday: boolean
   isOddWeek: boolean
   dateLabel: string
@@ -20,34 +17,39 @@ type TooltipState = {
   position: { x: number; y: number }
 } | null
 
-// Hard-coded dates
-const START_DATE = new Date(2025, 10, 20) // November 20, 2025
-const DISCOVERY_DATE = new Date(2025, 11, 24) // December 24, 2025
-const HOSPITAL_SCAN = new Date(2025, 11, 28) // December 28, 2025
-const DR_RODIN = new Date(2026, 0, 6) // January 6, 2026
-const TEN_WEEK_SCAN = new Date(2026, 0, 23) // January 23, 2026
-const ANNOUNCEMENT_DAY = new Date(2026, 1, 5) // February 5, 2026
-const ENGAGEMENT_PARTY = new Date(2026, 3, 12) // April 12, 2026
-const DUE_DATE = new Date(2026, 7, 20) // August 20, 2026
+// ============================================
+// CUSTOM DATA - Edit this section to customize
+// ============================================
+const CONFIG = {
+  startDate: new Date(2025, 10, 20),  // November 20, 2025
+  dueDate: new Date(2026, 7, 20),     // August 20, 2026
+  todayEmoji: '📍',
+  milestones: [
+    { date: new Date(2025, 10, 20), label: 'Start', emoji: '🌱' },
+    { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🧪', style: 'discovery' },
+    { date: new Date(2025, 11, 28), label: 'Hospital Scan', emoji: '🏥' },
+    { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
+    { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸' },
+    { date: new Date(2026, 1, 5), label: 'Announce!', emoji: '📢', style: 'announcement' },
+    { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', style: 'engagement' },
+    { date: new Date(2026, 7, 20), label: 'Due', emoji: '👶', style: 'due-date' },
+  ],
+}
+// ============================================
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+// Build emoji lookup from config
 const ANNOTATION_EMOJIS: Record<string, string> = {
-  'Start': '🌱',
-  'Discovery': '🧪',
-  'Hospital Scan': '🏥',
-  'Dr Rodin': '👨‍⚕️',
-  '10 Week Scan': '🔬',
-  'Announce!': '📢',
-  'Engagement Party': '🎉',
-  'Today': '📍',
-  'Due': '👶',
+  Today: CONFIG.todayEmoji,
+  ...Object.fromEntries(CONFIG.milestones.map(m => [m.label, m.emoji]))
 }
 
 function getAnnotationDisplay(text: string, cellSize: number, fontSize: number): string {
-  // Estimate if text fits: each char ~0.5 * fontSize wide
-  const estimatedWidth = text.length * fontSize * 0.5
-  const availableWidth = cellSize * 0.9
+  // Estimate if longest word fits: each char ~0.55 * fontSize wide
+  const longestWord = text.split(' ').reduce((a, b) => a.length > b.length ? a : b, '')
+  const estimatedWidth = longestWord.length * fontSize * 0.55
+  const availableWidth = cellSize * 0.85
   if (estimatedWidth <= availableWidth) {
     return text
   }
@@ -183,6 +185,16 @@ export function App() {
     }
   }, [cancelPress])
 
+  const handleDoubleClick = useCallback((e: MouseEvent, day: DayInfo) => {
+    if (!day.annotation) return
+    e.stopPropagation()
+    haptic()
+    setTooltip({
+      day,
+      position: { x: e.clientX, y: e.clientY }
+    })
+  }, [])
+
   const handlePointerUp = useCallback(() => {
     cancelPress()
   }, [cancelPress])
@@ -198,14 +210,18 @@ export function App() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const totalDays = getDaysBetween(START_DATE, DUE_DATE) + 1
-  const daysPassed = Math.max(0, Math.min(totalDays, getDaysBetween(START_DATE, today) + 1))
-  const discoveryDay = getDaysBetween(START_DATE, DISCOVERY_DATE)
-  const hospitalScanDay = getDaysBetween(START_DATE, HOSPITAL_SCAN)
-  const drRodinDay = getDaysBetween(START_DATE, DR_RODIN)
-  const tenWeekScanDay = getDaysBetween(START_DATE, TEN_WEEK_SCAN)
-  const announcementDay = getDaysBetween(START_DATE, ANNOUNCEMENT_DAY)
-  const engagementPartyDay = getDaysBetween(START_DATE, ENGAGEMENT_PARTY)
+  const totalDays = getDaysBetween(CONFIG.startDate, CONFIG.dueDate) + 1
+  const daysPassed = Math.max(0, Math.min(totalDays, getDaysBetween(CONFIG.startDate, today) + 1))
+
+  // Build milestone lookup by day index
+  const milestoneLookup = useMemo(() => {
+    const lookup: Record<number, { label: string; style?: string }> = {}
+    for (const m of CONFIG.milestones) {
+      const dayIndex = getDaysBetween(CONFIG.startDate, m.date)
+      lookup[dayIndex] = { label: m.label, style: m.style }
+    }
+    return lookup
+  }, [])
 
   const { cols, rows } = useMemo(() => calculateGrid(totalDays, windowSize.width, windowSize.height), [totalDays, windowSize])
 
@@ -224,33 +240,31 @@ export function App() {
 
   const days = useMemo(() => {
     return Array.from({ length: totalDays }, (_, i) => {
-      const date = addDays(START_DATE, i)
+      const date = addDays(CONFIG.startDate, i)
       const weekNum = Math.floor(i / 7) + 1
+      const milestone = milestoneLookup[i]
+      const isToday = i === daysPassed - 1
+
       let annotation = ''
-      if (i === 0) annotation = 'Start'
-      else if (i === discoveryDay) annotation = 'Discovery'
-      else if (i === hospitalScanDay) annotation = 'Hospital Scan'
-      else if (i === drRodinDay) annotation = 'Dr Rodin'
-      else if (i === tenWeekScanDay) annotation = '10 Week Scan'
-      else if (i === announcementDay) annotation = 'Announce!'
-      else if (i === engagementPartyDay) annotation = 'Engagement Party'
-      else if (i === daysPassed - 1) annotation = 'Today'
-      else if (i === totalDays - 1) annotation = 'Due'
+      let style: string | undefined
+      if (milestone) {
+        annotation = milestone.label
+        style = milestone.style
+      } else if (isToday) {
+        annotation = 'Today'
+      }
 
       return {
         index: i,
         passed: i < daysPassed,
-        isDiscovery: i === discoveryDay,
-        isAnnouncement: i === announcementDay,
-        isEngagement: i === engagementPartyDay,
-        isDueDate: i === totalDays - 1,
-        isToday: i === daysPassed - 1,
+        style,
+        isToday,
         isOddWeek: weekNum % 2 === 1,
         dateLabel: i % 7 === 0 ? `${formatDate(date)} (${weekNum})` : formatDate(date),
         annotation,
       }
     })
-  }, [totalDays, daysPassed, discoveryDay, hospitalScanDay, drRodinDay, tenWeekScanDay, announcementDay])
+  }, [totalDays, daysPassed, milestoneLookup])
 
   const daysRemaining = totalDays - daysPassed
   const weeksRemaining = Math.floor(daysRemaining / 7)
@@ -274,23 +288,24 @@ export function App() {
         {days.map((day) => (
           <div
             key={day.index}
-            class={`day ${day.passed ? 'passed' : 'future'} ${day.isDiscovery ? 'discovery' : ''} ${day.isAnnouncement ? 'announcement' : ''} ${day.isEngagement ? 'engagement' : ''} ${day.isDueDate ? 'due-date' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
+            class={`day ${day.passed ? 'passed' : 'future'} ${day.style || ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
             onPointerDown={(e) => handlePointerDown(e as unknown as PointerEvent, day)}
             onPointerMove={(e) => handlePointerMove(e as unknown as PointerEvent)}
             onPointerUp={handlePointerUp}
             onPointerCancel={cancelPress}
             onPointerLeave={cancelPress}
+            onDblClick={(e) => handleDoubleClick(e as unknown as MouseEvent, day)}
           >
             {day.annotation ? (
               cellSize >= 50 ? (
                 <>
-                  <span class="date-label" style={{ fontSize: `${fontSize}px` }}>{formatDate(addDays(START_DATE, day.index))}</span>
+                  <span class="date-label" style={{ fontSize: `${fontSize}px` }}>{formatDate(addDays(CONFIG.startDate, day.index))}</span>
                   <span class="annotation-text visible" style={{ fontSize: `${fontSize}px` }}>{getAnnotationDisplay(day.annotation, cellSize, fontSize)}</span>
                 </>
               ) : (
                 <span class="annotation-container" style={{ fontSize: `${fontSize}px` }}>
                   <span class={`annotation-text ${showAnnotationDate ? 'hidden' : 'visible'}`}>{getAnnotationDisplay(day.annotation, cellSize, fontSize)}</span>
-                  <span class={`annotation-date ${showAnnotationDate ? 'visible' : 'hidden'}`}>{formatDate(addDays(START_DATE, day.index))}</span>
+                  <span class={`annotation-date ${showAnnotationDate ? 'visible' : 'hidden'}`}>{formatDate(addDays(CONFIG.startDate, day.index))}</span>
                 </span>
               )
             ) : (
@@ -315,11 +330,15 @@ export function App() {
   )
 }
 
+const STYLE_COLORS: Record<string, string> = {
+  'discovery': '#d64d7a',
+  'announcement': '#8944ab',
+  'engagement': '#f5a623',
+  'due-date': '#e05550',
+}
+
 function getDayColor(day: DayInfo): string {
-  if (day.isDiscovery) return '#d64d7a'
-  if (day.isAnnouncement) return '#8944ab'
-  if (day.isEngagement) return '#f5a623'
-  if (day.isDueDate) return '#e05550'
+  if (day.style && STYLE_COLORS[day.style]) return STYLE_COLORS[day.style]
   if (day.isToday) return '#2d5a3d'
   if (day.passed) return day.isOddWeek ? '#5fb87d' : '#4a9c68'
   return day.isOddWeek ? '#636366' : '#8e8e93'
@@ -330,7 +349,7 @@ function Tooltip({ day, position, windowSize }: {
   position: { x: number; y: number }
   windowSize: { width: number; height: number }
 }) {
-  const date = addDays(START_DATE, day.index)
+  const date = addDays(CONFIG.startDate, day.index)
   const weekNum = Math.floor(day.index / 7) + 1
   const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
   const fullDate = `${dayOfWeek}, ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
