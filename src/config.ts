@@ -3,7 +3,7 @@ export const CONFIG = {
   dueDate: new Date(2026, 7, 20),     // August 20, 2026
   todayEmoji: '📍',
   milestones: [
-    { date: new Date(2025, 10, 20), label: 'Start', emoji: '🌱' },
+    { date: new Date(2025, 10, 20), label: 'Start', emoji: '🌱', description: 'Start of first trimester' },
     { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🕵️‍♀️', color: 'gold' },
     { date: new Date(2025, 11, 28), label: 'Hospital Scan', emoji: '🏥', description: 'Confirmed heartbeat and normal implantation' },
     { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
