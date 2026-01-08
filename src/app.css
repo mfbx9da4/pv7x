@@ -29,40 +29,40 @@
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
-.day.passed {
+/* Alternating week colors - passed */
+.day.passed.odd-week {
   background: #5fb87d;
 }
 
-.day.future {
+.day.passed.even-week {
+  background: #4a9c68;
+}
+
+/* Alternating week colors - future */
+.day.future.odd-week {
   background: #ffffff;
   border: 1px solid #e5e5ea;
 }
 
-.day.passed.week-start {
-  background: #4a9c68;
-}
-
-.day.future.week-start {
+.day.future.even-week {
   background: #f0f0f5;
   border: 1px solid #d1d1d6;
 }
 
-.day.discovery {
+/* Special days - override week colors with higher specificity */
+.day.day.day.discovery {
   background: #d64d7a;
 }
 
-.day.announcement,
-.day.future.announcement {
+.day.day.day.announcement {
   background: #8944ab;
 }
 
-.day.engagement,
-.day.future.engagement {
+.day.day.day.engagement {
   background: #f5a623;
 }
 
-.day.due-date,
-.day.future.due-date {
+.day.day.day.due-date {
   background: #e05550;
 }
 

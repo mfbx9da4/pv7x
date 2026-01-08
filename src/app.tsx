@@ -10,7 +10,7 @@ type DayInfo = {
   isEngagement: boolean
   isDueDate: boolean
   isToday: boolean
-  isWeekStart: boolean
+  isOddWeek: boolean
   dateLabel: string
   annotation: string
 }
@@ -45,9 +45,9 @@ const ANNOTATION_EMOJIS: Record<string, string> = {
 }
 
 function getAnnotationDisplay(text: string, cellSize: number, fontSize: number): string {
-  // Estimate if text fits: each char ~0.6 * fontSize wide
-  const estimatedWidth = text.length * fontSize * 0.6
-  const availableWidth = cellSize * 0.85
+  // Estimate if text fits: each char ~0.5 * fontSize wide
+  const estimatedWidth = text.length * fontSize * 0.5
+  const availableWidth = cellSize * 0.9
   if (estimatedWidth <= availableWidth) {
     return text
   }
@@ -245,7 +245,7 @@ export function App() {
         isEngagement: i === engagementPartyDay,
         isDueDate: i === totalDays - 1,
         isToday: i === daysPassed - 1,
-        isWeekStart: i % 7 === 0,
+        isOddWeek: weekNum % 2 === 1,
         dateLabel: i % 7 === 0 ? `${formatDate(date)} (${weekNum})` : formatDate(date),
         annotation,
       }
@@ -274,7 +274,7 @@ export function App() {
         {days.map((day) => (
           <div
             key={day.index}
-            class={`day ${day.passed ? 'passed' : 'future'} ${day.isDiscovery ? 'discovery' : ''} ${day.isAnnouncement ? 'announcement' : ''} ${day.isEngagement ? 'engagement' : ''} ${day.isDueDate ? 'due-date' : ''} ${day.isWeekStart ? 'week-start' : ''} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
+            class={`day ${day.passed ? 'passed' : 'future'} ${day.isDiscovery ? 'discovery' : ''} ${day.isAnnouncement ? 'announcement' : ''} ${day.isEngagement ? 'engagement' : ''} ${day.isDueDate ? 'due-date' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
             onPointerDown={(e) => handlePointerDown(e as unknown as PointerEvent, day)}
             onPointerMove={(e) => handlePointerMove(e as unknown as PointerEvent)}
             onPointerUp={handlePointerUp}
@@ -321,8 +321,8 @@ function getDayColor(day: DayInfo): string {
   if (day.isEngagement) return '#f5a623'
   if (day.isDueDate) return '#e05550'
   if (day.isToday) return '#2d5a3d'
-  if (day.passed) return day.isWeekStart ? '#4a9c68' : '#5fb87d'
-  return day.isWeekStart ? '#8e8e93' : '#636366'
+  if (day.passed) return day.isOddWeek ? '#5fb87d' : '#4a9c68'
+  return day.isOddWeek ? '#636366' : '#8e8e93'
 }
 
 function Tooltip({ day, position, windowSize }: {
