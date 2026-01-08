@@ -9,7 +9,7 @@ export const CONFIG = {
     { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
     { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues' },
     { date: new Date(2026, 1, 12), label: 'Announce!', emoji: '📢', color: 'purple', description: 'Start of second trimester' },
-    { date: new Date(2026, 2, 10), label: "Jame's Baby Due", emoji: '👶' },
+    { date: new Date(2026, 2, 10), label: "James' Baby Due", emoji: '👶' },
     { date: new Date(2026, 2, 29), label: "Vishal's Baby Due", emoji: '👶' },
     { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', color: 'orange' },
     { date: new Date(2026, 3, 26), label: "Seb's Baby Due", emoji: '👶' },
