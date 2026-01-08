@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from 'preact/hooks'
 import { haptic } from 'ios-haptics'
-import { FillView } from './FillView'
+import { FillScreenView } from './FillScreenView'
 import { WeeklyView } from './WeeklyView'
 import { InfoBar, VersionPopover, useVersionTap } from './InfoBar'
 import { Tooltip } from './Tooltip'
@@ -159,7 +159,7 @@ export function App() {
     <div class="container">
       <div ref={contentRef} style={{ flex: 1, overflow: 'hidden' }}>
         {contentSize && (viewMode === 'fill' ? (
-          <FillView
+          <FillScreenView
             days={days}
             windowSize={contentSize}
             showAnnotationDate={showAnnotationDate}

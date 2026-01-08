@@ -57,7 +57,7 @@ function getAnnotationDisplay(
   return annotationEmojis[text] || text
 }
 
-type FillViewProps = {
+type FillScreenViewProps = {
   days: DayInfo[]
   windowSize: { width: number; height: number }
   showAnnotationDate: boolean
@@ -67,7 +67,7 @@ type FillViewProps = {
   onDayClick: (e: MouseEvent, day: DayInfo) => void
 }
 
-export function FillView({
+export function FillScreenView({
   days,
   windowSize,
   showAnnotationDate,
@@ -75,7 +75,7 @@ export function FillView({
   startDate,
   annotationEmojis,
   onDayClick,
-}: FillViewProps) {
+}: FillScreenViewProps) {
   const totalDays = days.length
   const availableWidth = windowSize.width - LAYOUT.padding * 2
   const availableHeight = windowSize.height - LAYOUT.padding * 2
