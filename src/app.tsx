@@ -5,7 +5,7 @@ import './app.css'
 type DayInfo = {
   index: number
   passed: boolean
-  style?: string  // 'discovery' | 'announcement' | 'engagement' | 'due-date'
+  color?: string  // color name from CSS variables (e.g., 'pink', 'purple', 'teal')
   isToday: boolean
   isOddWeek: boolean
   dateLabel: string
@@ -26,14 +26,15 @@ const CONFIG = {
   todayEmoji: '📍',
   milestones: [
     { date: new Date(2025, 10, 20), label: 'Start', emoji: '🌱' },
-    { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🕵️‍♀️', style: 'discovery' },
+    { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🕵️‍♀️', color: 'pink' },
     { date: new Date(2025, 11, 28), label: 'Hospital Scan', emoji: '🏥', description: 'Confirmed heartbeat and normal implantation' },
     { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
     { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues' },
-    { date: new Date(2026, 1, 5), label: 'Announce!', emoji: '📢', style: 'announcement' },
-    { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', style: 'engagement' },
-    { date: new Date(2026, 7, 13), label: 'C Section', emoji: '🥗', style: 'c-section', description: 'Potential scheduled date of Caesarean section birth' },
-    { date: new Date(2026, 7, 20), label: 'Due', emoji: '👶', style: 'due-date' },
+    { date: new Date(2026, 1, 5), label: 'Announce!', emoji: '📢', color: 'purple', description: 'Start of second trimester' },
+    { date: new Date(2026, 3, 12), label: 'Engagement Party', emoji: '🎉', color: 'orange' },
+    { date: new Date(2026, 4, 28), label: 'Third Trimester', emoji: '🤰', color: 'teal', description: 'Start of third trimester (week 28)' },
+    { date: new Date(2026, 7, 13), label: 'C Section', emoji: '🥗', color: 'blue', description: 'Potential scheduled date of Caesarean section birth' },
+    { date: new Date(2026, 7, 20), label: 'Due', emoji: '👶', color: 'red' },
   ],
 }
 // ============================================
@@ -252,10 +253,10 @@ export function App() {
 
   // Build milestone lookup by day index
   const milestoneLookup = useMemo(() => {
-    const lookup: Record<number, { label: string; style?: string }> = {}
+    const lookup: Record<number, { label: string; color?: string }> = {}
     for (const m of CONFIG.milestones) {
       const dayIndex = getDaysBetween(CONFIG.startDate, m.date)
-      lookup[dayIndex] = { label: m.label, style: m.style }
+      lookup[dayIndex] = { label: m.label, color: m.color }
     }
     return lookup
   }, [])
@@ -283,10 +284,10 @@ export function App() {
       const isToday = i === daysPassed - 1
 
       let annotation = ''
-      let style: string | undefined
+      let color: string | undefined
       if (milestone) {
         annotation = milestone.label
-        style = milestone.style
+        color = milestone.color
       } else if (isToday) {
         annotation = 'Today'
       }
@@ -294,7 +295,7 @@ export function App() {
       return {
         index: i,
         passed: i < daysPassed,
-        style,
+        color,
         isToday,
         isOddWeek: weekNum % 2 === 1,
         dateLabel: i % 7 === 0 ? `${formatDate(date)} (${weekNum})` : formatDate(date),
@@ -325,7 +326,8 @@ export function App() {
         {days.map((day) => (
           <div
             key={day.index}
-            class={`day ${day.passed ? 'passed' : 'future'} ${day.style || ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
+            class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
+            style={day.color ? { background: `var(--color-${day.color})` } : undefined}
             onPointerDown={(e) => handlePointerDown(e as unknown as PointerEvent, day)}
             onPointerMove={(e) => handlePointerMove(e as unknown as PointerEvent)}
             onPointerUp={handlePointerUp}
@@ -374,8 +376,8 @@ function getCssVar(name: string): string {
 }
 
 function getDayColor(day: DayInfo): string {
-  if (day.style) {
-    const varName = `--color-${day.style}`
+  if (day.color) {
+    const varName = `--color-${day.color}`
     return getCssVar(varName) || getCssVar('--color-primary')
   }
   if (day.isToday) return getCssVar('--color-primary')

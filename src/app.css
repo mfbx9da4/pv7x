@@ -13,12 +13,13 @@
   --color-future-even: #f0f0f5;
   --color-future-even-border: #d1d1d6;
 
-  /* Milestone colors */
-  --color-discovery: #d64d7a;
-  --color-announcement: #8944ab;
-  --color-engagement: #f5a623;
-  --color-c-section: #2d9cdb;
-  --color-due-date: #e05550;
+  /* Milestone colors (named by actual color) */
+  --color-pink: #d64d7a;
+  --color-purple: #8944ab;
+  --color-orange: #f5a623;
+  --color-teal: #00a896;
+  --color-blue: #2d9cdb;
+  --color-red: #e05550;
 
   /* Surfaces */
   --color-background: #f2f2f7;
@@ -90,26 +91,7 @@
   border: 1px solid var(--color-future-even-border);
 }
 
-/* Special days - override week colors with higher specificity */
-.day.day.day.discovery {
-  background: var(--color-discovery);
-}
-
-.day.day.day.announcement {
-  background: var(--color-announcement);
-}
-
-.day.day.day.engagement {
-  background: var(--color-engagement);
-}
-
-.day.day.day.c-section {
-  background: var(--color-c-section);
-}
-
-.day.day.day.due-date {
-  background: var(--color-due-date);
-}
+/* Milestone days - background color applied inline via style attribute */
 
 .day.today {
   box-shadow: 0 0 0 1px var(--color-primary);
@@ -139,11 +121,7 @@
   text-shadow: 0 1px 2px var(--shadow-text);
 }
 
-.day.discovery .date-label,
-.day.announcement .date-label,
-.day.engagement .date-label,
-.day.c-section .date-label,
-.day.due-date .date-label {
+.day.milestone .date-label {
   color: var(--color-text-on-color);
   text-shadow: 0 1px 2px var(--shadow-text);
 }
@@ -193,16 +171,8 @@
   text-shadow: 0 1px 2px var(--shadow-text);
 }
 
-.day.discovery .annotation-text,
-.day.discovery .annotation-date,
-.day.announcement .annotation-text,
-.day.announcement .annotation-date,
-.day.engagement .annotation-text,
-.day.engagement .annotation-date,
-.day.c-section .annotation-text,
-.day.c-section .annotation-date,
-.day.due-date .annotation-text,
-.day.due-date .annotation-date {
+.day.milestone .annotation-text,
+.day.milestone .annotation-date {
   color: var(--color-text-on-color);
   text-shadow: 0 1px 2px var(--shadow-text);
 }
