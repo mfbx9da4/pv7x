@@ -114,7 +114,7 @@ const getViewportSize = () => ({
   height: window.visualViewport?.height ?? window.innerHeight,
 })
 
-const VERSION_TAP_COUNT = 5
+const VERSION_TAP_COUNT = 4
 const VERSION_TAP_TIMEOUT = 500
 
 type ViewMode = 'grid' | 'calendar'
@@ -232,7 +232,7 @@ export function App() {
   }, [])
 
   const availableWidth = windowSize.width - 20 // padding
-  const availableHeight = windowSize.height - 80 // padding + info bar + safe area
+  const availableHeight = windowSize.height - 100 // padding + info bar + safe area + browser chrome
 
   const { cols, rows } = useMemo(() => calculateGrid(totalDays, availableWidth, availableHeight), [totalDays, availableWidth, availableHeight])
 
