@@ -324,7 +324,7 @@ export function App() {
           <div
             key={day.index}
             class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${pressingIndex === day.index ? 'pressing' : ''} ${day.annotation ? 'has-annotation' : ''}`}
-            style={day.color ? { background: `var(--color-${day.color})` } : undefined}
+            style={day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : undefined}
             onPointerDown={(e) => handlePointerDown(e as unknown as PointerEvent, day)}
             onPointerMove={(e) => handlePointerMove(e as unknown as PointerEvent)}
             onPointerUp={handlePointerUp}

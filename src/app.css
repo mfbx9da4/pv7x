@@ -21,6 +21,14 @@
   --color-blue: #2d9cdb;
   --color-red: #e05550;
 
+  /* Milestone text colors (light tinted shades for text on colored backgrounds) */
+  --color-pink-text: #ffeef3;
+  --color-purple-text: #f3e8f8;
+  --color-orange-text: #7a5200;
+  --color-teal-text: #e0f7f4;
+  --color-blue-text: #e3f2fd;
+  --color-red-text: #ffebee;
+
   /* Surfaces */
   --color-background: #f2f2f7;
   --color-surface: #ffffff;
@@ -122,7 +130,7 @@
 }
 
 .day.milestone .date-label {
-  color: var(--color-text-on-color);
+  color: inherit;
   text-shadow: 0 1px 2px var(--shadow-text);
 }
 
@@ -173,7 +181,7 @@
 
 .day.milestone .annotation-text,
 .day.milestone .annotation-date {
-  color: var(--color-text-on-color);
+  color: inherit;
   text-shadow: 0 1px 2px var(--shadow-text);
 }
 
