@@ -168,9 +168,9 @@ export function App() {
     return () => clearTimeout(timer)
   }, [tooltip])
 
-  const handleDayClick = useCallback((e: PointerEvent, day: DayInfo) => {
+  const handleDayPointerDown = useCallback((e: PointerEvent, day: DayInfo) => {
     e.stopPropagation()
-    // If tooltip is already open, just close it
+    // If tooltip is open, just close it
     if (tooltip) {
       setTooltip(null)
       return
@@ -305,7 +305,7 @@ export function App() {
               key={day.index}
               class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${day.annotation ? 'has-annotation' : ''}`}
               style={day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : undefined}
-              onClick={(e) => handleDayClick(e as unknown as PointerEvent, day)}
+              onPointerDown={(e) => handleDayPointerDown(e as unknown as PointerEvent, day)}
             >
               {day.annotation ? (
                 cellSize >= 50 ? (
@@ -330,7 +330,7 @@ export function App() {
           days={days}
           windowSize={windowSize}
           isLandscape={isLandscape}
-          onDayClick={handleDayClick}
+          onDayPointerDown={handleDayPointerDown}
         />
       )}
       <div class="info">
@@ -380,12 +380,12 @@ function CalendarView({
   days,
   windowSize,
   isLandscape,
-  onDayClick,
+  onDayPointerDown,
 }: {
   days: DayInfo[]
   windowSize: { width: number; height: number }
   isLandscape: boolean
-  onDayClick: (e: PointerEvent, day: DayInfo) => void
+  onDayPointerDown: (e: PointerEvent, day: DayInfo) => void
 }) {
   const labelSpace = 24 // space for day labels (used in JSX)
 
@@ -534,7 +534,7 @@ function CalendarView({
                       gridRow: dayOfWeek + 1,
                       ...(day.color ? { background: `var(--color-${day.color})` } : {}),
                     }}
-                    onClick={(e) => onDayClick(e as unknown as PointerEvent, day)}
+                    onPointerDown={(e) => onDayPointerDown(e as unknown as PointerEvent, day)}
                   />
                 ) : (
                   <div
@@ -610,7 +610,7 @@ function CalendarView({
                     key={`${weekIndex}-${dayOfWeek}`}
                     class={`calendar-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''}`}
                     style={day.color ? { background: `var(--color-${day.color})` } : undefined}
-                    onClick={(e) => onDayClick(e as unknown as PointerEvent, day)}
+                    onPointerDown={(e) => onDayPointerDown(e as unknown as PointerEvent, day)}
                   />
                 ) : (
                   <div
