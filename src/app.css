@@ -1,10 +1,50 @@
+:root {
+  /* Primary accent */
+  --color-primary: #2d5a3d;
+  --color-primary-light: #7dcea0;
+
+  /* Passed days (green spectrum) */
+  --color-passed-odd: #5fb87d;
+  --color-passed-even: #4a9c68;
+
+  /* Future days */
+  --color-future-odd: #ffffff;
+  --color-future-odd-border: #e5e5ea;
+  --color-future-even: #f0f0f5;
+  --color-future-even-border: #d1d1d6;
+
+  /* Milestone colors */
+  --color-discovery: #d64d7a;
+  --color-announcement: #8944ab;
+  --color-engagement: #f5a623;
+  --color-due-date: #e05550;
+
+  /* Surfaces */
+  --color-background: #f2f2f7;
+  --color-surface: #ffffff;
+  --color-border: #e5e5ea;
+
+  /* Text */
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #3a3a3c;
+  --color-text-tertiary: #636366;
+  --color-text-on-color: #ffffff;
+
+  /* Shadows */
+  --shadow-subtle: rgba(0, 0, 0, 0.04);
+  --shadow-text: rgba(0, 0, 0, 0.15);
+  --shadow-medium: rgba(0, 0, 0, 0.18);
+  --shadow-strong: rgba(0, 0, 0, 0.2);
+  --shadow-backdrop: rgba(0, 0, 0, 0.4);
+}
+
 .container {
   width: 100vw;
   height: 100vh;
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #f2f2f7;
+  background: var(--color-background);
   overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -26,60 +66,60 @@
   justify-content: center;
   gap: 3px;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 2px var(--shadow-subtle);
 }
 
 /* Alternating week colors - passed */
 .day.passed.odd-week {
-  background: #5fb87d;
+  background: var(--color-passed-odd);
 }
 
 .day.passed.even-week {
-  background: #4a9c68;
+  background: var(--color-passed-even);
 }
 
 /* Alternating week colors - future */
 .day.future.odd-week {
-  background: #ffffff;
-  border: 1px solid #e5e5ea;
+  background: var(--color-future-odd);
+  border: 1px solid var(--color-future-odd-border);
 }
 
 .day.future.even-week {
-  background: #f0f0f5;
-  border: 1px solid #d1d1d6;
+  background: var(--color-future-even);
+  border: 1px solid var(--color-future-even-border);
 }
 
 /* Special days - override week colors with higher specificity */
 .day.day.day.discovery {
-  background: #d64d7a;
+  background: var(--color-discovery);
 }
 
 .day.day.day.announcement {
-  background: #8944ab;
+  background: var(--color-announcement);
 }
 
 .day.day.day.engagement {
-  background: #f5a623;
+  background: var(--color-engagement);
 }
 
 .day.day.day.due-date {
-  background: #e05550;
+  background: var(--color-due-date);
 }
 
 .day.today {
-  box-shadow: 0 0 0 1px #2d5a3d;
+  box-shadow: 0 0 0 1px var(--color-primary);
   animation: pulse-border 4s ease-in-out infinite;
 }
 
 @keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 1px #2d5a3d; }
-  50% { box-shadow: 0 0 0 1px #7dcea0; }
+  0%, 100% { box-shadow: 0 0 0 1px var(--color-primary); }
+  50% { box-shadow: 0 0 0 1px var(--color-primary-light); }
 }
 
 .date-label {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  color: #1c1c1e;
+  color: var(--color-text-primary);
   text-align: center;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -90,16 +130,16 @@
 }
 
 .day.passed .date-label {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  color: var(--color-text-on-color);
+  text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .day.discovery .date-label,
 .day.announcement .date-label,
 .day.engagement .date-label,
 .day.due-date .date-label {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  color: var(--color-text-on-color);
+  text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .annotation-container {
@@ -113,7 +153,7 @@
   grid-area: 1 / 1;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  color: #1c1c1e;
+  color: var(--color-text-primary);
   text-align: center;
   line-height: 1.2;
   letter-spacing: -0.01em;
@@ -143,8 +183,8 @@
 
 .day.passed .annotation-text,
 .day.passed .annotation-date {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  color: var(--color-text-on-color);
+  text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .day.discovery .annotation-text,
@@ -155,8 +195,8 @@
 .day.engagement .annotation-date,
 .day.due-date .annotation-text,
 .day.due-date .annotation-date {
-  color: #ffffff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  color: var(--color-text-on-color);
+  text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .info {
@@ -165,9 +205,9 @@
   gap: 2rem;
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  background: #ffffff;
-  border-top: 1px solid #e5e5ea;
-  color: #3a3a3c;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
@@ -209,11 +249,11 @@
 /* Tooltip */
 .day-tooltip {
   position: fixed;
-  background: #ffffff;
-  border: 2px solid #2d5a3d;
+  background: var(--color-surface);
+  border: 2px solid var(--color-primary);
   border-radius: 10px;
   padding: 10px 14px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 4px 16px var(--shadow-medium);
   z-index: 100;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   pointer-events: none;
@@ -234,13 +274,13 @@
 .tooltip-date {
   font-size: 14px;
   font-weight: 600;
-  color: #1c1c1e;
+  color: var(--color-text-primary);
   margin-bottom: 2px;
 }
 
 .tooltip-week {
   font-size: 12px;
-  color: #636366;
+  color: var(--color-text-tertiary);
   font-weight: 500;
 }
 
@@ -257,7 +297,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--shadow-backdrop);
   z-index: 200;
   animation: fade-in 0.15s ease-out;
 }
@@ -268,10 +308,10 @@
 }
 
 .version-content {
-  background: #ffffff;
+  background: var(--color-surface);
   border-radius: 12px;
   padding: 16px 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px var(--shadow-strong);
   min-width: 240px;
   max-width: 90vw;
   animation: scale-in 0.15s ease-out;
@@ -296,19 +336,19 @@
 }
 
 .version-row:not(:last-child) {
-  border-bottom: 1px solid #e5e5ea;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .version-label {
   font-size: 12px;
   font-weight: 600;
-  color: #636366;
+  color: var(--color-text-tertiary);
   min-width: 60px;
 }
 
 .version-value {
   font-size: 12px;
   font-weight: 500;
-  color: #1c1c1e;
+  color: var(--color-text-primary);
   word-break: break-all;
 }

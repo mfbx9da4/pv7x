@@ -363,18 +363,18 @@ export function App() {
   )
 }
 
-const STYLE_COLORS: Record<string, string> = {
-  'discovery': '#d64d7a',
-  'announcement': '#8944ab',
-  'engagement': '#f5a623',
-  'due-date': '#e05550',
+function getCssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
 }
 
 function getDayColor(day: DayInfo): string {
-  if (day.style && STYLE_COLORS[day.style]) return STYLE_COLORS[day.style]
-  if (day.isToday) return '#2d5a3d'
-  if (day.passed) return day.isOddWeek ? '#5fb87d' : '#4a9c68'
-  return day.isOddWeek ? '#636366' : '#8e8e93'
+  if (day.style) {
+    const varName = `--color-${day.style}`
+    return getCssVar(varName) || getCssVar('--color-primary')
+  }
+  if (day.isToday) return getCssVar('--color-primary')
+  if (day.passed) return getCssVar(day.isOddWeek ? '--color-passed-odd' : '--color-passed-even')
+  return getCssVar(day.isOddWeek ? '--color-text-tertiary' : '--color-text-secondary')
 }
 
 function Tooltip({ day, position, windowSize }: {
