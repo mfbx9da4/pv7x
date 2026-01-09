@@ -57,8 +57,9 @@ export function InfoBar({
   const timeRemainingCompact = weeksRemaining > 0
     ? `Due in ${weeksRemaining}w${extraDays > 0 ? ` ${extraDays}d` : ''}`
     : `Due in ${daysRemaining}d`
-  const currentWeek = Math.floor((daysPassed - 1) / 7) + 1
-  const currentDayInWeek = ((daysPassed - 1) % 7) + 1
+  const daysElapsed = Math.max(0, daysPassed - 1)
+  const currentWeek = Math.floor(daysElapsed / 7) + 1
+  const currentDayInWeek = daysElapsed % 7
   const progressPercent = ((daysPassed / totalDays) * 100).toFixed(1)
 
   return (
@@ -85,8 +86,8 @@ export function InfoBar({
         )}
       </button>
       <span class="info-text">
-        <span class="info-full">Week {currentWeek}, Day {currentDayInWeek}</span>
-        <span class="info-compact">{currentWeek}w {currentDayInWeek}d</span>
+        <span class="info-full">Week {currentWeek}{currentDayInWeek > 0 ? ` + ${currentDayInWeek}` : ''}</span>
+        <span class="info-compact">Wk {currentWeek}</span>
       </span>
       <span class="info-text" onClick={handleVersionTap}>{progressPercent}%</span>
       <span class="info-text">

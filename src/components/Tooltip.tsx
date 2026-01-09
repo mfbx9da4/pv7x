@@ -41,6 +41,7 @@ export function Tooltip({
 }: TooltipProps) {
   const date = addDays(startDate, day.index)
   const weekNum = Math.floor(day.index / 7) + 1
+  const dayOffset = day.index % 7
   const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
   const fullDate = `${dayOfWeek}, ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
   const color = getDayColor(day)
@@ -76,7 +77,7 @@ export function Tooltip({
       {emoji && <div class="tooltip-emoji">{emoji}</div>}
       <div class="tooltip-content">
         <div class="tooltip-date">{fullDate}</div>
-        <div class="tooltip-week">Week {weekNum}, Day {(day.index % 7) + 1}</div>
+        <div class="tooltip-week">Week {weekNum}{dayOffset > 0 ? ` + ${dayOffset}` : ''}</div>
         {day.annotation && <div class="tooltip-annotation" style={{ color }}>{day.annotation}</div>}
         {description && <div class="tooltip-description">{description}</div>}
       </div>
