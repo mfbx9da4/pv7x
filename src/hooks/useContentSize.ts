@@ -2,14 +2,24 @@ import { useState, useEffect } from 'preact/hooks'
 import type { RefObject } from 'preact'
 
 export function useContentSize(contentRef: RefObject<HTMLDivElement>) {
-  const [contentSize, setContentSize] = useState<{ width: number; height: number } | null>(null)
-
-  useEffect(() => {
-    const updateSize = () => {
-      if (contentRef.current) {
-        const rect = contentRef.current.getBoundingClientRect()
-        setContentSize({ width: rect.width, height: rect.height })
+    const scheduleNext = () => {
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId)
       }
+      timeoutId = window.setTimeout(tick, delay)
+    }
+    const tick = () => {
+      updateSize()
+      scheduleNext()
+    }
+    const handleResize = () => {
+      updateSize()
+      scheduleNext()
+    scheduleNext()
+    window.addEventListener('resize', handleResize)
+    window.visualViewport?.addEventListener('resize', handleResize)
+      window.removeEventListener('resize', handleResize)
+      window.visualViewport?.removeEventListener('resize', handleResize)
     }
     updateSize()
     // Periodic recalc for standalone PWA mode where initial size can be wrong
