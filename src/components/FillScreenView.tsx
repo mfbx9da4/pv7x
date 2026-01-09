@@ -27,7 +27,8 @@ function AnnotationText({ text, emoji, fontSize, className }: AnnotationTextProp
 
   useLayoutEffect(() => {
     if (ref.current) {
-      const overflows = ref.current.scrollWidth > ref.current.clientWidth
+      const overflows = ref.current.scrollWidth > ref.current.clientWidth ||
+        ref.current.scrollHeight > ref.current.clientHeight
       setUseEmoji(overflows)
     }
   }, [text, fontSize])
