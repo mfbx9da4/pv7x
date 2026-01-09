@@ -13,6 +13,25 @@ function addDays(date: Date, days: number): Date {
   return result
 }
 
+function getTodayStyle(day: DayInfo): Record<string, string> {
+  if (!day.isToday) return {}
+  if (day.color) {
+    return {
+      '--today-start-bg': `var(--color-${day.color})`,
+      '--today-start-border': `var(--color-${day.color})`,
+      '--today-start-text': `var(--color-${day.color}-text)`,
+    }
+  }
+  if (day.isUncoloredMilestone) {
+    return {
+      '--today-start-bg': 'var(--color-milestone-passed)',
+      '--today-start-border': 'var(--color-milestone-passed)',
+      '--today-start-text': 'var(--color-text-on-color)',
+    }
+  }
+  return {}
+}
+
 type WeeklyViewProps = {
   days: DayInfo[]
   windowSize: { width: number; height: number }
@@ -167,7 +186,8 @@ export function WeeklyView({
                       style={{
                         gridColumn: weekIndex + 1,
                         gridRow: dayOfWeek + 1,
-                        ...(day.color ? { background: `var(--color-${day.color})` } : {}),
+                        ...(day.color && !day.isToday ? { background: `var(--color-${day.color})` } : {}),
+                        ...getTodayStyle(day),
                       }}
                       onClick={(e) => onDayClick(e as unknown as MouseEvent, day)}
                     />
@@ -231,7 +251,10 @@ export function WeeklyView({
                   <div
                     key={`${weekIndex}-${dayOfWeek}`}
                     class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
-                    style={day.color ? { background: `var(--color-${day.color})` } : undefined}
+                    style={{
+                      ...(day.color && !day.isToday ? { background: `var(--color-${day.color})` } : {}),
+                      ...getTodayStyle(day),
+                    }}
                     onClick={(e) => onDayClick(e as unknown as MouseEvent, day)}
                   />
                 ) : (

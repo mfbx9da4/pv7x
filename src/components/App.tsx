@@ -118,7 +118,7 @@ export function App() {
       let annotation = ''
       let color: string | undefined
       if (milestone) {
-        annotation = milestone.label
+        annotation = isToday ? `Today + ${milestone.label}` : milestone.label
         color = milestone.color
       } else if (isToday) {
         annotation = 'Today'
@@ -128,6 +128,7 @@ export function App() {
         index: i,
         passed: i < daysPassed,
         color,
+        milestoneLabel: milestone?.label,
         isToday,
         isOddWeek: weekNum % 2 === 1,
         dateLabel: i % 7 === 0 ? `${formatDate(date)} (${weekNum})` : formatDate(date),
@@ -186,4 +187,3 @@ export function App() {
     </div>
   )
 }
-
