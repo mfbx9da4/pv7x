@@ -266,7 +266,6 @@ body {
   grid-area: 1 / 1;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 500;
-  white-space: nowrap;
   color: var(--color-text-primary);
   text-align: center;
   line-height: 1.2;
@@ -285,12 +284,12 @@ body {
 }
 
 .annotation-text.hidden {
-  transform: translateY(-100%);
+  transform: translateY(-1.5em);
   opacity: 0;
 }
 
 .annotation-date.hidden {
-  transform: translateY(100%);
+  transform: translateY(1.5em);
   opacity: 0;
 }
 
