@@ -7,6 +7,7 @@ export const CONFIG = {
     { date: new Date(2025, 11, 24), label: 'Discovery', emoji: '🕵️‍♀️', color: 'gold' },
     { date: new Date(2025, 11, 28), label: 'Hospital Scan', emoji: '🏥', description: 'Confirmed heartbeat and normal implantation' },
     { date: new Date(2026, 0, 6), label: 'Dr Rodin', emoji: '👨‍⚕️' },
+    { date: new Date(2026, 0, 12), label: 'Leon Birthday', emoji: '🎂' },
     { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues' },
     { date: new Date(2026, 1, 12), label: 'Announce!', emoji: '📢', color: 'teal', description: 'Start of second trimester' },
     { date: new Date(2026, 2, 10), label: "James' Baby Due", emoji: '🐣' },
