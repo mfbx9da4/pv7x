@@ -38,6 +38,8 @@ type InfoBarProps = {
   currentDayInWeek: number
   progressPercent: string
   timeRemaining: string
+  weeksRemaining: number
+  daysRemaining: number
   onToggleView: () => void
   onVersionTap: () => void
 }
@@ -48,6 +50,8 @@ export function InfoBar({
   currentDayInWeek,
   progressPercent,
   timeRemaining,
+  weeksRemaining,
+  daysRemaining,
   onToggleView,
   onVersionTap,
 }: InfoBarProps) {
@@ -74,9 +78,15 @@ export function InfoBar({
           </svg>
         )}
       </button>
-      <span class="info-text">Week {currentWeek}, Day {currentDayInWeek}</span>
+      <span class="info-text">
+        <span class="info-full">Week {currentWeek}, Day {currentDayInWeek}</span>
+        <span class="info-compact">{currentWeek}wk+{currentDayInWeek}d</span>
+      </span>
       <span class="info-text" onClick={onVersionTap}>{progressPercent}%</span>
-      <span class="info-text">{timeRemaining}</span>
+      <span class="info-text">
+        <span class="info-full">{timeRemaining}</span>
+        <span class="info-compact">Due in {weeksRemaining}w{daysRemaining}d</span>
+      </span>
     </div>
   )
 }

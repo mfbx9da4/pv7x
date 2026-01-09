@@ -185,6 +185,8 @@ export function App() {
         currentDayInWeek={currentDayInWeek}
         progressPercent={progressPercent}
         timeRemaining={timeRemaining}
+        weeksRemaining={weeksRemaining}
+        daysRemaining={extraDays}
         onToggleView={toggleViewMode}
         onVersionTap={handleVersionTap}
       />

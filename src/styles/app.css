@@ -521,6 +521,19 @@ body {
   cursor: pointer;
 }
 
+.info-compact {
+  display: none;
+}
+
+@media (max-width: 380px) {
+  .info-full {
+    display: none;
+  }
+  .info-compact {
+    display: inline;
+  }
+}
+
 /* Calendar View Styles */
 .weekly-view {
   flex: 1;
