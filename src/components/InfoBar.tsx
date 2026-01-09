@@ -87,7 +87,9 @@ export function InfoBar({
       </button>
       <span class="info-text">
         <span class="info-full">Week {currentWeek}{currentDayInWeek > 0 ? ` + ${currentDayInWeek}` : ''}</span>
-        <span class="info-compact">Wk {currentWeek}</span>
+        <span class="info-compact">
+          Wk {currentWeek}{currentDayInWeek > 0 ? ` + ${currentDayInWeek}` : ''}
+        </span>
       </span>
       <span class="info-text" onClick={handleVersionTap}>{progressPercent}%</span>
       <span class="info-text">
