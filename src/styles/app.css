@@ -521,6 +521,29 @@ body {
   cursor: pointer;
 }
 
+.info-label-compact {
+  display: none;
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .info {
+    gap: 1rem;
+    font-size: 0.72rem;
+  }
+
+  .info-text {
+    letter-spacing: -0.02em;
+  }
+
+  .info-label-full {
+    display: none;
+  }
+
+  .info-label-compact {
+    display: inline;
+  }
+}
+
 /* Calendar View Styles */
 .weekly-view {
   flex: 1;

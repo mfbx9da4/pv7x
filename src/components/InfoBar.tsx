@@ -74,7 +74,13 @@ export function InfoBar({
           </svg>
         )}
       </button>
-      <span class="info-text">Week {currentWeek}, Day {currentDayInWeek}</span>
+      <span class="info-text">
+        <span class="info-label info-label-full">Week </span>
+        <span class="info-label info-label-compact">Wk </span>
+        {currentWeek}, <span class="info-label info-label-full">Day </span>
+        <span class="info-label info-label-compact">D </span>
+        {currentDayInWeek}
+      </span>
       <span class="info-text" onClick={onVersionTap}>{progressPercent}%</span>
       <span class="info-text">{timeRemaining}</span>
     </div>
