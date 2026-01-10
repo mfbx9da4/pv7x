@@ -1,4 +1,5 @@
 import type { DayInfo } from '../types'
+import { CountdownTimer } from './CountdownTimer'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
@@ -27,6 +28,7 @@ type TooltipProps = {
   position: { x: number; y: number }
   windowSize: { width: number; height: number }
   startDate: Date
+  dueDate: Date
   annotationEmojis: Record<string, string>
   annotationDescriptions: Record<string, string>
 }
@@ -36,6 +38,7 @@ export function Tooltip({
   position,
   windowSize,
   startDate,
+  dueDate,
   annotationEmojis,
   annotationDescriptions,
 }: TooltipProps) {
@@ -80,6 +83,7 @@ export function Tooltip({
         <div class="tooltip-week">Week {weekNum}{dayOffset > 0 ? ` + ${dayOffset}` : ''}</div>
         {day.annotation && <div class="tooltip-annotation" style={{ color }}>{day.annotation}</div>}
         {description && <div class="tooltip-description">{description}</div>}
+        {day.isToday && <CountdownTimer targetDate={dueDate} />}
       </div>
     </div>
   )

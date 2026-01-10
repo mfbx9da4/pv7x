@@ -179,6 +179,7 @@ export function App() {
           position={tooltip.position}
           windowSize={windowSize}
           startDate={CONFIG.startDate}
+          dueDate={CONFIG.dueDate}
           annotationEmojis={ANNOTATION_EMOJIS}
           annotationDescriptions={ANNOTATION_DESCRIPTIONS}
         />
