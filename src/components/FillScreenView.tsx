@@ -115,6 +115,25 @@ export function FillScreenView({
     return Math.max(7, Math.min(base, 13))
   }, [cellSize])
 
+  const getTodayStyle = (day: DayInfo): Record<string, string> => {
+    if (!day.isToday) return {}
+    if (day.color) {
+      return {
+        '--today-start-bg': `var(--color-${day.color})`,
+        '--today-start-border': `var(--color-${day.color})`,
+        '--today-start-text': `var(--color-${day.color}-text)`,
+      }
+    }
+    if (day.isUncoloredMilestone) {
+      return {
+        '--today-start-bg': 'var(--color-milestone-passed)',
+        '--today-start-border': 'var(--color-milestone-passed)',
+        '--today-start-text': 'var(--color-text-on-color)',
+      }
+    }
+    return {}
+  }
+
   return (
     <div
       class="grid"
@@ -130,7 +149,10 @@ export function FillScreenView({
         <div
           key={day.index}
           class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${day.annotation ? 'has-annotation' : ''} ${selectedDayIndex === day.index ? 'selected' : ''}`}
-          style={day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : undefined}
+          style={{
+            ...(day.color && !day.isToday ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : {}),
+            ...getTodayStyle(day),
+          }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => onDayClick(e as unknown as MouseEvent, day)}
         >
@@ -140,7 +162,7 @@ export function FillScreenView({
                 <span class="date-label" style={{ fontSize: `${fontSize}px` }}>{formatDate(addDays(startDate, day.index))}</span>
                 <AnnotationText
                   text={day.annotation}
-                  emoji={annotationEmojis[day.annotation] || day.annotation}
+                  emoji={annotationEmojis[day.milestoneLabel ?? day.annotation] || day.annotation}
                   fontSize={fontSize}
                   className="annotation-text visible"
                 />
@@ -149,7 +171,7 @@ export function FillScreenView({
               <span class="annotation-container" style={{ fontSize: `${fontSize}px` }}>
                 <AnnotationText
                   text={day.annotation}
-                  emoji={annotationEmojis[day.annotation] || day.annotation}
+                  emoji={annotationEmojis[day.milestoneLabel ?? day.annotation] || day.annotation}
                   fontSize={fontSize}
                   className={`annotation-text ${showAnnotationDate ? 'hidden' : 'visible'}`}
                 />
