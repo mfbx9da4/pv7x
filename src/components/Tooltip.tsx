@@ -65,8 +65,9 @@ export function Tooltip({
     top = position.y + margin
   }
 
-  const emoji = day.annotation ? annotationEmojis[day.annotation] : null
-  const description = day.annotation ? annotationDescriptions[day.annotation] : null
+  const annotationKey = day.annotation ? (day.milestoneLabel ?? day.annotation) : null
+  const emoji = annotationKey ? annotationEmojis[annotationKey] : null
+  const description = annotationKey ? annotationDescriptions[annotationKey] : null
 
   return (
     <div

@@ -218,22 +218,31 @@ body {
   border: 1px solid var(--color-milestone-future-border);
 }
 
+.day.today {
+  animation: pulse-today 4s ease-in-out infinite;
+}
+
 .day.today.odd-week {
-  animation: pulse-bg-odd 4s ease-in-out infinite;
+  --today-start-bg: var(--color-passed-odd);
+  --today-start-border: var(--color-passed-odd);
+  --today-start-text: var(--color-text-on-color);
+  --today-end-bg: var(--color-future-odd);
+  --today-end-border: var(--color-future-odd-border);
+  --today-end-text: var(--color-text-primary);
 }
 
 .day.today.even-week {
-  animation: pulse-bg-even 4s ease-in-out infinite;
+  --today-start-bg: var(--color-passed-even);
+  --today-start-border: var(--color-passed-even);
+  --today-start-text: var(--color-text-on-color);
+  --today-end-bg: var(--color-future-even);
+  --today-end-border: var(--color-future-even-border);
+  --today-end-text: var(--color-text-primary);
 }
 
-@keyframes pulse-bg-odd {
-  0%, 100% { background: var(--color-passed-odd); border: 1px solid var(--color-passed-odd); color: var(--color-text-on-color); }
-  50% { background: var(--color-future-odd); border: 1px solid var(--color-future-odd-border); color: var(--color-text-primary); }
-}
-
-@keyframes pulse-bg-even {
-  0%, 100% { background: var(--color-passed-odd); border: 1px solid var(--color-passed-odd); color: var(--color-text-on-color); }
-  50% { background: var(--color-future-even); border: 1px solid var(--color-future-even-border); color: var(--color-text-primary); }
+@keyframes pulse-today {
+  0%, 100% { background: var(--today-start-bg); border: 1px solid var(--today-start-border); color: var(--today-start-text); }
+  50% { background: var(--today-end-bg); border: 1px solid var(--today-end-border); color: var(--today-end-text); }
 }
 
 .date-label {
