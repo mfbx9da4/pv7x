@@ -3,9 +3,10 @@ import { signal } from '@preact/signals'
 import { haptic } from 'ios-haptics'
 import { FillScreenView } from './FillScreenView'
 import { WeeklyView } from './WeeklyView'
+import { TimelineView } from './TimelineView'
 import { InfoBar } from './InfoBar'
 import { Tooltip } from './Tooltip'
-import { useViewMode } from '../hooks/useViewMode'
+import { useViewMode, getNextViewMode } from '../hooks/useViewMode'
 import { useContentSize } from '../hooks/useContentSize'
 import { CONFIG, ANNOTATION_EMOJIS, ANNOTATION_DESCRIPTIONS } from '../config'
 import type { DayInfo } from '../types'
@@ -47,7 +48,7 @@ export function App() {
   const contentSize = useContentSize(contentRef)
   const [showAnnotationDate, setShowAnnotationDate] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState>(null)
-  const [viewMode, setViewMode] = useViewMode()
+  const [viewMode, setViewMode] = useViewMode(windowSize.width)
 
   useEffect(() => {
     const updateSize = () => setWindowSize(getViewportSize())
@@ -100,24 +101,13 @@ export function App() {
       return
     }
     haptic()
-
-    // Check if this day has a milestone with a range
-    const milestone = milestoneLookup[day.index]
-    if (milestone && milestone.endIndex > milestone.startIndex) {
-      const indices = new Set<number>()
-      for (let i = milestone.startIndex; i <= milestone.endIndex; i++) {
-        indices.add(i)
-      }
-      highlightedDays.value = { indices, color: milestone.color }
-    } else {
-      highlightedDays.value = { indices: new Set() }
-    }
+    highlightedDays.value = { indices: new Set() }
 
     setTooltip({
       day,
       position: { x: e.clientX, y: e.clientY }
     })
-  }, [tooltip, milestoneLookup])
+  }, [tooltip])
 
   // Cycle annotation display on mobile
   useEffect(() => {
@@ -165,32 +155,43 @@ export function App() {
   const isLandscape = windowSize.width > windowSize.height
   const toggleViewMode = useCallback(() => {
     haptic()
-    setViewMode(prev => prev === 'fill' ? 'weekly' : 'fill')
-  }, [])
+    setViewMode(prev => getNextViewMode(prev, windowSize.width))
+  }, [windowSize.width])
 
   return (
     <div class="container">
       <div ref={contentRef} style={{ flex: 1, overflow: 'hidden' }}>
-        {contentSize && (viewMode === 'fill' ? (
-          <FillScreenView
-            days={days}
-            windowSize={contentSize}
-            showAnnotationDate={showAnnotationDate}
-            selectedDayIndex={tooltip?.day.index ?? null}
-            startDate={CONFIG.startDate}
-            annotationEmojis={ANNOTATION_EMOJIS}
-            onDayClick={handleDayClick}
-          />
-        ) : (
-          <WeeklyView
-            days={days}
-            windowSize={contentSize}
-            isLandscape={isLandscape}
-            startDate={CONFIG.startDate}
-            onDayClick={handleDayClick}
-            selectedDayIndex={tooltip?.day.index ?? null}
-          />
-        ))}
+        {contentSize && (
+          viewMode === 'fill' ? (
+            <FillScreenView
+              days={days}
+              windowSize={contentSize}
+              showAnnotationDate={showAnnotationDate}
+              selectedDayIndex={tooltip?.day.index ?? null}
+              startDate={CONFIG.startDate}
+              annotationEmojis={ANNOTATION_EMOJIS}
+              onDayClick={handleDayClick}
+            />
+          ) : viewMode === 'weekly' ? (
+            <WeeklyView
+              days={days}
+              windowSize={contentSize}
+              isLandscape={isLandscape}
+              startDate={CONFIG.startDate}
+              onDayClick={handleDayClick}
+              selectedDayIndex={tooltip?.day.index ?? null}
+            />
+          ) : (
+            <TimelineView
+              days={days}
+              windowSize={contentSize}
+              startDate={CONFIG.startDate}
+              onDayClick={handleDayClick}
+              selectedDayIndex={tooltip?.day.index ?? null}
+              annotationEmojis={ANNOTATION_EMOJIS}
+            />
+          )
+        )}
       </div>
       <InfoBar
         viewMode={viewMode}

@@ -135,7 +135,7 @@ export function FillScreenView({
           key={day.index}
           class={`day ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${day.annotation ? 'has-annotation' : ''} ${selectedDayIndex === day.index ? 'selected' : ''} ${highlightedDays.value.indices.has(day.index) ? 'highlighted' : ''}`}
           style={{
-            ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : {}),
+            ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : day.isToday ? { viewTransitionName: 'today-marker' } : {}),
             ...(day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : {}),
             ...(highlightedDays.value.indices.has(day.index) && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } as React.CSSProperties : {}),
           }}

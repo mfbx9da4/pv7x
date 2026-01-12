@@ -821,3 +821,387 @@ body {
 ::view-transition-new(root) {
   animation-duration: 0.25s;
 }
+
+/* Timeline View */
+.timeline-view {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.timeline-content {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-milestones {
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  margin-bottom: -20px; /* Extend into line area so stems reach the line */
+}
+
+.timeline-line-area {
+  position: relative;
+}
+
+.timeline-milestone {
+  position: absolute;
+  bottom: 0;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+
+.timeline-months {
+  position: relative;
+  height: 20px;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.timeline-month {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.timeline-weeks {
+  position: relative;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 8px;
+}
+
+.timeline-week {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  opacity: 0.7;
+}
+
+.timeline-milestone.selected .timeline-milestone-content {
+  opacity: 0.8;
+}
+
+.timeline-milestone.today .timeline-milestone-content {
+  animation: pulse-milestone-colored 2s ease-in-out infinite;
+}
+
+.timeline-milestone.today:not(.colored) .timeline-milestone-content {
+  animation: pulse-milestone-uncolored 2s ease-in-out infinite;
+}
+
+.timeline-milestone.today .timeline-milestone-stem {
+  animation: pulse-stem-colored 2s ease-in-out infinite;
+}
+
+.timeline-milestone.today:not(.colored) .timeline-milestone-stem {
+  animation: pulse-stem-uncolored 2s ease-in-out infinite;
+}
+
+@keyframes pulse-milestone-colored {
+  0%, 100% {
+    background: var(--milestone-color);
+    border-color: var(--milestone-color);
+  }
+  50% {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+}
+
+@keyframes pulse-milestone-uncolored {
+  0%, 100% {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+  50% {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+  }
+}
+
+@keyframes pulse-stem-colored {
+  0%, 100% {
+    background: var(--milestone-color);
+  }
+  50% {
+    background: var(--color-primary);
+  }
+}
+
+@keyframes pulse-stem-uncolored {
+  0%, 100% {
+    background: var(--color-border);
+  }
+  50% {
+    background: var(--color-primary);
+  }
+}
+
+.timeline-milestone-content {
+  background: var(--milestone-color, var(--color-surface));
+  border: 1px solid var(--milestone-color, var(--color-border));
+  border-radius: 8px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px var(--shadow-subtle);
+  max-width: 120px;
+  position: relative;
+  z-index: 2;
+}
+
+.timeline-milestone.colored .timeline-milestone-content {
+  color: var(--color-text-on-color);
+  border-color: transparent;
+}
+
+/* Orange/gold milestones need dark text for readability */
+.timeline-milestone.color-orange .timeline-milestone-content {
+  color: var(--color-orange-text);
+}
+
+.timeline-milestone.color-gold .timeline-milestone-content {
+  color: var(--color-gold-text);
+}
+
+/* Salmon milestones need dark text for readability */
+.timeline-milestone.color-salmon .timeline-milestone-content {
+  color: var(--color-salmon-text);
+}
+
+/* Uncolored milestones need lighter text in light mode */
+.timeline-milestone:not(.colored) .timeline-milestone-content {
+  color: var(--color-text-secondary);
+}
+
+.timeline-milestone.highlighted .timeline-milestone-content {
+  background: var(--highlight-color, var(--color-highlight-default));
+  border-color: var(--highlight-color, var(--color-highlight-default));
+  box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
+}
+
+.timeline-milestone-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.timeline-milestone-label {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeline-milestone-stem {
+  width: 2px;
+  background: var(--milestone-color, var(--color-border));
+  flex-shrink: 0;
+  min-height: 10px;
+  z-index: 1;
+}
+
+.timeline-milestone.colored .timeline-milestone-stem {
+  background: var(--milestone-color);
+}
+
+.timeline-milestone.highlighted .timeline-milestone-stem {
+  background: var(--highlight-color, var(--color-highlight-default));
+}
+
+.timeline-line {
+  position: relative;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.timeline-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.timeline-today {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.timeline-today-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  box-shadow: 0 2px 6px var(--shadow-medium);
+  animation: pulse-today 2s ease-in-out infinite;
+}
+
+.timeline-hover-dot {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 5;
+  transition: transform 0.1s ease;
+}
+
+.timeline-hover-dot.passed {
+  background: var(--color-primary);
+}
+
+.timeline-hover-dot.future {
+  background: var(--color-text-tertiary);
+}
+
+.timeline-hover-dot:hover {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+@keyframes pulse-today {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* Gantt section for range milestones */
+.timeline-gantt-section {
+  position: relative;
+  flex-shrink: 0;
+  margin-top: 12px;
+}
+
+.timeline-gantt-labels {
+  position: relative;
+  flex-shrink: 0;
+  overflow: visible;
+  margin-top: -2px;
+}
+
+.timeline-gantt-item {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateX(-50%);
+  cursor: pointer;
+  /* Stem is first child, label content is second - stem goes up */
+}
+
+.timeline-gantt-label-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--bar-color, var(--color-surface-elevated));
+  border: 1px solid var(--bar-color, var(--color-border));
+  border-radius: 12px;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+  position: relative;
+  z-index: 10;
+}
+
+.timeline-gantt-item:hover .timeline-gantt-label-content {
+  opacity: 0.85;
+}
+
+.timeline-gantt-item.colored .timeline-gantt-label-content {
+  color: var(--color-text-on-color);
+  border-color: transparent;
+}
+
+.timeline-gantt-item:not(.colored) .timeline-gantt-label-content {
+  background: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--color-text-secondary);
+}
+
+/* Color-specific text rules for Gantt labels */
+.timeline-gantt-item.color-orange .timeline-gantt-label-content {
+  color: var(--color-orange-text);
+}
+
+.timeline-gantt-item.color-gold .timeline-gantt-label-content {
+  color: var(--color-gold-text);
+}
+
+.timeline-gantt-item.color-salmon .timeline-gantt-label-content {
+  color: var(--color-salmon-text);
+}
+
+.timeline-gantt-item.highlighted .timeline-gantt-label-content {
+  box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
+}
+
+.timeline-gantt-label-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.timeline-gantt-label-text {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.timeline-gantt-stem {
+  width: 2px;
+  background: var(--bar-color, var(--color-border));
+  flex-shrink: 0;
+}
+
+.timeline-gantt-bars {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.timeline-gantt-bar {
+  position: absolute;
+  background: var(--bar-color, var(--color-border));
+  border-radius: 4px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.timeline-gantt-bar:hover {
+  opacity: 0.85;
+}
+
+.timeline-gantt-bar:not(.colored) {
+  background: var(--color-border);
+}
+
+.timeline-gantt-bar.highlighted {
+  box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
+}

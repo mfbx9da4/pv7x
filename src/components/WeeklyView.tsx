@@ -169,7 +169,7 @@ export function WeeklyView({
                       key={`${weekIndex}-${dayOfWeek}`}
                       class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''} ${highlightedDays.value.indices.has(day.index) ? 'highlighted' : ''}`}
                       style={{
-                        ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : {}),
+                        ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : day.isToday ? { viewTransitionName: 'today-marker' } : {}),
                         gridColumn: weekIndex + 1,
                         gridRow: dayOfWeek + 1,
                         ...(day.color ? { background: `var(--color-${day.color})` } : {}),
@@ -238,7 +238,7 @@ export function WeeklyView({
                     key={`${weekIndex}-${dayOfWeek}`}
                     class={`weekly-cell ${day.passed ? 'passed' : 'future'} ${day.color ? 'milestone' : ''} ${day.isUncoloredMilestone ? 'uncolored-milestone' : ''} ${day.isOddWeek ? 'odd-week' : 'even-week'} ${day.isToday ? 'today' : ''} ${selectedDayIndex === day.index ? 'selected' : ''} ${highlightedDays.value.indices.has(day.index) ? 'highlighted' : ''}`}
                     style={{
-                      ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : {}),
+                      ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : day.isToday ? { viewTransitionName: 'today-marker' } : {}),
                       ...(day.color ? { background: `var(--color-${day.color})` } : {}),
                       ...(highlightedDays.value.indices.has(day.index) && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } as React.CSSProperties : {}),
                     }}

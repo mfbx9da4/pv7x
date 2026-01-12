@@ -13,7 +13,6 @@ export const CONFIG = {
     { date: new Date(2026, 0, 23), label: 'Blood Tests', emoji: '🩸', description: '10 week blood tests which should reveal gender and any adverse genetic issues at The Fetal Medicine Centre' },
     { date: new Date(2026, 0, 29), label: "Yael's Birthday", emoji: '🎂' },
     { date: new Date(2026, 1, 12), label: 'Announce!', emoji: '📢', color: 'blue', description: 'Start of second trimester' },
-    { date: new Date(2026, 1, 14), endDate: new Date(2026, 1, 22), label: 'Feb Half Term', emoji: '🏝️', description: 'School resumes 23 Feb' },
     { date: new Date(2026, 1, 16), endDate: new Date(2026, 1, 20), label: 'Secret Holiday', emoji: '🧣', color: 'gold', description: 'Until 20 Feb' },
     { date: new Date(2026, 2, 10), label: "James' Baby Due", emoji: '🐣' },
     { date: new Date(2026, 2, 15), endDate: new Date(2026, 2, 20), label: 'Madrid Offsite', emoji: '🇪🇸', color: 'gold', description: '15 - 20 Mar' },
