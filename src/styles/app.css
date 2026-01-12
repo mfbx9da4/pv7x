@@ -1332,7 +1332,6 @@ body {
   box-shadow: 0 2px 8px var(--shadow-subtle);
   z-index: 2;
   font-size: 11px;
-  width: 110px;
   max-width: 110px;
 }
 
