@@ -194,7 +194,6 @@ export function App() {
         )}
       </div>
       <InfoBar
-        viewMode={viewMode}
         totalDays={totalDays}
         daysPassed={daysPassed}
         onToggleView={toggleViewMode}
@@ -213,4 +212,3 @@ export function App() {
     </div>
   )
 }
-
