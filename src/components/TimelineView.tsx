@@ -52,6 +52,64 @@ type MilestoneWithLayout = DayInfo & {
   width: number
 }
 
+type PortraitMilestoneWithLayout = DayInfo & {
+  position: number
+  column: number  // column offset (0 = closest to line, positive = further right)
+  height: number  // estimated height of milestone element
+}
+
+// Portrait milestone layout constants (fixed-width milestones)
+const PORTRAIT_MILESTONE_HEIGHT = 26 // matches padding + font size + border
+const PORTRAIT_MILESTONE_GAP = 2
+const PORTRAIT_COLUMN_WIDTH = 80 // horizontal offset per column
+const PORTRAIT_MONTHS_WIDTH = 32 // width of months column that stems must cross
+
+// Assign columns to portrait milestones to avoid vertical overlaps
+function assignPortraitColumns(
+  milestones: (DayInfo & { position: number })[],
+  containerHeight: number
+): PortraitMilestoneWithLayout[] {
+  // Sort by position (top to bottom)
+  const sorted = [...milestones].sort((a, b) => a.position - b.position)
+
+  // Track occupied ranges per column: Map<column, Array<{top, bottom}>>
+  const columnOccupancy = new Map<number, Array<{ top: number; bottom: number }>>()
+
+  const result: PortraitMilestoneWithLayout[] = []
+
+  for (const milestone of sorted) {
+    // Convert percentage position to pixels
+    const centerPx = (milestone.position / 100) * containerHeight
+    const topPx = centerPx - PORTRAIT_MILESTONE_HEIGHT / 2
+    const bottomPx = centerPx + PORTRAIT_MILESTONE_HEIGHT / 2
+
+    // Find the closest available column (searching outward from 0)
+    let assignedColumn = 0
+    let maxSearch = 10
+
+    for (let distance = 0; distance < maxSearch; distance++) {
+      const occupied = columnOccupancy.get(distance) || []
+      const hasConflict = occupied.some(
+        range => !(bottomPx + PORTRAIT_MILESTONE_GAP < range.top || topPx - PORTRAIT_MILESTONE_GAP > range.bottom)
+      )
+
+      if (!hasConflict) {
+        assignedColumn = distance
+        break
+      }
+    }
+
+    // Record this milestone's occupancy
+    const occupied = columnOccupancy.get(assignedColumn) || []
+    occupied.push({ top: topPx, bottom: bottomPx })
+    columnOccupancy.set(assignedColumn, occupied)
+
+    result.push({ ...milestone, column: assignedColumn, height: PORTRAIT_MILESTONE_HEIGHT })
+  }
+
+  return result
+}
+
 // Assign rows to milestones to avoid overlaps
 function assignRows(
   milestones: (DayInfo & { position: number })[],
@@ -139,6 +197,7 @@ export function TimelineView({
   annotationEmojis,
 }: TimelineViewProps) {
   const totalDays = days.length
+  const isLandscape = windowSize.width > windowSize.height
 
   // Find today's index
   const todayIndex = days.findIndex(d => d.isToday)
@@ -156,6 +215,20 @@ export function TimelineView({
     const containerWidth = windowSize.width - 120 // account for 60px padding on each side
     return assignRows(basic, containerWidth, annotationEmojis)
   }, [days, totalDays, windowSize.width, annotationEmojis])
+
+  // Get point milestones for portrait mode with column assignments
+  const portraitMilestones = useMemo(() => {
+    const basic = days
+      .filter(d => d.annotation && d.annotation !== 'Today' && !rangeMilestoneLookup[d.annotation])
+      .map(d => ({
+        ...d,
+        position: (d.index / totalDays) * 100,
+      }))
+
+    // Use container height minus padding for layout calculation
+    const containerHeight = windowSize.height - 100 // account for padding
+    return assignPortraitColumns(basic, containerHeight)
+  }, [days, totalDays, windowSize.height])
 
   // Get range milestones for Gantt bars
   type GanttBar = {
@@ -311,12 +384,14 @@ export function TimelineView({
   const handleLineMouseMove = useCallback((e: MouseEvent) => {
     if (!lineRef.current) return
     const rect = lineRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100))
+    // For landscape, use X position; for portrait, use Y position
+    const pos = isLandscape ? e.clientX - rect.left : e.clientY - rect.top
+    const size = isLandscape ? rect.width : rect.height
+    const percent = Math.max(0, Math.min(100, (pos / size) * 100))
     const dayIndex = Math.round((percent / 100) * (totalDays - 1))
     setHoverPosition(percent)
     setHoverDayIndex(dayIndex)
-  }, [totalDays])
+  }, [totalDays, isLandscape])
 
   const handleLineMouseLeave = useCallback(() => {
     setHoverPosition(null)
@@ -328,8 +403,144 @@ export function TimelineView({
   const belowRows = Math.abs(minRow) // rows below 0
   const milestonesHeight = (aboveRows + belowRows) * ROW_HEIGHT
 
+  // Portrait layout - vertical timeline
+  if (!isLandscape) {
+    return (
+      <div class="timeline-view portrait">
+        <div class="timeline-content-portrait">
+          {/* Week markers on the left */}
+          <div class="timeline-weeks-portrait">
+            {weekMarkers.map((w) => (
+              <div
+                key={w.week}
+                class="timeline-week"
+                style={{ top: `${w.position}%` }}
+              >
+                {w.week}
+              </div>
+            ))}
+          </div>
+
+          {/* Gantt bars on the left (stems go right to line) */}
+          {ganttBars.length > 0 && (
+            <div class="timeline-gantt-portrait">
+              {ganttBars.map((bar) => {
+                const centerPosition = (bar.startPosition + bar.endPosition) / 2
+                return (
+                  <div
+                    key={bar.label}
+                    class={`timeline-gantt-item-portrait ${bar.color ? `colored color-${bar.color}` : ''}`}
+                    style={{
+                      top: `${centerPosition}%`,
+                      ...(bar.color ? { '--bar-color': `var(--color-${bar.color})` } : {}),
+                    }}
+                    onClick={(e) => {
+                      const day = days[bar.startIndex]
+                      if (day) onDayClick(e as unknown as MouseEvent, day)
+                    }}
+                  >
+                    <div class="timeline-gantt-label-portrait">
+                      <span class="timeline-gantt-label-emoji">{bar.emoji}</span>
+                      <span class="timeline-gantt-label-text">{bar.label}</span>
+                    </div>
+                    <div
+                      class="timeline-gantt-bar-portrait"
+                      style={{ height: `${bar.width}%` }}
+                    />
+                    <div class="timeline-gantt-stem-portrait" />
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {/* The vertical timeline line */}
+          <div
+            ref={lineRef}
+            class="timeline-line-portrait"
+            onMouseMove={handleLineMouseMove as unknown as (e: Event) => void}
+            onMouseLeave={handleLineMouseLeave}
+          >
+            {/* Progress fill */}
+            <div
+              class="timeline-progress-portrait"
+              style={{ height: `${todayPosition}%` }}
+            />
+            {/* Hover dot */}
+            {hoverPosition !== null && hoverDayIndex !== null && hoverDayIndex !== todayIndex && (
+              <div
+                class={`timeline-hover-dot-portrait ${hoverDayIndex < (todayIndex >= 0 ? todayIndex : totalDays) ? 'passed' : 'future'}`}
+                style={{ top: `${hoverPosition}%` }}
+                onClick={(e) => {
+                  const day = days[hoverDayIndex]
+                  if (day) onDayClick(e as unknown as MouseEvent, day)
+                }}
+              />
+            )}
+            {/* Today marker */}
+            {todayIndex >= 0 && (
+              <div
+                class="timeline-today-portrait"
+                style={{ top: `${todayPosition}%`, viewTransitionName: 'today-marker' }}
+                onClick={(e) => {
+                  const today = days.find(d => d.isToday)
+                  if (today) onDayClick(e as unknown as MouseEvent, today)
+                }}
+              >
+                <div class="timeline-today-dot" />
+              </div>
+            )}
+          </div>
+
+          {/* Month markers */}
+          <div class="timeline-months-portrait">
+            {monthMarkers.map((m, i) => (
+              <div
+                key={i}
+                class="timeline-month"
+                style={{ top: `${m.position}%` }}
+              >
+                {m.month}
+              </div>
+            ))}
+          </div>
+
+          {/* Milestones on the right (stems go left to line) */}
+          <div class="timeline-milestones-portrait">
+            {portraitMilestones.map((m) => {
+              // Offset the content box based on column (column 0 = no offset, column 1 = one step right, etc.)
+              const contentOffset = m.column * PORTRAIT_COLUMN_WIDTH
+              // Stem extends from milestone container through months column to the timeline line
+              // Base: 16px stem + 32px months width + collision offset
+              const stemWidth = 16 + PORTRAIT_MONTHS_WIDTH + contentOffset
+              return (
+                <div
+                  key={m.index}
+                  class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ''} ${m.isToday ? 'today' : ''} ${selectedDayIndex === m.index ? 'selected' : ''}`}
+                  style={{
+                    top: `${m.position}%`,
+                    ...(VIEW_TRANSITION_LABELS.has(m.annotation) ? { viewTransitionName: `day-${m.index}` } : {}),
+                    ...(m.color ? { '--milestone-color': `var(--color-${m.color})` } : {}),
+                  }}
+                  onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
+                >
+                  <div class="timeline-milestone-stem-portrait" style={{ width: `${stemWidth}px` }} />
+                  <div class="timeline-milestone-content-portrait">
+                    <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
+                    <span class="timeline-milestone-label">{m.annotation}</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Landscape layout - horizontal timeline
   return (
-    <div class="timeline-view">
+    <div class="timeline-view landscape">
       <div class="timeline-content">
         {/* Milestones container */}
         <div
