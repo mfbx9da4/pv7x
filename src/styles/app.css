@@ -50,6 +50,7 @@ body {
   --color-red: #e05550;
   --color-gold: #d4a83c;
   --color-salmon: #d4908f;
+  --color-subtle: #e5e5ea;
 
   /* Milestone text colors (light tinted shades for text on colored backgrounds) */
   --color-pink-text: #ffeef3;
@@ -60,6 +61,7 @@ body {
   --color-red-text: #ffebee;
   --color-gold-text: #4a3c00;
   --color-salmon-text: #fff5f5;
+  --color-subtle-text: #3a3a3c;
 
   /* Surfaces */
   --color-background: #f2f2f7;
@@ -125,6 +127,7 @@ body {
     --color-red: #f87171;
     --color-gold: #fbbf24;
     --color-salmon: #fda4af;
+    --color-subtle: #48484a;
 
     /* Milestone text - dark text on bright colors */
     --color-pink-text: #1c1c1e;
@@ -135,6 +138,7 @@ body {
     --color-red-text: #1c1c1e;
     --color-gold-text: #1c1c1e;
     --color-salmon-text: #1c1c1e;
+    --color-subtle-text: #ebebf5;
 
     /* Shadows - more subtle in dark mode */
     --shadow-subtle: rgba(0, 0, 0, 0.3);
@@ -1209,6 +1213,7 @@ body {
 /* Portrait Timeline Layout */
 .timeline-view.portrait {
   padding: 20px;
+  overflow: hidden;
 }
 
 .timeline-content-portrait {
@@ -1217,6 +1222,55 @@ body {
   height: 100%;
   gap: 8px;
   margin: 0 auto;
+  max-width: 100%;
+}
+
+/* Mobile-specific adjustments for portrait timeline */
+@media (max-width: 500px) {
+  .timeline-view.portrait {
+    padding: 12px;
+  }
+
+  .timeline-milestone-content-portrait {
+    max-width: 70px;
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .timeline-milestone-content-portrait .timeline-milestone-emoji {
+    font-size: 10px;
+  }
+
+  .timeline-milestone-content-portrait .timeline-milestone-label {
+    font-size: 10px;
+  }
+
+  .timeline-gantt-label-portrait {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .timeline-weeks-portrait {
+    width: 18px;
+  }
+
+  .timeline-weeks-portrait .timeline-week {
+    font-size: 9px;
+  }
+
+  .timeline-months-portrait {
+    width: 24px;
+  }
+
+  .timeline-months-portrait .timeline-month {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 400px) {
+  .timeline-milestone-content-portrait {
+    max-width: 60px;
+  }
 }
 
 .timeline-weeks-portrait {
@@ -1348,6 +1402,33 @@ body {
   min-width: 0;
 }
 
+/* Emoji-only compact milestone (collapsed state) */
+.timeline-milestone-emoji-only {
+  background: var(--milestone-color, var(--color-surface));
+  border: 1px solid var(--milestone-color, var(--color-border));
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px var(--shadow-subtle);
+  z-index: 2;
+}
+
+.timeline-milestone-emoji-only .timeline-milestone-emoji {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.timeline-milestone-portrait.colored .timeline-milestone-emoji-only {
+  border-color: transparent;
+}
+
+.timeline-milestone-portrait:not(.colored) .timeline-milestone-emoji-only {
+  background: var(--color-surface);
+}
+
 .timeline-milestone-portrait.colored .timeline-milestone-content-portrait {
   color: var(--color-text-on-color);
   border-color: transparent;
@@ -1369,6 +1450,10 @@ body {
   color: var(--color-salmon-text);
 }
 
+.timeline-milestone-portrait.color-subtle .timeline-milestone-content-portrait {
+  color: var(--color-subtle-text);
+}
+
 .timeline-milestone-portrait.selected .timeline-milestone-content-portrait {
   opacity: 0.8;
 }
@@ -1383,6 +1468,32 @@ body {
 
 .timeline-milestone-portrait.colored .timeline-milestone-stem-portrait {
   background: var(--milestone-color);
+}
+
+/* Portrait milestone today pulse animations */
+.timeline-milestone-portrait.today .timeline-milestone-content-portrait {
+  animation: pulse-milestone-colored 2s ease-in-out infinite;
+}
+
+.timeline-milestone-portrait.today:not(.colored) .timeline-milestone-content-portrait {
+  animation: pulse-milestone-uncolored 2s ease-in-out infinite;
+}
+
+.timeline-milestone-portrait.today .timeline-milestone-stem-portrait {
+  animation: pulse-stem-colored 2s ease-in-out infinite;
+}
+
+.timeline-milestone-portrait.today:not(.colored) .timeline-milestone-stem-portrait {
+  animation: pulse-stem-uncolored 2s ease-in-out infinite;
+}
+
+/* Emoji-only pulse animations */
+.timeline-milestone-portrait.today .timeline-milestone-emoji-only {
+  animation: pulse-milestone-colored 2s ease-in-out infinite;
+}
+
+.timeline-milestone-portrait.today:not(.colored) .timeline-milestone-emoji-only {
+  animation: pulse-milestone-uncolored 2s ease-in-out infinite;
 }
 
 /* Portrait Gantt */
@@ -1443,8 +1554,11 @@ body {
   width: 6px;
   background: var(--bar-color, var(--color-border));
   border-radius: 3px;
-  transform: translateY(-50%);
-  top: 50%;
+  cursor: pointer;
+}
+
+.timeline-gantt-bar-portrait.colored {
+  background: var(--bar-color);
 }
 
 .timeline-gantt-stem-portrait {

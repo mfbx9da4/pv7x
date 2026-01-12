@@ -56,38 +56,50 @@ type PortraitMilestoneWithLayout = DayInfo & {
   position: number
   column: number  // column offset (0 = closest to line, positive = further right)
   height: number  // estimated height of milestone element
+  expanded: boolean // whether to show label or just emoji
 }
 
-// Portrait milestone layout constants (fixed-width milestones)
-const PORTRAIT_MILESTONE_HEIGHT = 26 // matches padding + font size + border
+// Portrait milestone layout constants
+const PORTRAIT_EMOJI_HEIGHT = 26 // height when showing only emoji
+const PORTRAIT_EXPANDED_HEIGHT = 26 // height when showing emoji + label (same height, different width)
 const PORTRAIT_MILESTONE_GAP = 2
-const PORTRAIT_COLUMN_WIDTH = 80 // horizontal offset per column
 const PORTRAIT_MONTHS_WIDTH = 32 // width of months column that stems must cross
 
-// Assign columns to portrait milestones to avoid vertical overlaps
+// Get responsive column width for portrait milestones
+function getPortraitColumnWidth(screenWidth: number): number {
+  if (screenWidth <= 400) return 35 // small mobile
+  if (screenWidth <= 500) return 45 // mobile
+  return 80 // default
+}
+
+// Smart column assignment for portrait milestones
+// 1. Start with all emoji-only (collapsed)
+// 2. Assign columns based on emoji collision detection
+// 3. Try to expand colored milestones (non-subtle)
+// 4. Try to expand subtle milestones
 function assignPortraitColumns(
   milestones: (DayInfo & { position: number })[],
-  containerHeight: number
+  containerHeight: number,
+  maxColumns: number = 10
 ): PortraitMilestoneWithLayout[] {
   // Sort by position (top to bottom)
   const sorted = [...milestones].sort((a, b) => a.position - b.position)
 
-  // Track occupied ranges per column: Map<column, Array<{top, bottom}>>
-  const columnOccupancy = new Map<number, Array<{ top: number; bottom: number }>>()
+  // Track occupied ranges per column
+  const columnOccupancy = new Map<number, Array<{ top: number; bottom: number; index: number }>>()
 
+  // First pass: assign columns using emoji-only (collapsed) size
   const result: PortraitMilestoneWithLayout[] = []
 
   for (const milestone of sorted) {
-    // Convert percentage position to pixels
     const centerPx = (milestone.position / 100) * containerHeight
-    const topPx = centerPx - PORTRAIT_MILESTONE_HEIGHT / 2
-    const bottomPx = centerPx + PORTRAIT_MILESTONE_HEIGHT / 2
+    const topPx = centerPx - PORTRAIT_EMOJI_HEIGHT / 2
+    const bottomPx = centerPx + PORTRAIT_EMOJI_HEIGHT / 2
 
-    // Find the closest available column (searching outward from 0)
+    // Find the closest available column
     let assignedColumn = 0
-    let maxSearch = 10
 
-    for (let distance = 0; distance < maxSearch; distance++) {
+    for (let distance = 0; distance < maxColumns; distance++) {
       const occupied = columnOccupancy.get(distance) || []
       const hasConflict = occupied.some(
         range => !(bottomPx + PORTRAIT_MILESTONE_GAP < range.top || topPx - PORTRAIT_MILESTONE_GAP > range.bottom)
@@ -101,10 +113,63 @@ function assignPortraitColumns(
 
     // Record this milestone's occupancy
     const occupied = columnOccupancy.get(assignedColumn) || []
-    occupied.push({ top: topPx, bottom: bottomPx })
+    const idx = result.length
+    occupied.push({ top: topPx, bottom: bottomPx, index: idx })
     columnOccupancy.set(assignedColumn, occupied)
 
-    result.push({ ...milestone, column: assignedColumn, height: PORTRAIT_MILESTONE_HEIGHT })
+    result.push({
+      ...milestone,
+      column: assignedColumn,
+      height: PORTRAIT_EMOJI_HEIGHT,
+      expanded: false
+    })
+  }
+
+  // Helper to check if expanding a milestone causes conflicts
+  const canExpand = (index: number): boolean => {
+    const m = result[index]
+    const centerPx = (m.position / 100) * containerHeight
+    const topPx = centerPx - PORTRAIT_EXPANDED_HEIGHT / 2
+    const bottomPx = centerPx + PORTRAIT_EXPANDED_HEIGHT / 2
+
+    // Check same column for conflicts with other milestones
+    const occupied = columnOccupancy.get(m.column) || []
+    for (const range of occupied) {
+      if (range.index === index) continue // skip self
+      // If either is expanded, check with expanded width consideration
+      const otherM = result[range.index]
+      // Check vertical overlap - if they overlap vertically and one is expanded, conflict
+      if (!(bottomPx + PORTRAIT_MILESTONE_GAP < range.top || topPx - PORTRAIT_MILESTONE_GAP > range.bottom)) {
+        // They overlap vertically - if expanding would make visual conflict
+        // For simplicity, if any vertical overlap in same column, can't expand
+        if (otherM.expanded) return false
+      }
+    }
+    return true
+  }
+
+  // Second pass: try to expand colored milestones (non-subtle)
+  const coloredIndices = result
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => m.color && m.color !== 'subtle')
+    .map(({ i }) => i)
+
+  for (const idx of coloredIndices) {
+    if (canExpand(idx)) {
+      result[idx].expanded = true
+    }
+  }
+
+  // Third pass: try to expand subtle milestones
+  const subtleIndices = result
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => m.color === 'subtle')
+    .map(({ i }) => i)
+
+  for (const idx of subtleIndices) {
+    if (canExpand(idx)) {
+      result[idx].expanded = true
+    }
   }
 
   return result
@@ -227,8 +292,10 @@ export function TimelineView({
 
     // Use container height minus padding for layout calculation
     const containerHeight = windowSize.height - 100 // account for padding
-    return assignPortraitColumns(basic, containerHeight)
-  }, [days, totalDays, windowSize.height])
+    // Limit columns on narrow screens to prevent overflow
+    const maxColumns = windowSize.width <= 400 ? 2 : windowSize.width <= 500 ? 3 : 10
+    return assignPortraitColumns(basic, containerHeight, maxColumns)
+  }, [days, totalDays, windowSize.height, windowSize.width])
 
   // Get range milestones for Gantt bars
   type GanttBar = {
@@ -424,11 +491,28 @@ export function TimelineView({
           {/* Gantt bars on the left (stems go right to line) */}
           {ganttBars.length > 0 && (
             <div class="timeline-gantt-portrait">
+              {/* Vertical bars positioned absolutely */}
+              {ganttBars.map((bar) => (
+                <div
+                  key={`bar-${bar.label}`}
+                  class={`timeline-gantt-bar-portrait ${bar.color ? `colored color-${bar.color}` : ''}`}
+                  style={{
+                    top: `${bar.startPosition}%`,
+                    height: `${bar.width}%`,
+                    ...(bar.color ? { '--bar-color': `var(--color-${bar.color})` } : {}),
+                  }}
+                  onClick={(e) => {
+                    const day = days[bar.startIndex]
+                    if (day) onDayClick(e as unknown as MouseEvent, day)
+                  }}
+                />
+              ))}
+              {/* Labels with stems */}
               {ganttBars.map((bar) => {
                 const centerPosition = (bar.startPosition + bar.endPosition) / 2
                 return (
                   <div
-                    key={bar.label}
+                    key={`label-${bar.label}`}
                     class={`timeline-gantt-item-portrait ${bar.color ? `colored color-${bar.color}` : ''}`}
                     style={{
                       top: `${centerPosition}%`,
@@ -443,10 +527,6 @@ export function TimelineView({
                       <span class="timeline-gantt-label-emoji">{bar.emoji}</span>
                       <span class="timeline-gantt-label-text">{bar.label}</span>
                     </div>
-                    <div
-                      class="timeline-gantt-bar-portrait"
-                      style={{ height: `${bar.width}%` }}
-                    />
                     <div class="timeline-gantt-stem-portrait" />
                   </div>
                 )
@@ -509,14 +589,15 @@ export function TimelineView({
           <div class="timeline-milestones-portrait">
             {portraitMilestones.map((m) => {
               // Offset the content box based on column (column 0 = no offset, column 1 = one step right, etc.)
-              const contentOffset = m.column * PORTRAIT_COLUMN_WIDTH
+              const columnWidth = getPortraitColumnWidth(windowSize.width)
+              const contentOffset = m.column * columnWidth
               // Stem extends from milestone container through months column to the timeline line
               // Base: 16px stem + 32px months width + collision offset
               const stemWidth = 16 + PORTRAIT_MONTHS_WIDTH + contentOffset
               return (
                 <div
                   key={m.index}
-                  class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ''} ${m.isToday ? 'today' : ''} ${selectedDayIndex === m.index ? 'selected' : ''}`}
+                  class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ''} ${m.isToday ? 'today' : ''} ${selectedDayIndex === m.index ? 'selected' : ''} ${m.expanded ? 'expanded' : 'collapsed'}`}
                   style={{
                     top: `${m.position}%`,
                     ...(VIEW_TRANSITION_LABELS.has(m.annotation) ? { viewTransitionName: `day-${m.index}` } : {}),
@@ -525,10 +606,16 @@ export function TimelineView({
                   onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
                 >
                   <div class="timeline-milestone-stem-portrait" style={{ width: `${stemWidth}px` }} />
-                  <div class="timeline-milestone-content-portrait">
-                    <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
-                    <span class="timeline-milestone-label">{m.annotation}</span>
-                  </div>
+                  {m.expanded ? (
+                    <div class="timeline-milestone-content-portrait">
+                      <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
+                      <span class="timeline-milestone-label">{m.annotation}</span>
+                    </div>
+                  ) : (
+                    <div class="timeline-milestone-emoji-only">
+                      <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
+                    </div>
+                  )}
                 </div>
               )
             })}

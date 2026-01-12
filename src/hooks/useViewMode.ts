@@ -3,21 +3,12 @@ import { useState, useEffect } from 'preact/hooks'
 export type ViewMode = 'fill' | 'weekly' | 'timeline'
 
 const VIEW_MODE_KEY = 'pregnancy-visualizer-view-mode'
-const TIMELINE_MIN_WIDTH = 900
+const ALL_MODES: ViewMode[] = ['fill', 'weekly', 'timeline']
 
-function getAvailableModes(width: number): ViewMode[] {
-  return width >= TIMELINE_MIN_WIDTH
-    ? ['fill', 'weekly', 'timeline']
-    : ['fill', 'weekly']
-}
-
-function getStoredViewMode(width: number): ViewMode {
+function getStoredViewMode(): ViewMode {
   try {
     const stored = localStorage.getItem(VIEW_MODE_KEY)
-    if (stored === 'fill' || stored === 'weekly') {
-      return stored
-    }
-    if (stored === 'timeline' && width >= TIMELINE_MIN_WIDTH) {
+    if (stored === 'fill' || stored === 'weekly' || stored === 'timeline') {
       return stored
     }
   } catch {
@@ -26,21 +17,13 @@ function getStoredViewMode(width: number): ViewMode {
   return 'fill'
 }
 
-export function getNextViewMode(current: ViewMode, width: number): ViewMode {
-  const modes = getAvailableModes(width)
-  const idx = modes.indexOf(current)
-  return modes[(idx + 1) % modes.length]
+export function getNextViewMode(current: ViewMode, _width: number): ViewMode {
+  const idx = ALL_MODES.indexOf(current)
+  return ALL_MODES[(idx + 1) % ALL_MODES.length]
 }
 
-export function useViewMode(width: number) {
-  const [viewMode, setViewMode] = useState<ViewMode>(() => getStoredViewMode(width))
-
-  // If timeline is selected but width is too narrow, switch to fill
-  useEffect(() => {
-    if (viewMode === 'timeline' && width < TIMELINE_MIN_WIDTH) {
-      setViewMode('fill')
-    }
-  }, [width, viewMode])
+export function useViewMode(_width: number) {
+  const [viewMode, setViewMode] = useState<ViewMode>(() => getStoredViewMode())
 
   useEffect(() => {
     try {

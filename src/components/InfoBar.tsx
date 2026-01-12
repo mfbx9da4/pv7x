@@ -103,6 +103,7 @@ export function InfoBar({
 
   const handleToggle = useCallback(() => {
     setShuffleKey(k => k + 1)
+    haptic()
     if (document.startViewTransition) {
       document.startViewTransition(() => onToggleView())
     } else {
