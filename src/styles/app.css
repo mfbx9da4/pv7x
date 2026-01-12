@@ -50,7 +50,7 @@ body {
   --color-red: #e05550;
   --color-gold: #d4a83c;
   --color-salmon: #d4908f;
-  --color-subtle: #e5e5ea;
+  --color-subtle: #ffffff;
 
   /* Milestone text colors (light tinted shades for text on colored backgrounds) */
   --color-pink-text: #ffeef3;
@@ -1213,6 +1213,7 @@ body {
 /* Portrait Timeline Layout */
 .timeline-view.portrait {
   padding: 20px;
+  padding-top: 40px;
   overflow: hidden;
 }
 
@@ -1229,6 +1230,7 @@ body {
 @media (max-width: 500px) {
   .timeline-view.portrait {
     padding: 12px;
+    padding-top: 32px;
   }
 
   .timeline-milestone-content-portrait {
@@ -1347,6 +1349,7 @@ body {
   width: 32px;
   flex-shrink: 0;
   height: 100%;
+  z-index: 2;
 }
 
 .timeline-months-portrait .timeline-month {
@@ -1506,7 +1509,7 @@ body {
 
 .timeline-gantt-item-portrait {
   position: absolute;
-  right: 0;
+  right: 24px;
   transform: translateY(-50%);
   display: flex;
   flex-direction: row;
@@ -1548,9 +1551,13 @@ body {
   color: var(--color-salmon-text);
 }
 
+.timeline-gantt-item-portrait.color-subtle .timeline-gantt-label-portrait {
+  color: var(--color-subtle-text);
+}
+
 .timeline-gantt-bar-portrait {
   position: absolute;
-  right: 0;
+  right: 24px;
   width: 6px;
   background: var(--bar-color, var(--color-border));
   border-radius: 3px;

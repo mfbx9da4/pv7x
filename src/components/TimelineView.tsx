@@ -80,6 +80,7 @@ function getPortraitColumnWidth(screenWidth: number): number {
 function assignPortraitColumns(
   milestones: (DayInfo & { position: number })[],
   containerHeight: number,
+  screenWidth: number,
   maxColumns: number = 10
 ): PortraitMilestoneWithLayout[] {
   // Sort by position (top to bottom)
@@ -125,28 +126,73 @@ function assignPortraitColumns(
     })
   }
 
-  // Helper to check if expanding a milestone causes conflicts
-  const canExpand = (index: number): boolean => {
-    const m = result[index]
-    const centerPx = (m.position / 100) * containerHeight
-    const topPx = centerPx - PORTRAIT_EXPANDED_HEIGHT / 2
-    const bottomPx = centerPx + PORTRAIT_EXPANDED_HEIGHT / 2
+  // Helper to estimate label width (emoji + text + padding)
+  const estimateLabelWidth = (label: string): number => {
+    // ~7px per character + 18px emoji + 16px padding
+    return Math.min(150, label.length * 7 + 34)
+  }
 
-    // Check same column for conflicts with other milestones
-    const occupied = columnOccupancy.get(m.column) || []
-    for (const range of occupied) {
-      if (range.index === index) continue // skip self
-      // If either is expanded, check with expanded width consideration
-      const otherM = result[range.index]
-      // Check vertical overlap - if they overlap vertically and one is expanded, conflict
-      if (!(bottomPx + PORTRAIT_MILESTONE_GAP < range.top || topPx - PORTRAIT_MILESTONE_GAP > range.bottom)) {
-        // They overlap vertically - if expanding would make visual conflict
-        // For simplicity, if any vertical overlap in same column, can't expand
-        if (otherM.expanded) return false
+  // Helper to check if expanding a milestone causes conflicts
+  const canExpand = (index: number, expandedWidth: number, availableWidth: number): boolean => {
+    const m = result[index]
+    const columnWidth = screenWidth > 500 ? 80 : screenWidth > 400 ? 45 : 35
+    const emojiOnlyWidth = 24 // width of collapsed emoji-only milestone
+    const columnOffset = m.column * columnWidth
+
+    // Check if expanding would overflow the screen
+    if (columnOffset + expandedWidth > availableWidth) {
+      return false
+    }
+
+    // On very narrow screens, only allow expansion in column 0
+    if (screenWidth <= 400 && m.column > 0) {
+      return false
+    }
+
+    const centerPx = (m.position / 100) * containerHeight
+    const expandedTop = centerPx - PORTRAIT_EXPANDED_HEIGHT / 2
+    const expandedBottom = centerPx + PORTRAIT_EXPANDED_HEIGHT / 2
+
+    // Horizontal extent of this milestone if expanded
+    const myLeft = columnOffset
+    const myRight = columnOffset + expandedWidth
+
+    // Check against ALL other milestones for overlap
+    for (let i = 0; i < result.length; i++) {
+      if (i === index) continue
+
+      const other = result[i]
+      const otherCenterPx = (other.position / 100) * containerHeight
+      const otherHeight = other.expanded ? PORTRAIT_EXPANDED_HEIGHT : PORTRAIT_EMOJI_HEIGHT
+      const otherTop = otherCenterPx - otherHeight / 2
+      const otherBottom = otherCenterPx + otherHeight / 2
+
+      // Check vertical overlap
+      const verticalOverlap = !(expandedBottom + PORTRAIT_MILESTONE_GAP < otherTop ||
+                                expandedTop - PORTRAIT_MILESTONE_GAP > otherBottom)
+
+      if (verticalOverlap) {
+        // Calculate other milestone's horizontal extent
+        const otherColumnOffset = other.column * columnWidth
+        const otherWidth = other.expanded ? estimateLabelWidth(other.annotation) : emojiOnlyWidth
+        const otherLeft = otherColumnOffset
+        const otherRight = otherColumnOffset + otherWidth
+
+        // Check horizontal overlap (with small gap)
+        const horizontalOverlap = !(myRight + 4 < otherLeft || myLeft - 4 > otherRight)
+
+        if (horizontalOverlap) {
+          return false
+        }
       }
     }
     return true
   }
+
+  // Calculate available width for milestones based on screen width
+  // Portrait layout: weeks(30px) + gantt(~110px) + line(4px) + months(32px) + padding
+  // Available for milestones is roughly: screenWidth - 190px
+  const availableWidth = Math.max(80, screenWidth - 190)
 
   // Second pass: try to expand colored milestones (non-subtle)
   const coloredIndices = result
@@ -155,7 +201,8 @@ function assignPortraitColumns(
     .map(({ i }) => i)
 
   for (const idx of coloredIndices) {
-    if (canExpand(idx)) {
+    const expandedWidth = estimateLabelWidth(result[idx].annotation)
+    if (canExpand(idx, expandedWidth, availableWidth)) {
       result[idx].expanded = true
     }
   }
@@ -167,7 +214,8 @@ function assignPortraitColumns(
     .map(({ i }) => i)
 
   for (const idx of subtleIndices) {
-    if (canExpand(idx)) {
+    const expandedWidth = estimateLabelWidth(result[idx].annotation)
+    if (canExpand(idx, expandedWidth, availableWidth)) {
       result[idx].expanded = true
     }
   }
@@ -294,7 +342,7 @@ export function TimelineView({
     const containerHeight = windowSize.height - 100 // account for padding
     // Limit columns on narrow screens to prevent overflow
     const maxColumns = windowSize.width <= 400 ? 2 : windowSize.width <= 500 ? 3 : 10
-    return assignPortraitColumns(basic, containerHeight, maxColumns)
+    return assignPortraitColumns(basic, containerHeight, windowSize.width, maxColumns)
   }, [days, totalDays, windowSize.height, windowSize.width])
 
   // Get range milestones for Gantt bars
