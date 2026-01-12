@@ -571,7 +571,7 @@ export function TimelineView({
                       if (day) onDayClick(e as unknown as MouseEvent, day)
                     }}
                   >
-                    <div class="timeline-gantt-label-portrait">
+                    <div class="timeline-gantt-label-portrait timeline-label">
                       <span class="timeline-gantt-label-emoji">{bar.emoji}</span>
                       <span class="timeline-gantt-label-text">{bar.label}</span>
                     </div>
@@ -655,7 +655,7 @@ export function TimelineView({
                 >
                   <div class="timeline-milestone-stem-portrait" style={{ width: `${stemWidth}px` }} />
                   {m.expanded ? (
-                    <div class="timeline-milestone-content-portrait" style={viewTransitionStyle}>
+                    <div class="timeline-milestone-content-portrait timeline-label" style={viewTransitionStyle}>
                       <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
                       <span class="timeline-milestone-label">{m.annotation}</span>
                     </div>
@@ -702,7 +702,7 @@ export function TimelineView({
                 }}
                 onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
               >
-                <div class="timeline-milestone-content-landscape" style={viewTransitionStyle}>
+                <div class="timeline-milestone-content-landscape timeline-label" style={viewTransitionStyle}>
                   <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
                   <span class="timeline-milestone-label">{m.annotation}</span>
                 </div>
@@ -831,7 +831,7 @@ export function TimelineView({
                     }}
                   >
                     <div class="timeline-gantt-stem-landscape" style={{ height: `${stemHeight}px` }} />
-                    <div class="timeline-gantt-label-content-landscape">
+                    <div class="timeline-gantt-label-content-landscape timeline-label">
                       <span class="timeline-gantt-label-emoji">{bar.emoji}</span>
                       <span class="timeline-gantt-label-text">{bar.label}</span>
                     </div>

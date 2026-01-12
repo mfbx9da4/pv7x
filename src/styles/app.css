@@ -838,6 +838,32 @@ body {
   align-items: center;
 }
 
+/* Shared color text rules for all timeline labels */
+.colored > .timeline-label {
+  color: var(--color-text-on-color);
+  border-color: transparent;
+}
+
+.color-orange > .timeline-label {
+  color: var(--color-orange-text);
+}
+
+.color-gold > .timeline-label {
+  color: var(--color-gold-text);
+}
+
+.color-salmon > .timeline-label {
+  color: var(--color-salmon-text);
+}
+
+.color-subtle > .timeline-label {
+  color: var(--color-subtle-text);
+}
+
+:not(.colored) > .timeline-label {
+  color: var(--color-text-secondary);
+}
+
 .timeline-content-landscape {
   position: relative;
   width: 100%;
@@ -970,34 +996,6 @@ body {
   max-width: 120px;
   position: relative;
   z-index: 2;
-}
-
-.timeline-milestone-landscape.colored .timeline-milestone-content-landscape {
-  color: var(--color-text-on-color);
-  border-color: transparent;
-}
-
-/* Orange/gold milestones need dark text for readability */
-.timeline-milestone-landscape.color-orange .timeline-milestone-content-landscape {
-  color: var(--color-orange-text);
-}
-
-.timeline-milestone-landscape.color-gold .timeline-milestone-content-landscape {
-  color: var(--color-gold-text);
-}
-
-/* Salmon milestones need dark text for readability */
-.timeline-milestone-landscape.color-salmon .timeline-milestone-content-landscape {
-  color: var(--color-salmon-text);
-}
-
-.timeline-milestone-landscape.color-subtle .timeline-milestone-content-landscape {
-  color: var(--color-subtle-text);
-}
-
-/* Uncolored milestones need lighter text in light mode */
-.timeline-milestone-landscape:not(.colored) .timeline-milestone-content-landscape {
-  color: var(--color-text-secondary);
 }
 
 .timeline-milestone-landscape.highlighted .timeline-milestone-content-landscape {
@@ -1144,32 +1142,9 @@ body {
   opacity: 0.85;
 }
 
-.timeline-gantt-item-landscape.colored .timeline-gantt-label-content-landscape {
-  color: var(--color-text-on-color);
-  border-color: transparent;
-}
-
 .timeline-gantt-item-landscape:not(.colored) .timeline-gantt-label-content-landscape {
   background: var(--color-border);
   border-color: var(--color-border);
-  color: var(--color-text-secondary);
-}
-
-/* Color-specific text rules for Gantt labels - Landscape */
-.timeline-gantt-item-landscape.color-orange .timeline-gantt-label-content-landscape {
-  color: var(--color-orange-text);
-}
-
-.timeline-gantt-item-landscape.color-gold .timeline-gantt-label-content-landscape {
-  color: var(--color-gold-text);
-}
-
-.timeline-gantt-item-landscape.color-salmon .timeline-gantt-label-content-landscape {
-  color: var(--color-salmon-text);
-}
-
-.timeline-gantt-item-landscape.color-subtle .timeline-gantt-label-content-landscape {
-  color: var(--color-subtle-text);
 }
 
 .timeline-gantt-item-landscape.highlighted .timeline-gantt-label-content-landscape {
@@ -1440,31 +1415,6 @@ body {
   background: var(--color-surface);
 }
 
-.timeline-milestone-portrait.colored .timeline-milestone-content-portrait {
-  color: var(--color-text-on-color);
-  border-color: transparent;
-}
-
-.timeline-milestone-portrait:not(.colored) .timeline-milestone-content-portrait {
-  color: var(--color-text-secondary);
-}
-
-.timeline-milestone-portrait.color-orange .timeline-milestone-content-portrait {
-  color: var(--color-orange-text);
-}
-
-.timeline-milestone-portrait.color-gold .timeline-milestone-content-portrait {
-  color: var(--color-gold-text);
-}
-
-.timeline-milestone-portrait.color-salmon .timeline-milestone-content-portrait {
-  color: var(--color-salmon-text);
-}
-
-.timeline-milestone-portrait.color-subtle .timeline-milestone-content-portrait {
-  color: var(--color-subtle-text);
-}
-
 .timeline-milestone-portrait.selected .timeline-milestone-content-portrait {
   opacity: 0.8;
 }
@@ -1537,30 +1487,8 @@ body {
   z-index: 2;
 }
 
-.timeline-gantt-item-portrait.colored .timeline-gantt-label-portrait {
-  color: var(--color-text-on-color);
-  border-color: transparent;
-}
-
 .timeline-gantt-item-portrait:not(.colored) .timeline-gantt-label-portrait {
   background: var(--color-border);
-  color: var(--color-text-secondary);
-}
-
-.timeline-gantt-item-portrait.color-orange .timeline-gantt-label-portrait {
-  color: var(--color-orange-text);
-}
-
-.timeline-gantt-item-portrait.color-gold .timeline-gantt-label-portrait {
-  color: var(--color-gold-text);
-}
-
-.timeline-gantt-item-portrait.color-salmon .timeline-gantt-label-portrait {
-  color: var(--color-salmon-text);
-}
-
-.timeline-gantt-item-portrait.color-subtle .timeline-gantt-label-portrait {
-  color: var(--color-subtle-text);
 }
 
 .timeline-gantt-bar-portrait {
