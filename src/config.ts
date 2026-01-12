@@ -26,7 +26,7 @@ export const CONFIG = {
     { date: new Date(2026, 5, 7), label: 'Dan & Bex Wedding', emoji: '💒', color: 'pink' },
     { date: new Date(2026, 4, 22), label: "Charlie's Wedding", emoji: '💒', color: 'pink' },
     { date: new Date(2026, 6, 1), label: "Kry's Baby Due", emoji: '🐣', color: 'subtle' },
-    { date: new Date(2026, 6, 12), label: "Anakha's Wedding", emoji: '🦖', color: 'pink' },
+    { date: new Date(2026, 6, 12), label: "Anakha's Wedding", emoji: '💒', color: 'pink' },
     { date: new Date(2026, 7, 13), label: 'C Section', emoji: '🥗', color: 'salmon', description: 'Potential scheduled date of Caesarean section birth' },
     { date: new Date(2026, 7, 20), label: 'Due', emoji: '🐣', color: 'red' },
   ],
