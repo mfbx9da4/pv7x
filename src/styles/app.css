@@ -321,6 +321,11 @@ body {
   text-shadow: 0 1px 2px var(--shadow-text);
 }
 
+.day.uncolored-milestone.passed .annotation-text,
+.day.uncolored-milestone.passed .annotation-date {
+  color: var(--color-text-on-color);
+}
+
 .day.today .date-label,
 .day.today .annotation-text,
 .day.today .annotation-date {
