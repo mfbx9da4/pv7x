@@ -1,3 +1,4 @@
+import type { JSX } from 'preact'
 import { useMemo, useLayoutEffect, useRef, useState } from 'preact/hooks'
 import type { DayInfo } from '../types'
 import { LAYOUT } from '../constants'
@@ -137,7 +138,7 @@ export function FillScreenView({
           style={{
             ...(VIEW_TRANSITION_LABELS.has(day.annotation) ? { viewTransitionName: `day-${day.index}` } : day.isToday ? { viewTransitionName: 'today-marker' } : {}),
             ...(day.color ? { background: `var(--color-${day.color})`, color: `var(--color-${day.color}-text)` } : {}),
-            ...(highlightedDays.value.indices.has(day.index) && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } as React.CSSProperties : {}),
+            ...(highlightedDays.value.indices.has(day.index) && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } as JSX.CSSProperties : {}),
           }}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => onDayClick(e as unknown as MouseEvent, day)}
