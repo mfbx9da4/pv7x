@@ -322,7 +322,8 @@ body {
 }
 
 .day.uncolored-milestone.passed .annotation-text,
-.day.uncolored-milestone.passed .annotation-date {
+.day.uncolored-milestone.passed .annotation-date,
+.day.uncolored-milestone.passed .date-label {
   color: var(--color-text-on-color);
 }
 
