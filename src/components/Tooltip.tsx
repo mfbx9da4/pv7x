@@ -23,6 +23,16 @@ function getDayColor(day: DayInfo): string {
   return getCssVar(day.isOddWeek ? '--color-text-tertiary' : '--color-text-secondary')
 }
 
+// Colors that need a different text color for readability
+const TEXT_COLOR_OVERRIDES = ['subtle', 'orange', 'gold', 'salmon']
+
+function getAnnotationTextColor(day: DayInfo): string {
+  if (day.color && TEXT_COLOR_OVERRIDES.includes(day.color)) {
+    return getCssVar(`--color-${day.color}-text`) || getCssVar('--color-text-primary')
+  }
+  return getDayColor(day)
+}
+
 type TooltipProps = {
   day: DayInfo
   position: { x: number; y: number }
@@ -48,6 +58,7 @@ export function Tooltip({
   const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
   const fullDate = `${dayOfWeek}, ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
   const color = getDayColor(day)
+  const annotationColor = getAnnotationTextColor(day)
 
   const tooltipWidth = 180
   const tooltipHeight = day.annotation ? 70 : 50
@@ -81,7 +92,7 @@ export function Tooltip({
       <div class="tooltip-content">
         <div class="tooltip-date">{fullDate}</div>
         <div class="tooltip-week">Week {weekNum}{dayOffset > 0 ? ` + ${dayOffset}` : ''}</div>
-        {day.annotation && <div class="tooltip-annotation" style={{ color }}>{day.annotation}</div>}
+        {day.annotation && <div class="tooltip-annotation" style={{ color: annotationColor }}>{day.annotation}</div>}
         {description && <div class="tooltip-description">{description}</div>}
         {day.isToday && <CountdownTimer targetDate={dueDate} />}
       </div>
