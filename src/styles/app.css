@@ -991,6 +991,10 @@ body {
   color: var(--color-salmon-text);
 }
 
+.timeline-milestone-landscape.color-subtle .timeline-milestone-content-landscape {
+  color: var(--color-subtle-text);
+}
+
 /* Uncolored milestones need lighter text in light mode */
 .timeline-milestone-landscape:not(.colored) .timeline-milestone-content-landscape {
   color: var(--color-text-secondary);
