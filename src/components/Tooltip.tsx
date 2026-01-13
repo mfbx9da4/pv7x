@@ -24,6 +24,10 @@ function getDayColor(day: DayInfo): string {
 }
 
 function getBorderColor(day: DayInfo): string {
+  // Subtle milestones in the past use dark green to match the cell color
+  if (day.color === 'subtle' && day.passed) {
+    return getCssVar(day.isOddWeek ? '--color-milestone-passed-odd' : '--color-milestone-passed-even')
+  }
   // Subtle color needs a visible border since the color itself is white/transparent
   if (day.color === 'subtle') {
     return getCssVar('--color-subtle-border') || getCssVar('--color-border')
@@ -36,6 +40,10 @@ function getBorderColor(day: DayInfo): string {
 const TEXT_COLOR_OVERRIDES = ['subtle']
 
 function getAnnotationTextColor(day: DayInfo): string {
+  // Subtle milestones in the past use dark green to match the cell color
+  if (day.color === 'subtle' && day.passed) {
+    return getCssVar(day.isOddWeek ? '--color-milestone-passed-odd' : '--color-milestone-passed-even')
+  }
   if (day.color && TEXT_COLOR_OVERRIDES.includes(day.color)) {
     return getCssVar(`--color-${day.color}-text`) || getCssVar('--color-text-primary')
   }
