@@ -155,8 +155,9 @@ function assignPortraitColumns(
 
   // The milestone container starts at roughly 54% from left edge
   // Content position = container.left + BASE_STEM_WIDTH + leftPx
-  // Available width for leftPx + contentWidth = screenEdge - container.left - BASE_STEM_WIDTH
-  const availableWidth = Math.floor(screenWidth * 0.46) - BASE_STEM_WIDTH
+  // Available width for leftPx + contentWidth = screenEdge - container.left - BASE_STEM_WIDTH - padding
+  const RIGHT_PADDING = 10
+  const availableWidth = Math.floor(screenWidth * 0.46) - BASE_STEM_WIDTH - RIGHT_PADDING
 
   // Estimate expanded label width: ~7px per char + emoji + padding
   const estimateLabelWidth = (label: string): number => Math.min(140, label.length * 7 + 34)
@@ -247,6 +248,7 @@ function assignPortraitColumns(
   sorted.forEach((_, i) => expanded.set(i, true))
 
   // Collapse items that exceed available width
+  // Collapse from lane 0 outward - collapsing closer items frees space for those further right
   let stable = false
   let iterations = 0
   while (!stable && iterations < 50) {
@@ -254,7 +256,7 @@ function assignPortraitColumns(
     iterations++
     const xPositions = calculateXPositions(expanded)
 
-    for (let laneIdx = lanes.length - 1; laneIdx >= 0; laneIdx--) {
+    for (let laneIdx = 0; laneIdx < lanes.length; laneIdx++) {
       for (const item of lanes[laneIdx]) {
         const itemId = itemIds.get(item)!
         const x = xPositions.get(itemId)!
