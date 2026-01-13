@@ -8,7 +8,7 @@ import { InfoBar } from './InfoBar'
 import { Tooltip } from './Tooltip'
 import { useViewMode, getNextViewMode } from '../hooks/useViewMode'
 import { useContentSize } from '../hooks/useContentSize'
-import { CONFIG, ANNOTATION_EMOJIS, ANNOTATION_DESCRIPTIONS } from '../config'
+import { CONFIG } from '../config'
 import type { DayInfo } from '../types'
 import '../styles/app.css'
 
@@ -16,6 +16,21 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 // Signal for highlighted day indices when a range milestone is selected
 export const highlightedDays = signal<{ indices: Set<number>; color?: string }>({ indices: new Set() })
+
+// Milestone type for random generation
+export type Milestone = {
+  date: Date
+  endDate?: Date
+  label: string
+  emoji: string
+  color?: string
+  description?: string
+}
+
+// Random milestone generation for testing
+const RANDOM_EMOJIS = ['🎂', '🎉', '💒', '🐣', '🏥', '👨‍⚕️', '💉', '🩸', '📢', '🧣', '🇪🇸', '🏝️', '🎩', '🤰', '⭐', '🌟', '🎁', '🍰', '🎈', '🎊', '🏆', '🎯', '🚀', '✈️', '🌴', '🎭', '🎪', '🎨']
+const RANDOM_COLORS: (string | undefined)[] = ['blue', 'gold', 'subtle', 'orange', 'pink', 'salmon', 'red', undefined]
+const RANDOM_LABELS = ['Event', 'Checkup', 'Party', 'Trip', 'Meeting', 'Scan', 'Visit', 'Holiday', 'Birthday', 'Anniversary', 'Appointment', 'Celebration', 'Milestone', 'Special Day']
 
 type TooltipState = {
   day: DayInfo
@@ -42,6 +57,29 @@ const getViewportSize = () => ({
   height: window.visualViewport?.height ?? window.innerHeight,
 })
 
+function generateRandomMilestones(startDate: Date, dueDate: Date): Milestone[] {
+  const totalDays = getDaysBetween(startDate, dueDate)
+  const numMilestones = 15 + Math.floor(Math.random() * 15) // 15-30 milestones
+  const milestones: Milestone[] = []
+
+  for (let i = 0; i < numMilestones; i++) {
+    const dayOffset = Math.floor(Math.random() * totalDays)
+    const date = addDays(startDate, dayOffset)
+    const emoji = RANDOM_EMOJIS[Math.floor(Math.random() * RANDOM_EMOJIS.length)]
+    const color = RANDOM_COLORS[Math.floor(Math.random() * RANDOM_COLORS.length)]
+    const labelBase = RANDOM_LABELS[Math.floor(Math.random() * RANDOM_LABELS.length)]
+    const label = `${labelBase} ${i + 1}`
+
+    // 20% chance of being a range milestone
+    const isRange = Math.random() < 0.2
+    const endDate = isRange ? addDays(date, 2 + Math.floor(Math.random() * 10)) : undefined
+
+    milestones.push({ date, endDate, label, emoji, color })
+  }
+
+  return milestones.sort((a, b) => a.date.getTime() - b.date.getTime())
+}
+
 export function App() {
   const [windowSize, setWindowSize] = useState(getViewportSize)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -49,6 +87,23 @@ export function App() {
   const [showAnnotationDate, setShowAnnotationDate] = useState(false)
   const [tooltip, setTooltip] = useState<TooltipState>(null)
   const [viewMode, setViewMode] = useViewMode(windowSize.width)
+  const [randomMilestones, setRandomMilestones] = useState<Milestone[] | null>(null)
+
+  // CMD+; to toggle random milestones for testing
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey && e.key === ';') {
+        e.preventDefault()
+        setRandomMilestones(prev =>
+          prev === null
+            ? generateRandomMilestones(CONFIG.startDate, CONFIG.dueDate)
+            : null
+        )
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   useEffect(() => {
     const updateSize = () => setWindowSize(getViewportSize())
@@ -81,16 +136,39 @@ export function App() {
     return () => clearTimeout(timer)
   }, [tooltip])
 
+  // Use random or real milestones
+  const activeMilestones = randomMilestones ?? CONFIG.milestones
+
   // Build milestone lookup by day index (needs to be before handleDayClick)
   const milestoneLookup = useMemo(() => {
     const lookup: Record<number, { label: string; color?: string; startIndex: number; endIndex: number }> = {}
-    for (const m of CONFIG.milestones) {
+    for (const m of activeMilestones) {
       const startIndex = getDaysBetween(CONFIG.startDate, m.date)
       const endIndex = m.endDate ? getDaysBetween(CONFIG.startDate, m.endDate) : startIndex
       lookup[startIndex] = { label: m.label, color: m.color, startIndex, endIndex }
     }
     return lookup
-  }, [])
+  }, [activeMilestones])
+
+  // Build annotation emojis from active milestones
+  const annotationEmojis = useMemo(() => {
+    const emojis: Record<string, string> = { Today: CONFIG.todayEmoji }
+    for (const m of activeMilestones) {
+      emojis[m.label] = m.emoji
+    }
+    return emojis
+  }, [activeMilestones])
+
+  // Build annotation descriptions from active milestones
+  const annotationDescriptions = useMemo(() => {
+    const descriptions: Record<string, string> = {}
+    for (const m of activeMilestones) {
+      if (m.description) {
+        descriptions[m.label] = m.description
+      }
+    }
+    return descriptions
+  }, [activeMilestones])
 
   const handleDayClick = useCallback((e: MouseEvent, day: DayInfo) => {
     e.stopPropagation()
@@ -169,7 +247,7 @@ export function App() {
               showAnnotationDate={showAnnotationDate}
               selectedDayIndex={tooltip?.day.index ?? null}
               startDate={CONFIG.startDate}
-              annotationEmojis={ANNOTATION_EMOJIS}
+              annotationEmojis={annotationEmojis}
               onDayClick={handleDayClick}
             />
           ) : viewMode === 'weekly' ? (
@@ -188,7 +266,8 @@ export function App() {
               startDate={CONFIG.startDate}
               onDayClick={handleDayClick}
               selectedDayIndex={tooltip?.day.index ?? null}
-              annotationEmojis={ANNOTATION_EMOJIS}
+              annotationEmojis={annotationEmojis}
+              milestones={activeMilestones}
             />
           )
         )}
@@ -205,8 +284,8 @@ export function App() {
           windowSize={windowSize}
           startDate={CONFIG.startDate}
           dueDate={CONFIG.dueDate}
-          annotationEmojis={ANNOTATION_EMOJIS}
-          annotationDescriptions={ANNOTATION_DESCRIPTIONS}
+          annotationEmojis={annotationEmojis}
+          annotationDescriptions={annotationDescriptions}
         />
       )}
     </div>

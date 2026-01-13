@@ -1,20 +1,19 @@
-import { useMemo, useState, useRef, useCallback } from 'preact/hooks'
+import { useMemo } from 'preact/hooks'
 import type { DayInfo } from '../types'
-import { highlightedDays } from './App'
-import { CONFIG } from '../config'
+import type { Milestone } from './App'
+import { TimelineLandscape } from './TimelineLandscape'
+import { TimelinePortrait } from './TimelinePortrait'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
-// Milestones that get view transitions
-const VIEW_TRANSITION_LABELS = new Set(['Start', 'Announce!', 'Third Trimester', 'Due'])
 
 // Milestone styling constants
 const MILESTONE_PADDING = 20 // horizontal padding inside milestone
 const MILESTONE_GAP = 8 // minimum gap between milestones
 const EMOJI_WIDTH = 18 // approximate emoji width
 const ROW_HEIGHT = 42 // vertical spacing between rows
-const GANTT_ROW_HEIGHT = 24 // height of gantt bar rows
-const GANTT_BAR_HEIGHT = 18 // height of individual gantt bars
+
+// Portrait milestone layout constants
+const PORTRAIT_EMOJI_HEIGHT = 26 // height when showing only emoji
 
 // Build lookup of milestones with date ranges
 function getDaysBetween(start: Date, end: Date): number {
@@ -22,13 +21,16 @@ function getDaysBetween(start: Date, end: Date): number {
   return Math.ceil((end.getTime() - start.getTime()) / msPerDay)
 }
 
-const rangeMilestoneLookup: Record<string, { startIndex: number; endIndex: number; color?: string; emoji: string }> = {}
-for (const m of CONFIG.milestones) {
-  if (m.endDate) {
-    const startIndex = getDaysBetween(CONFIG.startDate, m.date)
-    const endIndex = getDaysBetween(CONFIG.startDate, m.endDate)
-    rangeMilestoneLookup[m.label] = { startIndex, endIndex, color: m.color, emoji: m.emoji }
+function buildRangeMilestoneLookup(milestones: Milestone[], startDate: Date) {
+  const lookup: Record<string, { startIndex: number; endIndex: number; color?: string; emoji: string }> = {}
+  for (const m of milestones) {
+    if (m.endDate) {
+      const startIndex = getDaysBetween(startDate, m.date)
+      const endIndex = getDaysBetween(startDate, m.endDate)
+      lookup[m.label] = { startIndex, endIndex, color: m.color, emoji: m.emoji }
+    }
   }
+  return lookup
 }
 
 function addDays(date: Date, days: number): Date {
@@ -46,184 +48,17 @@ function measureTextWidth(text: string, font: string): number {
   return ctx.measureText(text).width
 }
 
+// ============================================================================
+// LANDSCAPE LAYOUT TYPES AND FUNCTIONS
+// ============================================================================
+
 type MilestoneWithLayout = DayInfo & {
   position: number
   row: number
   width: number
 }
 
-type PortraitMilestoneWithLayout = DayInfo & {
-  position: number
-  column: number  // column offset (0 = closest to line, positive = further right)
-  height: number  // estimated height of milestone element
-  expanded: boolean // whether to show label or just emoji
-}
-
-// Portrait milestone layout constants
-const PORTRAIT_EMOJI_HEIGHT = 26 // height when showing only emoji
-const PORTRAIT_EXPANDED_HEIGHT = 26 // height when showing emoji + label (same height, different width)
-const PORTRAIT_MILESTONE_GAP = 2
-const PORTRAIT_MONTHS_WIDTH = 32 // width of months column that stems must cross
-
-// Get responsive column width for portrait milestones
-function getPortraitColumnWidth(screenWidth: number): number {
-  if (screenWidth <= 400) return 35 // small mobile
-  if (screenWidth <= 500) return 45 // mobile
-  return 80 // default
-}
-
-// Smart column assignment for portrait milestones
-// 1. Start with all emoji-only (collapsed)
-// 2. Assign columns based on emoji collision detection
-// 3. Try to expand colored milestones (non-subtle)
-// 4. Try to expand subtle milestones
-function assignPortraitColumns(
-  milestones: (DayInfo & { position: number })[],
-  containerHeight: number,
-  screenWidth: number,
-  maxColumns: number = 10
-): PortraitMilestoneWithLayout[] {
-  // Sort by position (top to bottom)
-  const sorted = [...milestones].sort((a, b) => a.position - b.position)
-
-  // Track occupied ranges per column
-  const columnOccupancy = new Map<number, Array<{ top: number; bottom: number; index: number }>>()
-
-  // First pass: assign columns using emoji-only (collapsed) size
-  const result: PortraitMilestoneWithLayout[] = []
-
-  for (const milestone of sorted) {
-    const centerPx = (milestone.position / 100) * containerHeight
-    const topPx = centerPx - PORTRAIT_EMOJI_HEIGHT / 2
-    const bottomPx = centerPx + PORTRAIT_EMOJI_HEIGHT / 2
-
-    // Find the closest available column
-    let assignedColumn = 0
-
-    for (let distance = 0; distance < maxColumns; distance++) {
-      const occupied = columnOccupancy.get(distance) || []
-      const hasConflict = occupied.some(
-        range => !(bottomPx + PORTRAIT_MILESTONE_GAP < range.top || topPx - PORTRAIT_MILESTONE_GAP > range.bottom)
-      )
-
-      if (!hasConflict) {
-        assignedColumn = distance
-        break
-      }
-    }
-
-    // Record this milestone's occupancy
-    const occupied = columnOccupancy.get(assignedColumn) || []
-    const idx = result.length
-    occupied.push({ top: topPx, bottom: bottomPx, index: idx })
-    columnOccupancy.set(assignedColumn, occupied)
-
-    result.push({
-      ...milestone,
-      column: assignedColumn,
-      height: PORTRAIT_EMOJI_HEIGHT,
-      expanded: false
-    })
-  }
-
-  // Helper to estimate label width (emoji + text + padding)
-  const estimateLabelWidth = (label: string): number => {
-    // ~7px per character + 18px emoji + 16px padding
-    return Math.min(150, label.length * 7 + 34)
-  }
-
-  // Helper to check if expanding a milestone causes conflicts
-  const canExpand = (index: number, expandedWidth: number, availableWidth: number): boolean => {
-    const m = result[index]
-    const columnWidth = screenWidth > 500 ? 80 : screenWidth > 400 ? 45 : 35
-    const emojiOnlyWidth = 24 // width of collapsed emoji-only milestone
-    const columnOffset = m.column * columnWidth
-
-    // Check if expanding would overflow the screen
-    if (columnOffset + expandedWidth > availableWidth) {
-      return false
-    }
-
-    // On very narrow screens, only allow expansion in column 0
-    if (screenWidth <= 400 && m.column > 0) {
-      return false
-    }
-
-    const centerPx = (m.position / 100) * containerHeight
-    const expandedTop = centerPx - PORTRAIT_EXPANDED_HEIGHT / 2
-    const expandedBottom = centerPx + PORTRAIT_EXPANDED_HEIGHT / 2
-
-    // Horizontal extent of this milestone if expanded
-    const myLeft = columnOffset
-    const myRight = columnOffset + expandedWidth
-
-    // Check against ALL other milestones for overlap
-    for (let i = 0; i < result.length; i++) {
-      if (i === index) continue
-
-      const other = result[i]
-      const otherCenterPx = (other.position / 100) * containerHeight
-      const otherHeight = other.expanded ? PORTRAIT_EXPANDED_HEIGHT : PORTRAIT_EMOJI_HEIGHT
-      const otherTop = otherCenterPx - otherHeight / 2
-      const otherBottom = otherCenterPx + otherHeight / 2
-
-      // Check vertical overlap
-      const verticalOverlap = !(expandedBottom + PORTRAIT_MILESTONE_GAP < otherTop ||
-                                expandedTop - PORTRAIT_MILESTONE_GAP > otherBottom)
-
-      if (verticalOverlap) {
-        // Calculate other milestone's horizontal extent
-        const otherColumnOffset = other.column * columnWidth
-        const otherWidth = other.expanded ? estimateLabelWidth(other.annotation) : emojiOnlyWidth
-        const otherLeft = otherColumnOffset
-        const otherRight = otherColumnOffset + otherWidth
-
-        // Check horizontal overlap (with small gap)
-        const horizontalOverlap = !(myRight + 4 < otherLeft || myLeft - 4 > otherRight)
-
-        if (horizontalOverlap) {
-          return false
-        }
-      }
-    }
-    return true
-  }
-
-  // Calculate available width for milestones based on screen width
-  // Portrait layout: weeks(30px) + gantt(~110px) + line(4px) + months(32px) + padding
-  // Available for milestones is roughly: screenWidth - 190px
-  const availableWidth = Math.max(80, screenWidth - 190)
-
-  // Second pass: try to expand colored milestones (non-subtle)
-  const coloredIndices = result
-    .map((m, i) => ({ m, i }))
-    .filter(({ m }) => m.color && m.color !== 'subtle')
-    .map(({ i }) => i)
-
-  for (const idx of coloredIndices) {
-    const expandedWidth = estimateLabelWidth(result[idx].annotation)
-    if (canExpand(idx, expandedWidth, availableWidth)) {
-      result[idx].expanded = true
-    }
-  }
-
-  // Third pass: try to expand subtle milestones
-  const subtleIndices = result
-    .map((m, i) => ({ m, i }))
-    .filter(({ m }) => m.color === 'subtle')
-    .map(({ i }) => i)
-
-  for (const idx of subtleIndices) {
-    const expandedWidth = estimateLabelWidth(result[idx].annotation)
-    if (canExpand(idx, expandedWidth, availableWidth)) {
-      result[idx].expanded = true
-    }
-  }
-
-  return result
-}
-
-// Assign rows to milestones to avoid overlaps
+// Assign rows to milestones to avoid overlaps (landscape mode)
 function assignRows(
   milestones: (DayInfo & { position: number })[],
   containerWidth: number,
@@ -292,6 +127,212 @@ function assignRows(
   return result
 }
 
+// ============================================================================
+// PORTRAIT LAYOUT TYPES AND FUNCTIONS
+// ============================================================================
+
+type PortraitMilestoneWithLayout = DayInfo & {
+  position: number
+  column: number  // approximate column (for legacy compatibility)
+  leftPx: number  // actual left position in pixels (relative to content area start)
+  height: number  // estimated height of milestone element
+  expanded: boolean // whether to show label or just emoji
+}
+
+// Smart column assignment for portrait milestones
+// Uses percentage-based vertical positioning to match CSS rendering
+// Horizontal positions in pixels for precise collision detection
+function assignPortraitColumns(
+  milestones: (DayInfo & { position: number })[],
+  _containerHeight: number, // kept for API compatibility but not used
+  screenWidth: number
+): PortraitMilestoneWithLayout[] {
+  // Sort by position (top to bottom)
+  const sorted = [...milestones].sort((a, b) => a.position - b.position)
+
+  // Collision detection parameters
+  const emojiOnlyWidth = 32 // pixels - actual rendered width of emoji element
+  const emojiGap = 8 // pixels - horizontal gap between emojis
+  const verticalGapPercent = 1.5 // percentage points - how close vertically before collision
+
+  // Calculate available width for milestone content
+  const availableWidth = screenWidth <= 500
+    ? Math.max(60, screenWidth * 0.45)
+    : Math.max(80, screenWidth - 190)
+
+  // Track occupied ranges: vertical in %, horizontal in px
+  const occupiedRanges: Array<{ topPct: number; bottomPct: number; leftPx: number; rightPx: number }>[] = []
+
+  const result: PortraitMilestoneWithLayout[] = []
+
+  for (const milestone of sorted) {
+    // Vertical bounds in percentage (matches CSS top: X%)
+    const centerPct = milestone.position
+    const halfHeightPct = 2 // approximate height in percentage points
+    const topPct = centerPct - halfHeightPct
+    const bottomPct = centerPct + halfHeightPct
+
+    // Find leftmost position that doesn't conflict
+    let bestLeftPx = 0
+
+    // Get ranges that vertically overlap with this milestone
+    const conflictingRanges = occupiedRanges.flat().filter(range => {
+      const verticalOverlap = !(bottomPct + verticalGapPercent < range.topPct ||
+                                topPct - verticalGapPercent > range.bottomPct)
+      return verticalOverlap
+    })
+
+    // Candidate positions: 0, then after each conflicting range
+    const positionsToTry = [0, ...conflictingRanges.map(r => r.rightPx + emojiGap)]
+      .filter((v, i, a) => a.indexOf(v) === i) // unique
+      .sort((a, b) => a - b)
+
+    for (const tryLeft of positionsToTry) {
+      const tryRight = tryLeft + emojiOnlyWidth
+
+      // Skip if off-screen
+      if (tryRight > availableWidth) continue
+
+      // Check for horizontal collision with vertically-overlapping ranges
+      const hasConflict = conflictingRanges.some(range =>
+        !(tryRight < range.leftPx || tryLeft > range.rightPx)
+      )
+
+      if (!hasConflict) {
+        bestLeftPx = tryLeft
+        break
+      }
+    }
+
+    // Record occupancy
+    const bounds = { topPct, bottomPct, leftPx: bestLeftPx, rightPx: bestLeftPx + emojiOnlyWidth }
+    occupiedRanges.push([bounds])
+
+    result.push({
+      ...milestone,
+      column: 0, // legacy
+      leftPx: bestLeftPx,
+      height: PORTRAIT_EMOJI_HEIGHT,
+      expanded: false,
+    })
+  }
+
+  // Helper to estimate label width (emoji + text + padding)
+  const estimateLabelWidth = (label: string): number => {
+    // ~7px per character + 18px emoji + 16px padding
+    return Math.min(150, label.length * 7 + 34)
+  }
+
+  // Helper to check if expanding a milestone causes conflicts
+  const canExpand = (index: number, expandedWidth: number): boolean => {
+    const m = result[index]
+
+    // Check if expanding would overflow the screen
+    if (m.leftPx + expandedWidth > availableWidth) {
+      return false
+    }
+
+    // On very narrow screens, only allow expansion at position 0
+    if (screenWidth <= 400 && m.leftPx > 0) {
+      return false
+    }
+
+    // Vertical bounds in percentage (same as first pass)
+    const centerPct = m.position
+    const halfHeightPct = 2
+    const myTopPct = centerPct - halfHeightPct
+    const myBottomPct = centerPct + halfHeightPct
+
+    // Horizontal extent if expanded
+    const myLeft = m.leftPx
+    const myRight = m.leftPx + expandedWidth
+
+    // Check against ALL other milestones for overlap
+    for (let i = 0; i < result.length; i++) {
+      if (i === index) continue
+
+      const other = result[i]
+      const otherCenterPct = other.position
+      const otherTopPct = otherCenterPct - halfHeightPct
+      const otherBottomPct = otherCenterPct + halfHeightPct
+
+      // Check vertical overlap (in percentage)
+      const verticalOverlap = !(myBottomPct + verticalGapPercent < otherTopPct ||
+                                myTopPct - verticalGapPercent > otherBottomPct)
+
+      if (verticalOverlap) {
+        // Calculate other milestone's horizontal extent
+        const otherWidth = other.expanded ? estimateLabelWidth(other.annotation) : emojiOnlyWidth
+        const otherLeft = other.leftPx
+        const otherRight = other.leftPx + otherWidth
+
+        // Check horizontal overlap
+        const horizontalOverlap = !(myRight + emojiGap < otherLeft || myLeft - emojiGap > otherRight)
+
+        if (horizontalOverlap) {
+          return false
+        }
+      }
+    }
+    return true
+  }
+
+  // Second pass: try to expand colored milestones (non-subtle)
+  const coloredIndices = result
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => m.color && m.color !== 'subtle')
+    .map(({ i }) => i)
+
+  for (const idx of coloredIndices) {
+    const expandedWidth = estimateLabelWidth(result[idx].annotation)
+    if (canExpand(idx, expandedWidth)) {
+      result[idx].expanded = true
+    }
+  }
+
+  // Third pass: try to expand subtle milestones
+  const subtleIndices = result
+    .map((m, i) => ({ m, i }))
+    .filter(({ m }) => m.color === 'subtle')
+    .map(({ i }) => i)
+
+  for (const idx of subtleIndices) {
+    const expandedWidth = estimateLabelWidth(result[idx].annotation)
+    if (canExpand(idx, expandedWidth)) {
+      result[idx].expanded = true
+    }
+  }
+
+  return result
+}
+
+// ============================================================================
+// GANTT BAR TYPES
+// ============================================================================
+
+type GanttBarBase = {
+  label: string
+  startPosition: number
+  endPosition: number
+  width: number
+  color?: string
+  emoji: string
+  labelWidth: number
+  startIndex: number
+  endIndex: number
+}
+
+type GanttBarLandscape = GanttBarBase & {
+  barRow: number
+  labelRow: number
+}
+
+type GanttBarPortrait = GanttBarBase
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 type TimelineViewProps = {
   days: DayInfo[]
   windowSize: { width: number; height: number }
@@ -299,6 +340,7 @@ type TimelineViewProps = {
   onDayClick: (e: MouseEvent, day: DayInfo) => void
   selectedDayIndex: number | null
   annotationEmojis: Record<string, string>
+  milestones: Milestone[]
 }
 
 export function TimelineView({
@@ -308,63 +350,102 @@ export function TimelineView({
   onDayClick,
   selectedDayIndex,
   annotationEmojis,
+  milestones,
 }: TimelineViewProps) {
   const totalDays = days.length
   const isLandscape = windowSize.width > windowSize.height
 
+  // Build range milestone lookup from passed milestones
+  const rangeMilestoneLookup = useMemo(() => {
+    return buildRangeMilestoneLookup(milestones, startDate)
+  }, [milestones, startDate])
+
   // Find today's index
   const todayIndex = days.findIndex(d => d.isToday)
+  const todayPosition = todayIndex >= 0 ? (todayIndex / totalDays) * 100 : -1
 
-  // Get point milestones (non-range) with positions and row assignments
-  const milestones = useMemo(() => {
-    const basic = days
+  // Get month markers
+  const monthMarkers = useMemo(() => {
+    const markers: { month: string; year: number; position: number }[] = []
+    let lastMonth = -1
+
+    for (let i = 0; i < totalDays; i++) {
+      const date = addDays(startDate, i)
+      const month = date.getMonth()
+      if (month !== lastMonth) {
+        markers.push({
+          month: MONTHS[month],
+          year: date.getFullYear(),
+          position: (i / totalDays) * 100,
+        })
+        lastMonth = month
+      }
+    }
+    return markers
+  }, [totalDays, startDate])
+
+  // Get week markers (pregnancy weeks 1-40)
+  const weekMarkers = useMemo(() => {
+    const markers: { week: number; position: number }[] = []
+    for (let i = 0; i < totalDays; i += 7) {
+      const weekNum = Math.floor(i / 7) + 1
+      markers.push({
+        week: weekNum,
+        position: (i / totalDays) * 100,
+      })
+    }
+    return markers
+  }, [totalDays])
+
+  // Get base milestones (non-range) with positions
+  const baseMilestones = useMemo(() => {
+    return days
       .filter(d => d.annotation && d.annotation !== 'Today' && !rangeMilestoneLookup[d.annotation])
       .map(d => ({
         ...d,
         position: (d.index / totalDays) * 100,
       }))
+  }, [days, totalDays])
 
-    // Use container width minus padding for layout calculation
-    const containerWidth = windowSize.width - 120 // account for 60px padding on each side
-    return assignRows(basic, containerWidth, annotationEmojis)
-  }, [days, totalDays, windowSize.width, annotationEmojis])
+  // Landscape: Get point milestones with row assignments
+  const landscapeMilestones = useMemo(() => {
+    if (!isLandscape) return []
+    const containerWidth = windowSize.width - 120
+    return assignRows(baseMilestones, containerWidth, annotationEmojis)
+  }, [baseMilestones, windowSize.width, annotationEmojis, isLandscape])
 
-  // Get point milestones for portrait mode with column assignments
+  // Portrait: Get point milestones with column assignments
   const portraitMilestones = useMemo(() => {
-    const basic = days
-      .filter(d => d.annotation && d.annotation !== 'Today' && !rangeMilestoneLookup[d.annotation])
-      .map(d => ({
-        ...d,
-        position: (d.index / totalDays) * 100,
-      }))
+    if (isLandscape) return []
+    const containerHeight = windowSize.height - 100
+    return assignPortraitColumns(baseMilestones, containerHeight, windowSize.width)
+  }, [baseMilestones, windowSize.height, windowSize.width, isLandscape])
 
-    // Use container height minus padding for layout calculation
-    const containerHeight = windowSize.height - 100 // account for padding
-    // Limit columns on narrow screens to prevent overflow
-    const maxColumns = windowSize.width <= 400 ? 2 : windowSize.width <= 500 ? 3 : 10
-    return assignPortraitColumns(basic, containerHeight, windowSize.width, maxColumns)
-  }, [days, totalDays, windowSize.height, windowSize.width])
+  // Landscape: Calculate row range for dynamic height
+  const { minRow, maxRow, milestonesHeight } = useMemo(() => {
+    if (!isLandscape || landscapeMilestones.length === 0) {
+      return { minRow: 0, maxRow: 0, milestonesHeight: ROW_HEIGHT }
+    }
+    const rows = landscapeMilestones.map(m => m.row)
+    const min = Math.min(...rows)
+    const max = Math.max(...rows)
+    const aboveRows = max + 1
+    const belowRows = Math.abs(min)
+    return {
+      minRow: min,
+      maxRow: max,
+      milestonesHeight: (aboveRows + belowRows) * ROW_HEIGHT,
+    }
+  }, [landscapeMilestones, isLandscape])
 
-  // Get range milestones for Gantt bars
-  type GanttBar = {
-    label: string
-    startPosition: number
-    endPosition: number
-    width: number
-    color?: string
-    emoji: string
-    barRow: number      // row for the bar itself (handles overlapping ranges)
-    labelRow: number    // row for the label above (handles label collision)
-    labelWidth: number  // calculated width of label for collision detection
-    startIndex: number
-    endIndex: number
-  }
+  // Landscape: Get Gantt bars with row assignments
+  const landscapeGanttBars = useMemo((): GanttBarLandscape[] => {
+    if (!isLandscape) return []
 
-  const ganttBars = useMemo(() => {
     const font = '600 11px Inter, -apple-system, BlinkMacSystemFont, sans-serif'
     const containerWidth = windowSize.width - 120
 
-    const bars: Omit<GanttBar, 'barRow' | 'labelRow'>[] = []
+    const bars: Omit<GanttBarLandscape, 'barRow' | 'labelRow'>[] = []
     for (const [label, range] of Object.entries(rangeMilestoneLookup)) {
       const startPosition = (range.startIndex / totalDays) * 100
       const endPosition = (range.endIndex / totalDays) * 100
@@ -391,7 +472,7 @@ export function TimelineView({
     // Assign label rows (for label collision detection)
     const labelRowOccupancy: Array<{ left: number; right: number }>[] = []
 
-    const result: GanttBar[] = []
+    const result: GanttBarLandscape[] = []
     for (const bar of bars) {
       const barLeftPx = (bar.startPosition / 100) * containerWidth
       const barRightPx = (bar.endPosition / 100) * containerWidth
@@ -439,409 +520,84 @@ export function TimelineView({
     }
 
     return result
-  }, [totalDays, windowSize.width])
+  }, [totalDays, windowSize.width, isLandscape])
 
-  const { ganttBarRowCount, ganttLabelRowCount } = useMemo(() => {
-    if (ganttBars.length === 0) return { ganttBarRowCount: 0, ganttLabelRowCount: 0 }
-    return {
-      ganttBarRowCount: Math.max(...ganttBars.map(b => b.barRow)) + 1,
-      ganttLabelRowCount: Math.max(...ganttBars.map(b => b.labelRow)) + 1,
-    }
-  }, [ganttBars])
+  // Portrait: Get Gantt bars (simpler, no row assignments needed)
+  const portraitGanttBars = useMemo((): GanttBarPortrait[] => {
+    if (isLandscape) return []
 
-  // Calculate the row range for dynamic height
-  const { minRow, maxRow } = useMemo(() => {
-    if (milestones.length === 0) return { minRow: 0, maxRow: 0 }
-    const rows = milestones.map(m => m.row)
-    return { minRow: Math.min(...rows), maxRow: Math.max(...rows) }
-  }, [milestones])
+    const font = '600 11px Inter, -apple-system, BlinkMacSystemFont, sans-serif'
 
-  // Get month markers
-  const monthMarkers = useMemo(() => {
-    const markers: { month: string; year: number; position: number }[] = []
-    let lastMonth = -1
-
-    for (let i = 0; i < totalDays; i++) {
-      const date = addDays(startDate, i)
-      const month = date.getMonth()
-      if (month !== lastMonth) {
-        markers.push({
-          month: MONTHS[month],
-          year: date.getFullYear(),
-          position: (i / totalDays) * 100,
-        })
-        lastMonth = month
-      }
-    }
-    return markers
-  }, [totalDays, startDate])
-
-  // Get week markers (pregnancy weeks 1-40)
-  const weekMarkers = useMemo(() => {
-    const markers: { week: number; position: number }[] = []
-    for (let i = 0; i < totalDays; i += 7) {
-      const weekNum = Math.floor(i / 7) + 1
-      markers.push({
-        week: weekNum,
-        position: (i / totalDays) * 100,
+    const bars: GanttBarPortrait[] = []
+    for (const [label, range] of Object.entries(rangeMilestoneLookup)) {
+      const startPosition = (range.startIndex / totalDays) * 100
+      const endPosition = (range.endIndex / totalDays) * 100
+      const textWidth = measureTextWidth(label, font)
+      const labelWidth = textWidth + MILESTONE_PADDING + EMOJI_WIDTH
+      bars.push({
+        label,
+        startPosition,
+        endPosition,
+        width: endPosition - startPosition,
+        color: range.color,
+        emoji: range.emoji,
+        labelWidth,
+        startIndex: range.startIndex,
+        endIndex: range.endIndex,
       })
     }
-    return markers
-  }, [totalDays])
 
-  const todayPosition = todayIndex >= 0 ? (todayIndex / totalDays) * 100 : -1
-
-  // Hover state for showing day dot on timeline
-  const lineRef = useRef<HTMLDivElement>(null)
-  const [hoverPosition, setHoverPosition] = useState<number | null>(null)
-  const [hoverDayIndex, setHoverDayIndex] = useState<number | null>(null)
-
-  const handleLineMouseMove = useCallback((e: MouseEvent) => {
-    if (!lineRef.current) return
-    const rect = lineRef.current.getBoundingClientRect()
-    // For landscape, use X position; for portrait, use Y position
-    const pos = isLandscape ? e.clientX - rect.left : e.clientY - rect.top
-    const size = isLandscape ? rect.width : rect.height
-    const percent = Math.max(0, Math.min(100, (pos / size) * 100))
-    const dayIndex = Math.round((percent / 100) * (totalDays - 1))
-    setHoverPosition(percent)
-    setHoverDayIndex(dayIndex)
+    return bars.sort((a, b) => a.startPosition - b.startPosition)
   }, [totalDays, isLandscape])
 
-  const handleLineMouseLeave = useCallback(() => {
-    setHoverPosition(null)
-    setHoverDayIndex(null)
-  }, [])
+  // Landscape: Gantt row counts
+  const { ganttBarRowCount, ganttLabelRowCount } = useMemo(() => {
+    if (!isLandscape || landscapeGanttBars.length === 0) {
+      return { ganttBarRowCount: 0, ganttLabelRowCount: 0 }
+    }
+    return {
+      ganttBarRowCount: Math.max(...landscapeGanttBars.map(b => b.barRow)) + 1,
+      ganttLabelRowCount: Math.max(...landscapeGanttBars.map(b => b.labelRow)) + 1,
+    }
+  }, [landscapeGanttBars, isLandscape])
 
-  // Calculate container height based on row range
-  const aboveRows = maxRow + 1 // rows 0 and above
-  const belowRows = Math.abs(minRow) // rows below 0
-  const milestonesHeight = (aboveRows + belowRows) * ROW_HEIGHT
-
-  // Portrait layout - vertical timeline
-  if (!isLandscape) {
+  // Render appropriate view
+  if (isLandscape) {
     return (
-      <div class="timeline-view portrait">
-        <div class="timeline-content-portrait">
-          {/* Week markers on the left */}
-          <div class="timeline-weeks-portrait">
-            {weekMarkers.map((w) => (
-              <div
-                key={w.week}
-                class="timeline-week"
-                style={{ top: `${w.position}%` }}
-              >
-                {w.week}
-              </div>
-            ))}
-          </div>
-
-          {/* Gantt bars on the left (stems go right to line) */}
-          {ganttBars.length > 0 && (
-            <div class="timeline-gantt-portrait">
-              {/* Vertical bars positioned absolutely */}
-              {ganttBars.map((bar) => (
-                <div
-                  key={`bar-${bar.label}`}
-                  class={`timeline-gantt-bar-portrait ${bar.color ? `colored color-${bar.color}` : ''}`}
-                  style={{
-                    top: `${bar.startPosition}%`,
-                    height: `${bar.width}%`,
-                    ...(bar.color ? { '--bar-color': `var(--color-${bar.color})` } : {}),
-                  }}
-                  onClick={(e) => {
-                    const day = days[bar.startIndex]
-                    if (day) onDayClick(e as unknown as MouseEvent, day)
-                  }}
-                />
-              ))}
-              {/* Labels with stems */}
-              {ganttBars.map((bar) => {
-                const centerPosition = (bar.startPosition + bar.endPosition) / 2
-                return (
-                  <div
-                    key={`label-${bar.label}`}
-                    class={`timeline-gantt-item-portrait ${bar.color ? `colored color-${bar.color}` : ''}`}
-                    style={{
-                      top: `${centerPosition}%`,
-                      ...(bar.color ? { '--bar-color': `var(--color-${bar.color})` } : {}),
-                    }}
-                    onClick={(e) => {
-                      const day = days[bar.startIndex]
-                      if (day) onDayClick(e as unknown as MouseEvent, day)
-                    }}
-                  >
-                    <div class="timeline-gantt-label-portrait timeline-label">
-                      <span class="timeline-gantt-label-emoji">{bar.emoji}</span>
-                      <span class="timeline-gantt-label-text">{bar.label}</span>
-                    </div>
-                    <div class="timeline-gantt-stem-portrait" />
-                  </div>
-                )
-              })}
-            </div>
-          )}
-
-          {/* The vertical timeline line */}
-          <div
-            ref={lineRef}
-            class="timeline-line-portrait"
-            onMouseMove={handleLineMouseMove as unknown as (e: Event) => void}
-            onMouseLeave={handleLineMouseLeave}
-          >
-            {/* Progress fill */}
-            <div
-              class="timeline-progress-portrait"
-              style={{ height: `${todayPosition}%` }}
-            />
-            {/* Hover dot */}
-            {hoverPosition !== null && hoverDayIndex !== null && hoverDayIndex !== todayIndex && (
-              <div
-                class={`timeline-hover-dot-portrait ${hoverDayIndex < (todayIndex >= 0 ? todayIndex : totalDays) ? 'passed' : 'future'}`}
-                style={{ top: `${hoverPosition}%` }}
-                onClick={(e) => {
-                  const day = days[hoverDayIndex]
-                  if (day) onDayClick(e as unknown as MouseEvent, day)
-                }}
-              />
-            )}
-            {/* Today marker */}
-            {todayIndex >= 0 && (
-              <div
-                class="timeline-today-portrait"
-                style={{ top: `${todayPosition}%`, viewTransitionName: 'today-marker' }}
-                onClick={(e) => {
-                  const today = days.find(d => d.isToday)
-                  if (today) onDayClick(e as unknown as MouseEvent, today)
-                }}
-              >
-                <div class="timeline-today-dot" />
-              </div>
-            )}
-          </div>
-
-          {/* Month markers */}
-          <div class="timeline-months-portrait">
-            {monthMarkers.map((m, i) => (
-              <div
-                key={i}
-                class="timeline-month"
-                style={{ top: `${m.position}%` }}
-              >
-                {m.month}
-              </div>
-            ))}
-          </div>
-
-          {/* Milestones on the right (stems go left to line) */}
-          <div class="timeline-milestones-portrait">
-            {portraitMilestones.map((m) => {
-              // Offset the content box based on column (column 0 = no offset, column 1 = one step right, etc.)
-              const columnWidth = getPortraitColumnWidth(windowSize.width)
-              const contentOffset = m.column * columnWidth
-              // Stem extends from milestone container through months column to the timeline line
-              // Base: 16px stem + 32px months width + collision offset
-              const stemWidth = 16 + PORTRAIT_MONTHS_WIDTH + contentOffset
-              const viewTransitionStyle = VIEW_TRANSITION_LABELS.has(m.annotation) ? { viewTransitionName: `day-${m.index}` } : {}
-              return (
-                <div
-                  key={m.index}
-                  class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ''} ${m.isToday ? 'today' : ''} ${selectedDayIndex === m.index ? 'selected' : ''} ${m.expanded ? 'expanded' : 'collapsed'}`}
-                  style={{
-                    top: `${m.position}%`,
-                    ...(m.color ? { '--milestone-color': `var(--color-${m.color})` } : {}),
-                  }}
-                  onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
-                >
-                  <div class="timeline-milestone-stem-portrait" style={{ width: `${stemWidth}px` }} />
-                  {m.expanded ? (
-                    <div class="timeline-milestone-content-portrait timeline-label" style={viewTransitionStyle}>
-                      <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
-                      <span class="timeline-milestone-label">{m.annotation}</span>
-                    </div>
-                  ) : (
-                    <div class="timeline-milestone-emoji-only" style={viewTransitionStyle}>
-                      <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
+      <TimelineLandscape
+        days={days}
+        milestones={landscapeMilestones}
+        ganttBars={landscapeGanttBars}
+        monthMarkers={monthMarkers}
+        weekMarkers={weekMarkers}
+        todayIndex={todayIndex}
+        todayPosition={todayPosition}
+        totalDays={totalDays}
+        selectedDayIndex={selectedDayIndex}
+        annotationEmojis={annotationEmojis}
+        onDayClick={onDayClick}
+        milestonesHeight={milestonesHeight}
+        minRow={minRow}
+        maxRow={maxRow}
+        ganttBarRowCount={ganttBarRowCount}
+        ganttLabelRowCount={ganttLabelRowCount}
+      />
     )
   }
 
-  // Landscape layout - horizontal timeline
   return (
-    <div class="timeline-view landscape">
-      <div class="timeline-content-landscape">
-        {/* Milestones container */}
-        <div
-          class="timeline-milestones-landscape"
-          style={{ height: `${milestonesHeight}px` }}
-        >
-          {milestones.map(m => {
-            // Stem height determines vertical position - taller stem = higher up
-            // All milestones anchored at bottom: 0, stem creates the spacing
-            const stemHeight = 45 + (m.row - minRow) * ROW_HEIGHT
-            // Lower rows get higher z-index so their content appears above stems from higher rows
-            const zIndex = maxRow - m.row + 1
-
-            const viewTransitionStyle = VIEW_TRANSITION_LABELS.has(m.annotation) ? { viewTransitionName: `day-${m.index}` } : {}
-            return (
-              <div
-                key={m.index}
-                class={`timeline-milestone-landscape ${m.color ? `colored color-${m.color}` : ''} ${m.isToday ? 'today' : ''} ${selectedDayIndex === m.index ? 'selected' : ''} ${highlightedDays.value.indices.has(m.index) ? 'highlighted' : ''}`}
-                style={{
-                  left: `${m.position}%`,
-                  zIndex,
-                  ...(m.color ? { '--milestone-color': `var(--color-${m.color})` } : {}),
-                  ...(highlightedDays.value.indices.has(m.index) && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } : {}),
-                }}
-                onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
-              >
-                <div class="timeline-milestone-content-landscape timeline-label" style={viewTransitionStyle}>
-                  <span class="timeline-milestone-emoji">{annotationEmojis[m.annotation] || ''}</span>
-                  <span class="timeline-milestone-label">{m.annotation}</span>
-                </div>
-                <div class="timeline-milestone-stem-landscape" style={{ height: `${stemHeight}px` }} />
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Line area with months above */}
-        <div class="timeline-line-area-landscape">
-          {/* Month markers above the line */}
-          <div class="timeline-months-landscape">
-            {monthMarkers.map((m, i) => (
-              <div
-                key={i}
-                class="timeline-month"
-                style={{ left: `${m.position}%` }}
-              >
-                {m.month}
-              </div>
-            ))}
-          </div>
-
-          {/* The timeline line */}
-          <div
-            ref={lineRef}
-            class="timeline-line-landscape"
-            onMouseMove={handleLineMouseMove as unknown as (e: Event) => void}
-            onMouseLeave={handleLineMouseLeave}
-          >
-            {/* Progress fill */}
-            <div
-              class="timeline-progress-landscape"
-              style={{ width: `${todayPosition}%` }}
-            />
-            {/* Hover dot */}
-            {hoverPosition !== null && hoverDayIndex !== null && hoverDayIndex !== todayIndex && (
-              <div
-                class={`timeline-hover-dot-landscape ${hoverDayIndex < (todayIndex >= 0 ? todayIndex : totalDays) ? 'passed' : 'future'}`}
-                style={{ left: `${hoverPosition}%` }}
-                onClick={(e) => {
-                  const day = days[hoverDayIndex]
-                  if (day) onDayClick(e as unknown as MouseEvent, day)
-                }}
-              />
-            )}
-            {/* Today marker */}
-            {todayIndex >= 0 && (
-              <div
-                class="timeline-today-landscape"
-                style={{ left: `${todayPosition}%`, viewTransitionName: 'today-marker' }}
-                onClick={(e) => {
-                  const today = days.find(d => d.isToday)
-                  if (today) onDayClick(e as unknown as MouseEvent, today)
-                }}
-              >
-                <div class="timeline-today-dot" />
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Week markers below the line */}
-        <div class="timeline-weeks-landscape">
-          {weekMarkers.map((w) => (
-            <div
-              key={w.week}
-              class="timeline-week"
-              style={{ left: `${w.position}%` }}
-            >
-              {w.week}
-            </div>
-          ))}
-        </div>
-
-        {/* Gantt section for range milestones */}
-        {ganttBars.length > 0 && (
-          <div
-            class="timeline-gantt-section-landscape"
-            style={{ height: `${ganttLabelRowCount * ROW_HEIGHT + ganttBarRowCount * GANTT_ROW_HEIGHT + 10}px` }}
-          >
-            {/* Bars at top */}
-            <div class="timeline-gantt-bars-landscape" style={{ height: `${ganttBarRowCount * GANTT_ROW_HEIGHT}px` }}>
-              {ganttBars.map((bar) => {
-                const isHighlighted = highlightedDays.value.indices.has(bar.startIndex)
-                return (
-                  <div
-                    key={`bar-${bar.label}`}
-                    class={`timeline-gantt-bar-landscape ${bar.color ? `colored color-${bar.color}` : ''} ${isHighlighted ? 'highlighted' : ''}`}
-                    style={{
-                      left: `${bar.startPosition}%`,
-                      width: `${bar.width}%`,
-                      top: `${bar.barRow * GANTT_ROW_HEIGHT + (GANTT_ROW_HEIGHT - GANTT_BAR_HEIGHT) / 2}px`,
-                      height: `${GANTT_BAR_HEIGHT}px`,
-                      ...(bar.color ? { '--bar-color': `var(--color-${bar.color})` } : {}),
-                      ...(isHighlighted && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } : {}),
-                    }}
-                    onClick={(e) => {
-                      const day = days[bar.startIndex]
-                      if (day) onDayClick(e as unknown as MouseEvent, day)
-                    }}
-                  />
-                )
-              })}
-            </div>
-            {/* Labels below bars with stems going up from center of range */}
-            <div class="timeline-gantt-labels-landscape" style={{ height: `${ganttLabelRowCount * ROW_HEIGHT}px` }}>
-              {ganttBars.map((bar) => {
-                const isHighlighted = highlightedDays.value.indices.has(bar.startIndex)
-                const stemHeight = 20 + bar.labelRow * ROW_HEIGHT
-                const centerPosition = (bar.startPosition + bar.endPosition) / 2
-                return (
-                  <div
-                    key={`label-${bar.label}`}
-                    class={`timeline-gantt-item-landscape ${bar.color ? `colored color-${bar.color}` : ''} ${isHighlighted ? 'highlighted' : ''}`}
-                    style={{
-                      left: `${centerPosition}%`,
-                      top: 0,
-                      ...(bar.color ? { '--bar-color': `var(--color-${bar.color})` } : {}),
-                      ...(isHighlighted && highlightedDays.value.color ? { '--highlight-color': `var(--color-${highlightedDays.value.color})` } : {}),
-                    }}
-                    onClick={(e) => {
-                      const day = days[bar.startIndex]
-                      if (day) onDayClick(e as unknown as MouseEvent, day)
-                    }}
-                  >
-                    <div class="timeline-gantt-stem-landscape" style={{ height: `${stemHeight}px` }} />
-                    <div class="timeline-gantt-label-content-landscape timeline-label">
-                      <span class="timeline-gantt-label-emoji">{bar.emoji}</span>
-                      <span class="timeline-gantt-label-text">{bar.label}</span>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+    <TimelinePortrait
+      days={days}
+      milestones={portraitMilestones}
+      ganttBars={portraitGanttBars}
+      monthMarkers={monthMarkers}
+      weekMarkers={weekMarkers}
+      todayIndex={todayIndex}
+      todayPosition={todayPosition}
+      totalDays={totalDays}
+      selectedDayIndex={selectedDayIndex}
+      annotationEmojis={annotationEmojis}
+      onDayClick={onDayClick}
+    />
   )
 }

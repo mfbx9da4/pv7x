@@ -74,7 +74,6 @@ export function Tooltip({
   const dayOffset = day.index % 7
   const dayOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()]
   const fullDate = `${dayOfWeek}, ${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`
-  const color = getDayColor(day)
   const borderColor = getBorderColor(day)
   const annotationColor = getAnnotationTextColor(day)
 
