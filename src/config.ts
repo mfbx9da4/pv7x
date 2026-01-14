@@ -67,7 +67,7 @@ export const CONFIG = {
 			date: new Date(2026, 1, 11),
 			label: "Nuchal Scan",
 			emoji: "🩺",
-			color: "subtle",
+			color: "salmon",
 		},
 		{
 			date: new Date(2026, 1, 12),
