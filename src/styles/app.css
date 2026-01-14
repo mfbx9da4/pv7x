@@ -961,7 +961,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	cursor: pointer;
+	pointer-events: none;
 }
 
 .timeline-months-landscape {
@@ -1074,6 +1074,8 @@ body {
 	max-width: 120px;
 	position: relative;
 	z-index: 10;
+	pointer-events: auto;
+	cursor: pointer;
 }
 
 .timeline-milestone-landscape.highlighted
@@ -1446,7 +1448,7 @@ body {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	cursor: pointer;
+	pointer-events: none;
 }
 
 .timeline-milestone-content-portrait {
@@ -1461,6 +1463,8 @@ body {
 	z-index: 10;
 	font-size: 11px;
 	max-width: 110px;
+	pointer-events: auto;
+	cursor: pointer;
 }
 
 .timeline-milestone-content-portrait .timeline-milestone-emoji {
@@ -1488,6 +1492,8 @@ body {
 	justify-content: center;
 	box-shadow: 0 2px 8px var(--shadow-subtle);
 	z-index: 10;
+	pointer-events: auto;
+	cursor: pointer;
 }
 
 .timeline-milestone-emoji-only .timeline-milestone-emoji {
