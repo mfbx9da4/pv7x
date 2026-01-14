@@ -209,38 +209,53 @@ export function TimelinePortrait({
 					))}
 				</div>
 
-				{/* Milestones on the right (stems go left to line) */}
+				{/* Milestones on the right - stems layer (behind) then labels layer (in front) */}
 				<div class="timeline-milestones-portrait" ref={milestonesContainerRef}>
+					{/* Stems layer - rendered first, appears behind */}
 					{milestones.map((m) => {
-						// Use the actual leftPx position calculated by the collision algorithm
 						const contentOffset = m.leftPx;
-						// Stem extends from milestone container through months column to the timeline line
-						// Base: 16px stem + 32px months width + content offset
 						const stemWidth = 16 + PORTRAIT_MONTHS_WIDTH + contentOffset;
-						const viewTransitionStyle = VIEW_TRANSITION_LABELS.has(m.annotation)
-							? { viewTransitionName: `day-${m.index}` }
-							: {};
 						return (
 							<div
-								key={m.index}
-								class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ""} ${m.isToday ? "today" : ""} ${selectedDayIndex === m.index ? "selected" : ""} ${m.expanded ? "expanded" : "collapsed"}`}
+								key={`stem-${m.index}`}
+								class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ""}`}
 								style={{
 									top: `${m.topPx}px`,
-									// leftPx is applied via stem width, not container position
 									...(m.color
 										? { "--milestone-color": `var(--color-${m.color})` }
 										: {}),
 								}}
-								onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
 							>
 								<div
 									class="timeline-milestone-stem-portrait"
 									style={{ width: `${stemWidth}px` }}
 								/>
+							</div>
+						);
+					})}
+					{/* Labels layer - rendered second, appears in front */}
+					{milestones.map((m) => {
+						const contentOffset = m.leftPx;
+						const viewTransitionStyle = VIEW_TRANSITION_LABELS.has(m.annotation)
+							? { viewTransitionName: `day-${m.index}` }
+							: {};
+						return (
+							<div
+								key={`label-${m.index}`}
+								class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ""} ${m.isToday ? "today" : ""} ${selectedDayIndex === m.index ? "selected" : ""} ${m.expanded ? "expanded" : "collapsed"}`}
+								style={{
+									top: `${m.topPx}px`,
+									paddingLeft: `${16 + PORTRAIT_MONTHS_WIDTH + contentOffset}px`,
+									...(m.color
+										? { "--milestone-color": `var(--color-${m.color})` }
+										: {}),
+								}}
+							>
 								{m.expanded ? (
 									<div
 										class="timeline-milestone-content-portrait timeline-label"
 										style={viewTransitionStyle}
+										onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
 									>
 										<span class="timeline-milestone-emoji">
 											{annotationEmojis[m.annotation] || ""}
@@ -251,6 +266,7 @@ export function TimelinePortrait({
 									<div
 										class="timeline-milestone-emoji-only"
 										style={viewTransitionStyle}
+										onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}
 									>
 										<span class="timeline-milestone-emoji">
 											{annotationEmojis[m.annotation] || ""}

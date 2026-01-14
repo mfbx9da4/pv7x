@@ -104,25 +104,23 @@ export function TimelineLandscape({
 	return (
 		<div class="timeline-view landscape">
 			<div class="timeline-content-landscape">
-				{/* Milestones container */}
+				{/* Milestones container - stems layer (behind) then labels layer (in front) */}
 				<div
 					class="timeline-milestones-landscape"
 					style={{ height: `${milestonesHeight}px` }}
 				>
 					{milestones.map((m) => {
-						// Stem height determines vertical position - taller stem = higher up
-						// All milestones anchored at bottom: 0, stem creates the spacing
 						const stemHeight = 45 + (m.row - minRow) * ROW_HEIGHT;
-
 						const viewTransitionStyle = VIEW_TRANSITION_LABELS.has(m.annotation)
 							? { viewTransitionName: `day-${m.index}` }
 							: {};
 						return (
 							<div
-								key={m.index}
+								key={`label-${m.index}`}
 								class={`timeline-milestone-landscape ${m.color ? `colored color-${m.color}` : ""} ${m.isToday ? "today" : ""} ${selectedDayIndex === m.index ? "selected" : ""} ${highlightedDays.value.indices.has(m.index) ? "highlighted" : ""}`}
 								style={{
 									left: `${m.position}%`,
+									paddingBottom: `${stemHeight}px`,
 									...(m.color
 										? { "--milestone-color": `var(--color-${m.color})` }
 										: {}),
@@ -144,10 +142,6 @@ export function TimelineLandscape({
 									</span>
 									<span class="timeline-milestone-label">{m.annotation}</span>
 								</div>
-								<div
-									class="timeline-milestone-stem-landscape"
-									style={{ height: `${stemHeight}px` }}
-								/>
 							</div>
 						);
 					})}
