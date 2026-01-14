@@ -1073,7 +1073,7 @@ body {
 	box-shadow: 0 2px 8px var(--shadow-subtle);
 	max-width: 120px;
 	position: relative;
-	z-index: 2;
+	z-index: 10;
 }
 
 .timeline-milestone-landscape.highlighted
@@ -1458,7 +1458,7 @@ body {
 	align-items: center;
 	gap: 4px;
 	box-shadow: 0 2px 8px var(--shadow-subtle);
-	z-index: 2;
+	z-index: 10;
 	font-size: 11px;
 	max-width: 110px;
 }
@@ -1487,7 +1487,7 @@ body {
 	align-items: center;
 	justify-content: center;
 	box-shadow: 0 2px 8px var(--shadow-subtle);
-	z-index: 2;
+	z-index: 10;
 }
 
 .timeline-milestone-emoji-only .timeline-milestone-emoji {
