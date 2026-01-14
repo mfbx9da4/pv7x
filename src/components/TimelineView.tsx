@@ -260,106 +260,54 @@ function layoutMilestonesCore(
 			return { layouts, ok: true };
 		}
 
-		// Build Y-overlap groups (connected components of overlapping milestones)
-		const buildYOverlapGroups = (): MilestoneLayout[][] => {
+		// Find the candidate to collapse: prioritize collapsing dependencies (Y-overlapping
+		// milestones to the left) of the rightmost milestone, starting with the innermost.
+		const findCandidate = (): MilestoneLayout | null => {
 			const expanded = layouts.filter((ms) => !ms.collapsed);
-			const visited = new Set<MilestoneLayout>();
-			const groups: MilestoneLayout[][] = [];
+			if (expanded.length === 0) return null;
 
-			for (const start of expanded) {
-				if (visited.has(start)) continue;
+			// Find all milestones at the max right edge (could be collapsed or expanded)
+			const atMaxRight = layouts.filter(
+				(ms) => ms.left + ms.width === maxRight,
+			);
 
-				// BFS to find connected component
-				const group: MilestoneLayout[] = [];
-				const queue = [start];
-
-				while (queue.length > 0) {
-					const curr = queue.shift()!;
-					if (visited.has(curr)) continue;
-					visited.add(curr);
-					group.push(curr);
-
-					// Find all expanded neighbors that overlap Y
-					for (const other of expanded) {
-						if (!visited.has(other) && overlapsY(curr, other)) {
-							queue.push(other);
-						}
+			// Find all Y-overlapping expanded milestones (only expanded can be collapsed)
+			const candidates = new Set<MilestoneLayout>();
+			for (const ms of atMaxRight) {
+				for (const other of expanded) {
+					if (overlapsY(ms, other)) {
+						candidates.add(other);
 					}
 				}
-
-				if (group.length > 0) {
-					groups.push(group);
-				}
 			}
 
-			return groups;
-		};
+			if (candidates.size === 0) return null;
 
-		// Calculate maxRight (left + width) for a group
-		const groupMaxRight = (group: MilestoneLayout[]): number => {
-			let max = 0;
-			for (const ms of group) {
-				const right = ms.left + ms.width;
-				if (right > max) max = right;
-			}
-			return max;
-		};
+			// Collapse the leftmost candidate, preferring non-coloured
+			const arr = Array.from(candidates);
+			const nonColoured = arr.filter((ms) => !ms.isColoured);
+			const coloured = arr.filter((ms) => ms.isColoured);
 
-		// Pick the best candidate to collapse within a group:
-		// non-coloured leftmost first, then coloured leftmost
-		const pickCandidateFromGroup = (
-			group: MilestoneLayout[],
-		): MilestoneLayout => {
-			const nonColoured = group.filter((ms) => !ms.isColoured);
-			const coloured = group.filter((ms) => ms.isColoured);
-
-			const findLeftmost = (items: MilestoneLayout[]): MilestoneLayout => {
-				let best = items[0];
-				for (const ms of items) {
+			const findLeftmost = (list: MilestoneLayout[]): MilestoneLayout => {
+				let best = list[0];
+				for (const ms of list) {
 					if (ms.left < best.left) best = ms;
 				}
 				return best;
 			};
 
-			if (nonColoured.length > 0) {
-				return findLeftmost(nonColoured);
-			}
-			if (coloured.length > 0) {
-				return findLeftmost(coloured);
-			}
-			return group[0];
+			if (nonColoured.length > 0) return findLeftmost(nonColoured);
+			if (coloured.length > 0) return findLeftmost(coloured);
+			return arr[0];
 		};
 
-		// Find candidates to collapse - one from each group with the highest maxRight
-		const findCandidates = (): MilestoneLayout[] => {
-			const groups = buildYOverlapGroups();
-			if (groups.length === 0) return [];
-
-			// Find the maximum maxRight among all groups
-			let maxMaxRight = 0;
-			for (const group of groups) {
-				const mr = groupMaxRight(group);
-				if (mr > maxMaxRight) maxMaxRight = mr;
-			}
-
-			// Find all groups that have this max right (they stick out the most)
-			const worstGroups = groups.filter(
-				(g) => groupMaxRight(g) === maxMaxRight,
-			);
-
-			// For each worst group, pick one candidate to collapse
-			return worstGroups.map((group) => pickCandidateFromGroup(group));
-		};
-
-		const candidates = findCandidates();
-		if (candidates.length === 0) {
+		const candidate = findCandidate();
+		if (!candidate) {
 			return { layouts, ok: false };
 		}
 
-		for (const candidate of candidates) {
-			candidate.collapsed = true;
-			candidate.width = collapsedWidth;
-		}
+		candidate.collapsed = true;
+		candidate.width = collapsedWidth;
 	}
 
 	// Safety fallback (iteration limit reached)
