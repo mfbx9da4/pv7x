@@ -19,12 +19,7 @@ const MONTHS = [
 ];
 
 // Milestones that get view transitions
-const VIEW_TRANSITION_LABELS = new Set([
-	"Start",
-	"Announce!",
-	"Third Trimester",
-	"Due",
-]);
+const VIEW_TRANSITION_LABELS = new Set(["Start", "Due"]);
 
 function formatDate(date: Date): string {
 	return `${date.getDate()} ${MONTHS[date.getMonth()]}`;

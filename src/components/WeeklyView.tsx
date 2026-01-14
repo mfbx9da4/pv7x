@@ -19,12 +19,7 @@ const MONTHS = [
 ];
 
 // Milestones that get view transitions
-const VIEW_TRANSITION_LABELS = new Set([
-	"Start",
-	"Announce!",
-	"Third Trimester",
-	"Due",
-]);
+const VIEW_TRANSITION_LABELS = new Set(["Start", "Due"]);
 
 const DAY_LABELS = ["Thu", "Fri", "Sat", "Sun", "Mon", "Tue", "Wed"];
 const DAY_LABELS_SHORT = ["T", "F", "S", "S", "M", "T", "W"];

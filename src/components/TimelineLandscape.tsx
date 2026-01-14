@@ -3,12 +3,7 @@ import type { DayInfo } from "../types";
 import { highlightedDays } from "./App";
 
 // Milestones that get view transitions
-const VIEW_TRANSITION_LABELS = new Set([
-	"Start",
-	"Announce!",
-	"Third Trimester",
-	"Due",
-]);
+const VIEW_TRANSITION_LABELS = new Set(["Start", "Due"]);
 
 // Milestone styling constants
 const ROW_HEIGHT = 42; // vertical spacing between rows

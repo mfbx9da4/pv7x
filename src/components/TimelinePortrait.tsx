@@ -2,12 +2,7 @@ import { useRef, useState, useCallback } from "preact/hooks";
 import type { DayInfo } from "../types";
 
 // Milestones that get view transitions
-const VIEW_TRANSITION_LABELS = new Set([
-	"Start",
-	"Announce!",
-	"Third Trimester",
-	"Due",
-]);
+const VIEW_TRANSITION_LABELS = new Set(["Start", "Due"]);
 
 // Portrait milestone layout constants
 const PORTRAIT_MONTHS_WIDTH = 32; // width of months column that stems must cross
