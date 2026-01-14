@@ -8,10 +8,8 @@ const VIEW_TRANSITION_LABELS = new Set(['Start', 'Announce!', 'Third Trimester',
 const PORTRAIT_MONTHS_WIDTH = 32 // width of months column that stems must cross
 
 type PortraitMilestoneWithLayout = DayInfo & {
-  position: number
-  column: number
+  topPx: number
   leftPx: number
-  height: number
   expanded: boolean
 }
 
@@ -49,6 +47,7 @@ type TimelinePortraitProps = {
   selectedDayIndex: number | null
   annotationEmojis: Record<string, string>
   onDayClick: (e: MouseEvent, day: DayInfo) => void
+  milestonesContainerRef?: { current: HTMLDivElement | null }
 }
 
 export function TimelinePortrait({
@@ -63,6 +62,7 @@ export function TimelinePortrait({
   selectedDayIndex,
   annotationEmojis,
   onDayClick,
+  milestonesContainerRef,
 }: TimelinePortraitProps) {
   const lineRef = useRef<HTMLDivElement>(null)
   const [hoverPosition, setHoverPosition] = useState<number | null>(null)
@@ -198,7 +198,7 @@ export function TimelinePortrait({
         </div>
 
         {/* Milestones on the right (stems go left to line) */}
-        <div class="timeline-milestones-portrait">
+        <div class="timeline-milestones-portrait" ref={milestonesContainerRef}>
           {milestones.map((m) => {
             // Use the actual leftPx position calculated by the collision algorithm
             const contentOffset = m.leftPx
@@ -211,7 +211,8 @@ export function TimelinePortrait({
                 key={m.index}
                 class={`timeline-milestone-portrait ${m.color ? `colored color-${m.color}` : ''} ${m.isToday ? 'today' : ''} ${selectedDayIndex === m.index ? 'selected' : ''} ${m.expanded ? 'expanded' : 'collapsed'}`}
                 style={{
-                  top: `${m.position}%`,
+                  top: `${m.topPx}px`,
+                  // leftPx is applied via stem width, not container position
                   ...(m.color ? { '--milestone-color': `var(--color-${m.color})` } : {}),
                 }}
                 onClick={(e) => onDayClick(e as unknown as MouseEvent, m)}

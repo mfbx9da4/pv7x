@@ -1,4 +1,4 @@
-import { useMemo } from 'preact/hooks'
+import { useMemo, useState, useLayoutEffect, useRef } from 'preact/hooks'
 import type { DayInfo } from '../types'
 import type { Milestone } from './App'
 import { TimelineLandscape } from './TimelineLandscape'
@@ -12,8 +12,6 @@ const MILESTONE_GAP = 8 // minimum gap between milestones
 const EMOJI_WIDTH = 18 // approximate emoji width
 const ROW_HEIGHT = 42 // vertical spacing between rows
 
-// Portrait milestone layout constants
-const PORTRAIT_EMOJI_HEIGHT = 26 // height when showing only emoji
 
 // Build lookup of milestones with date ranges
 function getDaysBetween(start: Date, end: Date): number {
@@ -53,6 +51,7 @@ function measureTextWidth(text: string, font: string): number {
 // ============================================================================
 
 type MilestoneWithLayout = DayInfo & {
+  /** Percentage (0-100) along the timeline where this milestone appears */
   position: number
   row: number
   width: number
@@ -132,43 +131,40 @@ function assignRows(
 // ============================================================================
 
 type PortraitMilestoneWithLayout = DayInfo & {
-  position: number
-  column: number  // approximate column (for legacy compatibility)
-  leftPx: number  // actual left position in pixels (relative to content area start)
-  height: number  // estimated height of milestone element
-  expanded: boolean // whether to show label or just emoji
+  topPx: number
+  leftPx: number
+  expanded: boolean
 }
 
 // Lane-based layout algorithm for portrait milestones
 // Uses interval graph coloring to assign lanes, then optimizes expansion
-function assignPortraitColumns(
+function layoutPortraitMilestones(
   milestones: (DayInfo & { position: number })[],
-  screenWidth: number
+  availableDimensions: { width: number; height: number }
 ): PortraitMilestoneWithLayout[] {
-  if (milestones.length === 0) return []
+  const { width: availableWidth, height: containerHeight } = availableDimensions
+  if (milestones.length === 0 || availableWidth <= 0 || containerHeight <= 0) return []
 
   // Layout constants
   const COLLAPSED_WIDTH = 24
-  const BASE_STEM_WIDTH = 48 // 16px stem + 32px months column
-  const halfHeightPct = 2
-  const verticalGapPct = 0.5
+  const MILESTONE_HEIGHT = 24 // fixed pixel height of milestone elements
+  const VERTICAL_GAP = 4 // minimum pixel gap between milestones
+  const HORIZONTAL_GAP = 4 // minimum pixel gap between horizontally adjacent items
+  const STEM_BASE_WIDTH = 48 // 16px base stem + 32px months column (content starts after stem)
 
-  // The milestone container starts at roughly 54% from left edge
-  // Content position = container.left + BASE_STEM_WIDTH + leftPx
-  // Available width for leftPx + contentWidth = screenEdge - container.left - BASE_STEM_WIDTH - padding
-  const RIGHT_PADDING = 10
-  const availableWidth = Math.floor(screenWidth * 0.46) - BASE_STEM_WIDTH - RIGHT_PADDING
-
-  // Estimate expanded label width: ~7px per char + emoji + padding
-  const estimateLabelWidth = (label: string): number => Math.min(140, label.length * 7 + 34)
+  // Estimate expanded label width: ~9px per char + emoji + padding + buffer for CSS truncation
+  const estimateLabelWidth = (label: string): number => Math.min(180, label.length * 9 + 50)
 
   // Check if two items conflict vertically
+  // Convert position (%) to pixel top, then check if bounding boxes overlap
   const conflictsVertically = (a: { position: number }, b: { position: number }): boolean => {
-    const aTop = a.position - halfHeightPct
-    const aBottom = a.position + halfHeightPct
-    const bTop = b.position - halfHeightPct
-    const bBottom = b.position + halfHeightPct
-    return Math.max(aTop, bTop) < Math.min(aBottom, bBottom) + verticalGapPct
+    // position is center point as percentage, convert to pixel top
+    const aTopPx = (a.position / 100) * containerHeight - MILESTONE_HEIGHT / 2
+    const aBottomPx = aTopPx + MILESTONE_HEIGHT
+    const bTopPx = (b.position / 100) * containerHeight - MILESTONE_HEIGHT / 2
+    const bBottomPx = bTopPx + MILESTONE_HEIGHT
+    // Check if ranges overlap with minimum gap
+    return Math.max(aTopPx, bTopPx) < Math.min(aBottomPx, bBottomPx) + VERTICAL_GAP
   }
 
   // Sort by position (top to bottom)
@@ -213,33 +209,69 @@ function assignPortraitColumns(
     }
   }
 
-  // Calculate x positions given expansion decisions
+  // Calculate x positions using two-pass greedy packing
+  // Pass 1: Place items that can fit at x=0 (no conflicts with other x=0 items)
+  // Pass 2: Place remaining items in the first available gap
   const calculateXPositions = (expanded: Map<number, boolean>): Map<number, number> => {
     const xPositions = new Map<number, number>()
+    const placed = new Set<number>()
 
-    for (let currentLane = 0; currentLane < lanes.length; currentLane++) {
-      for (const item of sorted) {
-        const itemId = itemIds.get(item)!
-        if (laneAssignment.get(itemId) !== currentLane) continue
+    // Pass 1: Greedily place items at x=0 if they don't conflict with existing x=0 items
+    for (const item of sorted) {
+      const itemId = itemIds.get(item)!
+      const itemConflicts = conflicts.get(itemId)!
 
-        if (currentLane === 0) {
-          xPositions.set(itemId, 0)
-        } else {
-          let maxRight = 0
-          for (const conflictId of conflicts.get(itemId)!) {
-            const conflictLane = laneAssignment.get(conflictId)!
-            if (conflictLane < currentLane) {
-              const conflictX = xPositions.get(conflictId)!
-              const conflictWidth = expanded.get(conflictId)
-                ? estimateLabelWidth(sorted[conflictId].annotation)
-                : COLLAPSED_WIDTH
-              maxRight = Math.max(maxRight, conflictX + conflictWidth)
-            }
-          }
-          xPositions.set(itemId, maxRight)
+      // Check if this item conflicts with any already-placed item at x=0
+      let canPlaceAtZero = true
+      for (const conflictId of itemConflicts) {
+        if (placed.has(conflictId) && xPositions.get(conflictId) === 0) {
+          // This item conflicts vertically with something already at x=0
+          // So both can't be at x=0
+          canPlaceAtZero = false
+          break
         }
       }
+
+      if (canPlaceAtZero) {
+        xPositions.set(itemId, 0)
+        placed.add(itemId)
+      }
     }
+
+    // Pass 2: Place remaining items in gaps
+    for (const item of sorted) {
+      const itemId = itemIds.get(item)!
+      if (placed.has(itemId)) continue
+
+      const itemConflicts = conflicts.get(itemId)!
+      const itemWidth = expanded.get(itemId)
+        ? estimateLabelWidth(item.annotation)
+        : COLLAPSED_WIDTH
+
+      // Collect blocked ranges from all placed conflicting items (including horizontal gap)
+      const blockedRanges: { start: number; end: number }[] = []
+      for (const conflictId of itemConflicts) {
+        if (placed.has(conflictId)) {
+          const conflictX = xPositions.get(conflictId)!
+          const conflictWidth = expanded.get(conflictId)
+            ? estimateLabelWidth(sorted[conflictId].annotation)
+            : COLLAPSED_WIDTH
+          blockedRanges.push({ start: conflictX, end: conflictX + conflictWidth + HORIZONTAL_GAP })
+        }
+      }
+
+      // Sort and find first gap
+      blockedRanges.sort((a, b) => a.start - b.start)
+      let x = 0
+      for (const range of blockedRanges) {
+        if (x + itemWidth <= range.start) break
+        x = Math.max(x, range.end)
+      }
+
+      xPositions.set(itemId, x)
+      placed.add(itemId)
+    }
+
     return xPositions
   }
 
@@ -247,64 +279,79 @@ function assignPortraitColumns(
   const expanded = new Map<number, boolean>()
   sorted.forEach((_, i) => expanded.set(i, true))
 
-  // Collapse items that exceed available width
-  // Collapse from lane 0 outward - collapsing closer items frees space for those further right
-  let stable = false
+  // Check if current layout fits
+  const layoutFits = (): boolean => {
+    const xPositions = calculateXPositions(expanded)
+    for (let i = 0; i < sorted.length; i++) {
+      const x = xPositions.get(i)!
+      const w = expanded.get(i) ? estimateLabelWidth(sorted[i].annotation) : COLLAPSED_WIDTH
+      if (STEM_BASE_WIDTH + x + w > availableWidth) return false
+    }
+    return true
+  }
+
+  // Collapse items starting from leftmost (smallest x) until layout fits
+  // This keeps rightmost items expanded, which tend to be more important
   let iterations = 0
-  while (!stable && iterations < 50) {
-    stable = true
+  while (!layoutFits() && iterations < 50) {
     iterations++
     const xPositions = calculateXPositions(expanded)
 
-    for (let laneIdx = 0; laneIdx < lanes.length; laneIdx++) {
-      for (const item of lanes[laneIdx]) {
-        const itemId = itemIds.get(item)!
-        const x = xPositions.get(itemId)!
-        const width = expanded.get(itemId) ? estimateLabelWidth(item.annotation) : COLLAPSED_WIDTH
-
-        if (x + width > availableWidth && expanded.get(itemId)) {
-          expanded.set(itemId, false)
-          stable = false
+    // Find leftmost expanded item and collapse it
+    let leftmostIdx = -1
+    let leftmostX = Infinity
+    for (let i = 0; i < sorted.length; i++) {
+      if (expanded.get(i)) {
+        const x = xPositions.get(i)!
+        if (x < leftmostX) {
+          leftmostX = x
+          leftmostIdx = i
         }
       }
     }
+
+    if (leftmostIdx >= 0) {
+      expanded.set(leftmostIdx, false)
+    } else {
+      break // No more items to collapse
+    }
   }
 
-  // Try to re-expand collapsed items if they fit
-  for (let laneIdx = 0; laneIdx < lanes.length; laneIdx++) {
-    for (const item of lanes[laneIdx]) {
-      const itemId = itemIds.get(item)!
-      if (!expanded.get(itemId)) {
-        expanded.set(itemId, true)
-        const xPositions = calculateXPositions(expanded)
+  // Try to re-expand collapsed items, starting from rightmost (largest x)
+  // This prioritizes expanding items that are already pushed right
+  const xPositionsForReexpand = calculateXPositions(expanded)
+  const collapsedItems = sorted
+    .map((_, i) => i)
+    .filter(i => !expanded.get(i))
+    .sort((a, b) => {
+      // Sort by x position descending (rightmost first)
+      const xA = xPositionsForReexpand.get(a) ?? 0
+      const xB = xPositionsForReexpand.get(b) ?? 0
+      return xB - xA
+    })
 
-        let fits = true
-        for (let i = 0; i < sorted.length; i++) {
-          const x = xPositions.get(i)!
-          const w = expanded.get(i) ? estimateLabelWidth(sorted[i].annotation) : COLLAPSED_WIDTH
-          if (x + w > availableWidth) {
-            fits = false
-            break
-          }
-        }
-
-        if (!fits) expanded.set(itemId, false)
-      }
+  for (const itemId of collapsedItems) {
+    expanded.set(itemId, true)
+    if (!layoutFits()) {
+      expanded.set(itemId, false)
     }
   }
 
   const finalX = calculateXPositions(expanded)
 
-  // Clamp positions so even collapsed items don't overflow
-  const maxLeftPx = Math.max(0, availableWidth - COLLAPSED_WIDTH)
-
-  return sorted.map((item, i) => ({
-    ...item,
-    column: laneAssignment.get(i) ?? 0,
-    leftPx: Math.min(finalX.get(i) ?? 0, maxLeftPx),
-    height: PORTRAIT_EMOJI_HEIGHT,
-    expanded: expanded.get(i) ?? false,
-  }))
+  // Clamp positions so items don't overflow, accounting for stem and content width
+  // Content right edge = STEM_BASE_WIDTH + leftPx + itemWidth (must fit in availableWidth)
+  return sorted.map((item, i) => {
+    const isExpanded = expanded.get(i) ?? false
+    const itemWidth = isExpanded ? estimateLabelWidth(item.annotation) : COLLAPSED_WIDTH
+    const maxLeftPx = Math.max(0, availableWidth - STEM_BASE_WIDTH - itemWidth)
+    return {
+      ...item,
+      topPx: (item.position / 100) * containerHeight,
+      leftPx: Math.min(finalX.get(i) ?? 0, maxLeftPx),
+      expanded: isExpanded,
+    }
+  })
 }
 
 // ============================================================================
@@ -355,6 +402,28 @@ export function TimelineView({
 }: TimelineViewProps) {
   const totalDays = days.length
   const isLandscape = windowSize.width > windowSize.height
+
+  // Measure the milestones container position from the DOM
+  const [portraitLayout, setPortraitLayout] = useState<{ left: number; top: number; width: number; height: number } | null>(null)
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // Measure container position when in portrait mode
+  useLayoutEffect(() => {
+    if (!isLandscape && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      setPortraitLayout({
+        left: Math.floor(rect.left),
+        top: Math.floor(rect.top),
+        // Add 20px safety margin to account for CSS rendering differences
+        width: Math.floor(windowSize.width - rect.left - 30),
+        height: Math.floor(rect.height),
+      })
+    }
+  }, [isLandscape, windowSize.width, windowSize.height])
+
+  // Fallback values until measured
+  const portraitAvailableWidth = portraitLayout?.width ?? Math.floor(windowSize.width * 0.35)
+  const portraitContainerHeight = portraitLayout?.height ?? Math.floor(windowSize.height * 0.85)
 
   // Build range milestone lookup from passed milestones
   const rangeMilestoneLookup = useMemo(() => {
@@ -418,8 +487,11 @@ export function TimelineView({
   // Portrait: Get point milestones with column assignments
   const portraitMilestones = useMemo(() => {
     if (isLandscape) return []
-    return assignPortraitColumns(baseMilestones, windowSize.width)
-  }, [baseMilestones, windowSize.width, isLandscape])
+    return layoutPortraitMilestones(baseMilestones, {
+      width: portraitAvailableWidth,
+      height: portraitContainerHeight,
+    })
+  }, [baseMilestones, isLandscape, portraitAvailableWidth, portraitContainerHeight])
 
   // Landscape: Calculate row range for dynamic height
   const { minRow, maxRow, milestonesHeight } = useMemo(() => {
@@ -586,18 +658,21 @@ export function TimelineView({
   }
 
   return (
-    <TimelinePortrait
-      days={days}
-      milestones={portraitMilestones}
-      ganttBars={portraitGanttBars}
-      monthMarkers={monthMarkers}
-      weekMarkers={weekMarkers}
-      todayIndex={todayIndex}
-      todayPosition={todayPosition}
-      totalDays={totalDays}
-      selectedDayIndex={selectedDayIndex}
-      annotationEmojis={annotationEmojis}
-      onDayClick={onDayClick}
-    />
+    <>
+      <TimelinePortrait
+        days={days}
+        milestones={portraitMilestones}
+        ganttBars={portraitGanttBars}
+        monthMarkers={monthMarkers}
+        weekMarkers={weekMarkers}
+        todayIndex={todayIndex}
+        todayPosition={todayPosition}
+        totalDays={totalDays}
+        selectedDayIndex={selectedDayIndex}
+        annotationEmojis={annotationEmojis}
+        onDayClick={onDayClick}
+        milestonesContainerRef={containerRef}
+      />
+    </>
   )
 }
