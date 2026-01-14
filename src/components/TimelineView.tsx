@@ -136,9 +136,153 @@ type PortraitMilestoneWithLayout = DayInfo & {
   expanded: boolean
 }
 
-// Lane-based layout algorithm for portrait milestones
-// Uses interval graph coloring to assign lanes, then optimizes expansion
-function layoutPortraitMilestones(
+// Internal types for the layout algorithm
+type MilestoneLayoutInput = {
+  top: number
+  height: number
+  isColoured: boolean
+}
+
+type MilestoneLayout = MilestoneLayoutInput & {
+  left: number
+  width: number
+  collapsed: boolean
+}
+
+type LayoutOptions = {
+  maxWidth: number
+  expandedWidth?: number
+  collapsedWidth?: number
+}
+
+function overlapsY(a: MilestoneLayoutInput, b: MilestoneLayoutInput): boolean {
+  // vertical intervals [top, top+height) intersect?
+  return !(a.top + a.height <= b.top || b.top + b.height <= a.top)
+}
+
+function layoutMilestonesCore(
+  unsortedMilestones: MilestoneLayoutInput[],
+  opts: LayoutOptions
+): { layouts: MilestoneLayout[]; ok: boolean } {
+  const expandedWidth = opts.expandedWidth ?? 120
+  const collapsedWidth = opts.collapsedWidth ?? 24
+  const maxWidth = opts.maxWidth
+
+  if (collapsedWidth > maxWidth) {
+    throw new Error('collapsedWidth cannot exceed maxWidth')
+  }
+
+  // Sort by top; build mutable layout objects
+  const layouts: MilestoneLayout[] = [...unsortedMilestones]
+    .sort((a, b) => a.top - b.top)
+    .map(ms => ({
+      ...ms,
+      left: 0,
+      width: expandedWidth,
+      collapsed: false,
+    }))
+
+  const n = layouts.length
+
+  const runPass = () => {
+    let maxRight = 0
+
+    for (let i = 0; i < n; i++) {
+      const base = layouts[i]
+      const w = base.width
+
+      const others: { start: number; end: number }[] = []
+
+      // collect horizontal spans for vertically-overlapping earlier milestones
+      for (let j = 0; j < i; j++) {
+        const other = layouts[j]
+        if (overlapsY(base, other)) {
+          others.push({
+            start: other.left,
+            end: other.left + other.width,
+          })
+        }
+      }
+
+      others.sort((a, b) => a.start - b.start)
+
+      // slide from x = 0 to the first gap large enough
+      let x = 0
+      for (const { start, end } of others) {
+        if (x + w <= start) break
+        if (x < end) x = end
+      }
+
+      base.left = x
+      const right = x + w
+      if (right > maxRight) maxRight = right
+    }
+
+    return maxRight
+  }
+
+  const hasAnyYOverlap = (index: number) => {
+    const ms = layouts[index]
+    for (let j = 0; j < n; j++) {
+      if (j === index) continue
+      if (overlapsY(ms, layouts[j])) return true
+    }
+    return false
+  }
+
+  // collapse loop
+  for (let iter = 0; iter < n+2; iter++) {
+    const maxRight = runPass()
+
+    if (maxRight <= maxWidth) {
+      return { layouts, ok: true }
+    }
+
+    // Find leftmost uncollapsed candidate matching any predicate (in priority order)
+    const findCandidate = (): number => {
+      const predicates = [
+        // 1) Non-coloured with Y-overlap
+        (ms: MilestoneLayout, i: number) => !ms.isColoured && hasAnyYOverlap(i),
+        // 2) Coloured with Y-overlap
+        (ms: MilestoneLayout, i: number) => ms.isColoured && hasAnyYOverlap(i),
+        // 3) Non-coloured without Y-overlap (still reduces their own width)
+        (ms: MilestoneLayout, i: number) => !ms.isColoured && !hasAnyYOverlap(i),
+        // 4) Coloured without Y-overlap
+        (ms: MilestoneLayout, i: number) => ms.isColoured && !hasAnyYOverlap(i),
+      ]
+
+      for (const predicate of predicates) {
+        const candidates = layouts
+          .map((ms, i) => ({ ms, i }))
+          .filter(({ ms }) => !ms.collapsed)
+          .filter(({ ms, i }) => predicate(ms, i))
+
+        let best = candidates[0]
+        if (best) {
+          for (const c of candidates) {
+            if (c.ms.left < best.ms.left) best = c
+          }
+          return best.i
+        }
+      }
+      return -1
+    }
+
+    const candidate = findCandidate()
+    if (candidate === -1) {
+      return { layouts, ok: false }
+    }
+
+    layouts[candidate].collapsed = true
+    layouts[candidate].width = collapsedWidth
+  }
+
+  // Safety fallback (iteration limit reached)
+  return { layouts, ok: false }
+}
+
+// Wrapper that adapts the core algorithm to work with the existing interface
+function layoutTimelineMilestones(
   milestones: (DayInfo & { position: number })[],
   availableDimensions: { width: number; height: number }
 ): PortraitMilestoneWithLayout[] {
@@ -146,212 +290,41 @@ function layoutPortraitMilestones(
   if (milestones.length === 0 || availableWidth <= 0 || containerHeight <= 0) return []
 
   // Layout constants
-  const COLLAPSED_WIDTH = 24
   const MILESTONE_HEIGHT = 24 // fixed pixel height of milestone elements
-  const VERTICAL_GAP = 4 // minimum pixel gap between milestones
-  const HORIZONTAL_GAP = 4 // minimum pixel gap between horizontally adjacent items
   const STEM_BASE_WIDTH = 48 // 16px base stem + 32px months column (content starts after stem)
+  const EXPANDED_WIDTH = 120
+  const COLLAPSED_WIDTH = 24
 
-  // Estimate expanded label width: ~9px per char + emoji + padding + buffer for CSS truncation
-  const estimateLabelWidth = (label: string): number => Math.min(180, label.length * 9 + 50)
+  // Convert input milestones to the core algorithm's format
+  // position is percentage (0-100), convert to pixel top
+  const inputLayouts: (MilestoneLayoutInput & { original: DayInfo & { position: number } })[] =
+    milestones.map(m => ({
+      top: (m.position / 100) * containerHeight - MILESTONE_HEIGHT / 2,
+      height: MILESTONE_HEIGHT,
+      isColoured: false, // Can be extended to check for special milestones
+      original: m,
+    }))
 
-  // Check if two items conflict vertically
-  // Convert position (%) to pixel top, then check if bounding boxes overlap
-  const conflictsVertically = (a: { position: number }, b: { position: number }): boolean => {
-    // position is center point as percentage, convert to pixel top
-    const aTopPx = (a.position / 100) * containerHeight - MILESTONE_HEIGHT / 2
-    const aBottomPx = aTopPx + MILESTONE_HEIGHT
-    const bTopPx = (b.position / 100) * containerHeight - MILESTONE_HEIGHT / 2
-    const bBottomPx = bTopPx + MILESTONE_HEIGHT
-    // Check if ranges overlap with minimum gap
-    return Math.max(aTopPx, bTopPx) < Math.min(aBottomPx, bBottomPx) + VERTICAL_GAP
-  }
-
-  // Sort by position (top to bottom)
-  const sorted = [...milestones].sort((a, b) => a.position - b.position)
-  const itemIds = new Map(sorted.map((m, i) => [m, i]))
-
-  // Assign lanes using greedy interval graph coloring
-  const lanes: typeof sorted[] = []
-  const laneAssignment = new Map<number, number>()
-
-  for (const item of sorted) {
-    const itemId = itemIds.get(item)!
-    let assignedLane = -1
-
-    for (let laneIdx = 0; laneIdx < lanes.length; laneIdx++) {
-      if (!lanes[laneIdx].some(other => conflictsVertically(item, other))) {
-        assignedLane = laneIdx
-        break
-      }
+  // Run the core layout algorithm
+  const { layouts } = layoutMilestonesCore(
+    inputLayouts.map(({ top, height, isColoured }) => ({ top, height, isColoured })),
+    {
+      maxWidth: availableWidth - STEM_BASE_WIDTH,
+      expandedWidth: EXPANDED_WIDTH,
+      collapsedWidth: COLLAPSED_WIDTH,
     }
+  )
 
-    if (assignedLane === -1) {
-      assignedLane = lanes.length
-      lanes.push([])
-    }
+  // Sort inputLayouts by top to match layouts order (core algorithm sorts by top)
+  const sortedInputs = [...inputLayouts].sort((a, b) => a.top - b.top)
 
-    lanes[assignedLane].push(item)
-    laneAssignment.set(itemId, assignedLane)
-  }
-
-  // Build conflict map
-  const conflicts = new Map<number, Set<number>>()
-  for (let i = 0; i < sorted.length; i++) {
-    conflicts.set(i, new Set())
-  }
-  for (let i = 0; i < sorted.length; i++) {
-    for (let j = i + 1; j < sorted.length; j++) {
-      if (conflictsVertically(sorted[i], sorted[j])) {
-        conflicts.get(i)!.add(j)
-        conflicts.get(j)!.add(i)
-      }
-    }
-  }
-
-  // Calculate x positions using two-pass greedy packing
-  // Pass 1: Place items that can fit at x=0 (no conflicts with other x=0 items)
-  // Pass 2: Place remaining items in the first available gap
-  const calculateXPositions = (expanded: Map<number, boolean>): Map<number, number> => {
-    const xPositions = new Map<number, number>()
-    const placed = new Set<number>()
-
-    // Pass 1: Greedily place items at x=0 if they don't conflict with existing x=0 items
-    for (const item of sorted) {
-      const itemId = itemIds.get(item)!
-      const itemConflicts = conflicts.get(itemId)!
-
-      // Check if this item conflicts with any already-placed item at x=0
-      let canPlaceAtZero = true
-      for (const conflictId of itemConflicts) {
-        if (placed.has(conflictId) && xPositions.get(conflictId) === 0) {
-          // This item conflicts vertically with something already at x=0
-          // So both can't be at x=0
-          canPlaceAtZero = false
-          break
-        }
-      }
-
-      if (canPlaceAtZero) {
-        xPositions.set(itemId, 0)
-        placed.add(itemId)
-      }
-    }
-
-    // Pass 2: Place remaining items in gaps
-    for (const item of sorted) {
-      const itemId = itemIds.get(item)!
-      if (placed.has(itemId)) continue
-
-      const itemConflicts = conflicts.get(itemId)!
-      const itemWidth = expanded.get(itemId)
-        ? estimateLabelWidth(item.annotation)
-        : COLLAPSED_WIDTH
-
-      // Collect blocked ranges from all placed conflicting items (including horizontal gap)
-      const blockedRanges: { start: number; end: number }[] = []
-      for (const conflictId of itemConflicts) {
-        if (placed.has(conflictId)) {
-          const conflictX = xPositions.get(conflictId)!
-          const conflictWidth = expanded.get(conflictId)
-            ? estimateLabelWidth(sorted[conflictId].annotation)
-            : COLLAPSED_WIDTH
-          blockedRanges.push({ start: conflictX, end: conflictX + conflictWidth + HORIZONTAL_GAP })
-        }
-      }
-
-      // Sort and find first gap
-      blockedRanges.sort((a, b) => a.start - b.start)
-      let x = 0
-      for (const range of blockedRanges) {
-        if (x + itemWidth <= range.start) break
-        x = Math.max(x, range.end)
-      }
-
-      xPositions.set(itemId, x)
-      placed.add(itemId)
-    }
-
-    return xPositions
-  }
-
-  // Start with all expanded
-  const expanded = new Map<number, boolean>()
-  sorted.forEach((_, i) => expanded.set(i, true))
-
-  // Check if current layout fits
-  const layoutFits = (): boolean => {
-    const xPositions = calculateXPositions(expanded)
-    for (let i = 0; i < sorted.length; i++) {
-      const x = xPositions.get(i)!
-      const w = expanded.get(i) ? estimateLabelWidth(sorted[i].annotation) : COLLAPSED_WIDTH
-      if (STEM_BASE_WIDTH + x + w > availableWidth) return false
-    }
-    return true
-  }
-
-  // Collapse items starting from leftmost (smallest x) until layout fits
-  // This keeps rightmost items expanded, which tend to be more important
-  let iterations = 0
-  while (!layoutFits() && iterations < 50) {
-    iterations++
-    const xPositions = calculateXPositions(expanded)
-
-    // Find leftmost expanded item and collapse it
-    let leftmostIdx = -1
-    let leftmostX = Infinity
-    for (let i = 0; i < sorted.length; i++) {
-      if (expanded.get(i)) {
-        const x = xPositions.get(i)!
-        if (x < leftmostX) {
-          leftmostX = x
-          leftmostIdx = i
-        }
-      }
-    }
-
-    if (leftmostIdx >= 0) {
-      expanded.set(leftmostIdx, false)
-    } else {
-      break // No more items to collapse
-    }
-  }
-
-  // Try to re-expand collapsed items, starting from rightmost (largest x)
-  // This prioritizes expanding items that are already pushed right
-  const xPositionsForReexpand = calculateXPositions(expanded)
-  const collapsedItems = sorted
-    .map((_, i) => i)
-    .filter(i => !expanded.get(i))
-    .sort((a, b) => {
-      // Sort by x position descending (rightmost first)
-      const xA = xPositionsForReexpand.get(a) ?? 0
-      const xB = xPositionsForReexpand.get(b) ?? 0
-      return xB - xA
-    })
-
-  for (const itemId of collapsedItems) {
-    expanded.set(itemId, true)
-    if (!layoutFits()) {
-      expanded.set(itemId, false)
-    }
-  }
-
-  const finalX = calculateXPositions(expanded)
-
-  // Clamp positions so items don't overflow, accounting for stem and content width
-  // Content right edge = STEM_BASE_WIDTH + leftPx + itemWidth (must fit in availableWidth)
-  return sorted.map((item, i) => {
-    const isExpanded = expanded.get(i) ?? false
-    const itemWidth = isExpanded ? estimateLabelWidth(item.annotation) : COLLAPSED_WIDTH
-    const maxLeftPx = Math.max(0, availableWidth - STEM_BASE_WIDTH - itemWidth)
-    return {
-      ...item,
-      topPx: (item.position / 100) * containerHeight,
-      leftPx: Math.min(finalX.get(i) ?? 0, maxLeftPx),
-      expanded: isExpanded,
-    }
-  })
+  // Convert back to the output format
+  return layouts.map((layout, i) => ({
+    ...sortedInputs[i].original,
+    topPx: (sortedInputs[i].original.position / 100) * containerHeight,
+    leftPx: layout.left,
+    expanded: !layout.collapsed,
+  }))
 }
 
 // ============================================================================
@@ -487,7 +460,7 @@ export function TimelineView({
   // Portrait: Get point milestones with column assignments
   const portraitMilestones = useMemo(() => {
     if (isLandscape) return []
-    return layoutPortraitMilestones(baseMilestones, {
+    return layoutTimelineMilestones(baseMilestones, {
       width: portraitAvailableWidth,
       height: portraitContainerHeight,
     })
