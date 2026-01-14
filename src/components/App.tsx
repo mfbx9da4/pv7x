@@ -12,6 +12,7 @@ import { WeeklyView } from "./WeeklyView";
 import { TimelineView } from "./TimelineView";
 import { InfoBar } from "./InfoBar";
 import { Tooltip } from "./Tooltip";
+import { LandingView } from "./LandingView";
 import { useViewMode, getNextViewMode } from "../hooks/useViewMode";
 import { useContentSize } from "../hooks/useContentSize";
 import { CONFIG } from "../config";
@@ -159,6 +160,8 @@ function generateRandomMilestones(startDate: Date, dueDate: Date): Milestone[] {
 	return milestones.sort((a, b) => a.date.getTime() - b.date.getTime());
 }
 
+const LANDING_SEEN_KEY = "meanwhile-landing-seen";
+
 export function App() {
 	const [windowSize, setWindowSize] = useState(getViewportSize);
 	const contentRef = useRef<HTMLDivElement>(null);
@@ -169,6 +172,9 @@ export function App() {
 	const [randomMilestones, setRandomMilestones] = useState<Milestone[] | null>(
 		null,
 	);
+	const [showLanding, setShowLanding] = useState(() => {
+		return !localStorage.getItem(LANDING_SEEN_KEY);
+	});
 
 	// CMD+; to toggle random milestones for testing
 	useEffect(() => {
@@ -334,40 +340,52 @@ export function App() {
 		setViewMode((prev) => getNextViewMode(prev, windowSize.width));
 	}, [windowSize.width]);
 
+	// Due date index for view transition
+	const dueIndex = totalDays - 1;
+
+	const handleLandingEnter = useCallback(() => {
+		localStorage.setItem(LANDING_SEEN_KEY, "true");
+		setViewMode("timeline"); // Use timeline view so Due milestone is visible for transition
+		setShowLanding(false);
+	}, []);
+
+	if (showLanding) {
+		return <LandingView dueIndex={dueIndex} onEnter={handleLandingEnter} />;
+	}
+
 	return (
 		<div class="container">
 			<div ref={contentRef} style={{ flex: 1, overflow: "hidden" }}>
-				{contentSize &&
-					(viewMode === "fill" ? (
-						<FillScreenView
-							days={days}
-							windowSize={contentSize}
-							showAnnotationDate={showAnnotationDate}
-							selectedDayIndex={tooltip?.day.index ?? null}
-							startDate={CONFIG.startDate}
-							annotationEmojis={annotationEmojis}
-							onDayClick={handleDayClick}
-						/>
-					) : viewMode === "weekly" ? (
-						<WeeklyView
-							days={days}
-							windowSize={contentSize}
-							isLandscape={isLandscape}
-							startDate={CONFIG.startDate}
-							onDayClick={handleDayClick}
-							selectedDayIndex={tooltip?.day.index ?? null}
-						/>
-					) : (
-						<TimelineView
-							days={days}
-							windowSize={contentSize}
-							startDate={CONFIG.startDate}
-							onDayClick={handleDayClick}
-							selectedDayIndex={tooltip?.day.index ?? null}
-							annotationEmojis={annotationEmojis}
-							milestones={activeMilestones}
-						/>
-					))}
+				{viewMode === "fill" ? (
+					<FillScreenView
+						days={days}
+						windowSize={contentSize ?? windowSize}
+						showAnnotationDate={showAnnotationDate}
+						selectedDayIndex={tooltip?.day.index ?? null}
+						startDate={CONFIG.startDate}
+						annotationEmojis={annotationEmojis}
+						onDayClick={handleDayClick}
+					/>
+				) : viewMode === "weekly" ? (
+					<WeeklyView
+						days={days}
+						windowSize={contentSize ?? windowSize}
+						isLandscape={isLandscape}
+						startDate={CONFIG.startDate}
+						onDayClick={handleDayClick}
+						selectedDayIndex={tooltip?.day.index ?? null}
+					/>
+				) : (
+					<TimelineView
+						days={days}
+						windowSize={contentSize ?? windowSize}
+						startDate={CONFIG.startDate}
+						onDayClick={handleDayClick}
+						selectedDayIndex={tooltip?.day.index ?? null}
+						annotationEmojis={annotationEmojis}
+						milestones={activeMilestones}
+					/>
+				)}
 			</div>
 			<InfoBar
 				totalDays={totalDays}
