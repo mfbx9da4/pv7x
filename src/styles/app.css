@@ -1,1542 +1,1604 @@
 /* Global resets */
 * {
-  margin: 0;
-  padding: 0;
+	margin: 0;
+	padding: 0;
 }
 
-html, body, #app {
-  width: 100%;
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
+html,
+body,
+#app {
+	width: 100%;
+	height: 100%;
+	height: 100dvh;
+	overflow: hidden;
 }
 
 body {
-  background: #f2f2f7;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	background: #f2f2f7;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 :root {
-  /* Primary accent */
-  --color-primary: #2d5a3d;
-  --color-primary-light: #7dcea0;
+	/* Primary accent */
+	--color-primary: #2d5a3d;
+	--color-primary-light: #7dcea0;
 
-  /* Passed days (green spectrum) */
-  --color-passed-odd: #5fb87d;
-  --color-passed-even: #4a9c68;
+	/* Passed days (green spectrum) */
+	--color-passed-odd: #5fb87d;
+	--color-passed-even: #4a9c68;
 
-  /* Uncolored milestone passed days (slightly darker green) */
-  --color-milestone-passed-odd: #337d4b;
-  --color-milestone-passed-even: #2d6b40;
+	/* Uncolored milestone passed days (slightly darker green) */
+	--color-milestone-passed-odd: #337d4b;
+	--color-milestone-passed-even: #2d6b40;
 
-  /* Future days */
-  --color-future-odd: #ffffff;
-  --color-future-odd-border: #e5e5ea;
-  --color-future-even: #f0f0f5;
-  --color-future-even-border: #d1d1d6;
+	/* Future days */
+	--color-future-odd: #ffffff;
+	--color-future-odd-border: #e5e5ea;
+	--color-future-even: #f0f0f5;
+	--color-future-even-border: #d1d1d6;
 
-  /* Uncolored milestone future days (slightly darker grey) */
-  --color-milestone-future: #d8d8dd;
-  --color-milestone-future-border: #c7c7cc;
+	/* Uncolored milestone future days (slightly darker grey) */
+	--color-milestone-future: #d8d8dd;
+	--color-milestone-future-border: #c7c7cc;
 
-  /* Milestone colors (named by actual color) */
-  --color-pink: #d64d7a;
-  --color-purple: #8944ab;
-  --color-orange: #f5a623;
-  --color-teal: #00b8d4;
-  --color-blue: #2d9cdb;
-  --color-red: #e05550;
-  --color-gold: #d4a83c;
-  --color-salmon: #d4908f;
-  --color-subtle: #ffffff;
-  --color-subtle-border: #c7c7cc;
+	/* Milestone colors (named by actual color) */
+	--color-pink: #d64d7a;
+	--color-purple: #8944ab;
+	--color-orange: #f5a623;
+	--color-teal: #00b8d4;
+	--color-blue: #2d9cdb;
+	--color-red: #e05550;
+	--color-gold: #d4a83c;
+	--color-salmon: #d4908f;
+	--color-subtle: #ffffff;
+	--color-subtle-border: #c7c7cc;
 
-  /* Milestone text colors (light tinted shades for text on colored backgrounds) */
-  --color-pink-text: #ffeef3;
-  --color-purple-text: #f3e8f8;
-  --color-orange-text: #3a2700;
-  --color-teal-text: #e0f7f4;
-  --color-blue-text: #e3f2fd;
-  --color-red-text: #ffebee;
-  --color-gold-text: #2b2300;
-  --color-salmon-text: #fff5f5;
-  --color-subtle-text: #3a3a3c;
+	/* Milestone text colors (light tinted shades for text on colored backgrounds) */
+	--color-pink-text: #ffeef3;
+	--color-purple-text: #f3e8f8;
+	--color-orange-text: #3a2700;
+	--color-teal-text: #e0f7f4;
+	--color-blue-text: #e3f2fd;
+	--color-red-text: #ffebee;
+	--color-gold-text: #2b2300;
+	--color-salmon-text: #fff5f5;
+	--color-subtle-text: #3a3a3c;
 
-  /* Surfaces */
-  --color-background: #f2f2f7;
-  --color-surface: #ffffff;
-  --color-border: #e5e5ea;
+	/* Surfaces */
+	--color-background: #f2f2f7;
+	--color-surface: #ffffff;
+	--color-border: #e5e5ea;
 
-  /* Text */
-  --color-text-primary: #1c1c1e;
-  --color-text-secondary: #3a3a3c;
-  --color-text-tertiary: #636366;
-  --color-text-on-color: #ffffff;
+	/* Text */
+	--color-text-primary: #1c1c1e;
+	--color-text-secondary: #3a3a3c;
+	--color-text-tertiary: #636366;
+	--color-text-on-color: #ffffff;
 
-  /* Shadows */
-  --shadow-subtle: rgba(0, 0, 0, 0.04);
-  --shadow-text: rgba(0, 0, 0, 0.15);
-  --shadow-medium: rgba(0, 0, 0, 0.18);
-  --shadow-strong: rgba(0, 0, 0, 0.2);
-  --shadow-backdrop: rgba(0, 0, 0, 0.4);
+	/* Shadows */
+	--shadow-subtle: rgba(0, 0, 0, 0.04);
+	--shadow-text: rgba(0, 0, 0, 0.15);
+	--shadow-medium: rgba(0, 0, 0, 0.18);
+	--shadow-strong: rgba(0, 0, 0, 0.2);
+	--shadow-backdrop: rgba(0, 0, 0, 0.4);
 
-  /* Highlight default (for uncolored milestones) */
-  --color-highlight-default: #3a3a3c;
+	/* Highlight default (for uncolored milestones) */
+	--color-highlight-default: #3a3a3c;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    /* Primary accent - brighter for dark mode */
-    --color-primary: #7dcea0;
-    --color-primary-light: #a8e6c3;
+	:root {
+		/* Primary accent - brighter for dark mode */
+		--color-primary: #7dcea0;
+		--color-primary-light: #a8e6c3;
 
-    /* Surfaces */
-    --color-background: #1c1c1e;
-    --color-surface: #2c2c2e;
-    --color-border: #38383a;
+		/* Surfaces */
+		--color-background: #1c1c1e;
+		--color-surface: #2c2c2e;
+		--color-border: #38383a;
 
-    /* Text - inverted for dark backgrounds */
-    --color-text-primary: #ffffff;
-    --color-text-secondary: #ebebf5;
-    --color-text-tertiary: #8e8e93;
-    --color-text-on-color: #ffffff;
+		/* Text - inverted for dark backgrounds */
+		--color-text-primary: #ffffff;
+		--color-text-secondary: #ebebf5;
+		--color-text-tertiary: #8e8e93;
+		--color-text-on-color: #ffffff;
 
-    /* Passed days - slightly brighter greens for dark mode */
-    --color-passed-odd: #63c17f;
-    --color-passed-even: #4fa86a;
-    --color-milestone-passed-odd: #3d8a55;
-    --color-milestone-passed-even: #358a4a;
+		/* Passed days - slightly brighter greens for dark mode */
+		--color-passed-odd: #63c17f;
+		--color-passed-even: #4fa86a;
+		--color-milestone-passed-odd: #3d8a55;
+		--color-milestone-passed-even: #358a4a;
 
-    /* Future days - subtle elevation from background */
-    --color-future-odd: #1c1c1e;
-    --color-future-odd-border: #38383a;
-    --color-future-even: #2c2c2e;
-    --color-future-even-border: #2c2c2e;
+		/* Future days - subtle elevation from background */
+		--color-future-odd: #1c1c1e;
+		--color-future-odd-border: #38383a;
+		--color-future-even: #2c2c2e;
+		--color-future-even-border: #2c2c2e;
 
-    /* Uncolored milestones */
-    --color-milestone-future: #3a3a3c;
-    --color-milestone-future-border: #48484a;
+		/* Uncolored milestones */
+		--color-milestone-future: #3a3a3c;
+		--color-milestone-future-border: #48484a;
 
-    /* Milestone colors - increased vibrancy for dark mode */
-    --color-pink: #ff6b9d;
-    --color-purple: #a855f7;
-    --color-orange: #ffb340;
-    --color-teal: #22d3ee;
-    --color-blue: #3b82f6;
-    --color-red: #f87171;
-    --color-gold: #fbbf24;
-    --color-salmon: #fda4af;
-    --color-subtle: #48484a;
-    --color-subtle-border: #636366;
+		/* Milestone colors - increased vibrancy for dark mode */
+		--color-pink: #ff6b9d;
+		--color-purple: #a855f7;
+		--color-orange: #ffb340;
+		--color-teal: #22d3ee;
+		--color-blue: #3b82f6;
+		--color-red: #f87171;
+		--color-gold: #fbbf24;
+		--color-salmon: #fda4af;
+		--color-subtle: #48484a;
+		--color-subtle-border: #636366;
 
-    /* Milestone text - dark text on bright colors */
-    --color-pink-text: #1c1c1e;
-    --color-purple-text: #f3e8f8;
-    --color-orange-text: #1c1c1e;
-    --color-teal-text: #1c1c1e;
-    --color-blue-text: #e3f2fd;
-    --color-red-text: #1c1c1e;
-    --color-gold-text: #1c1c1e;
-    --color-salmon-text: #1c1c1e;
-    --color-subtle-text: #ebebf5;
+		/* Milestone text - dark text on bright colors */
+		--color-pink-text: #1c1c1e;
+		--color-purple-text: #f3e8f8;
+		--color-orange-text: #1c1c1e;
+		--color-teal-text: #1c1c1e;
+		--color-blue-text: #e3f2fd;
+		--color-red-text: #1c1c1e;
+		--color-gold-text: #1c1c1e;
+		--color-salmon-text: #1c1c1e;
+		--color-subtle-text: #ebebf5;
 
-    /* Shadows - more subtle in dark mode */
-    --shadow-subtle: rgba(0, 0, 0, 0.3);
-    --shadow-text: rgba(0, 0, 0, 0.4);
-    --shadow-medium: rgba(0, 0, 0, 0.5);
-    --shadow-strong: rgba(0, 0, 0, 0.6);
-    --shadow-backdrop: rgba(0, 0, 0, 0.7);
+		/* Shadows - more subtle in dark mode */
+		--shadow-subtle: rgba(0, 0, 0, 0.3);
+		--shadow-text: rgba(0, 0, 0, 0.4);
+		--shadow-medium: rgba(0, 0, 0, 0.5);
+		--shadow-strong: rgba(0, 0, 0, 0.6);
+		--shadow-backdrop: rgba(0, 0, 0, 0.7);
 
-    /* Highlight default (for uncolored milestones) */
-    --color-highlight-default: #ffffff;
-  }
+		/* Highlight default (for uncolored milestones) */
+		--color-highlight-default: #ffffff;
+	}
 
-  body {
-    background: #1c1c1e;
-  }
+	body {
+		background: #1c1c1e;
+	}
 }
 
-*, *::before, *::after {
-  box-sizing: border-box;
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
 }
 
 .container {
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  background: var(--color-background);
-  overflow: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  /* Safe area insets for PWA standalone mode */
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-left: env(safe-area-inset-left, 0px);
-  padding-right: env(safe-area-inset-right, 0px);
+	width: 100%;
+	height: 100vh;
+	height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	background: var(--color-background);
+	overflow: hidden;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	/* Safe area insets for PWA standalone mode */
+	padding-top: env(safe-area-inset-top, 0px);
+	padding-left: env(safe-area-inset-left, 0px);
+	padding-right: env(safe-area-inset-right, 0px);
 }
 
 .grid {
-  flex: 1;
-  min-height: 0;
-  display: grid;
+	flex: 1;
+	min-height: 0;
+	display: grid;
 }
 
 .day {
-  border-radius: clamp(2px, 1vmin, 8px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px var(--shadow-subtle);
+	border-radius: clamp(2px, 1vmin, 8px);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 3px;
+	overflow: hidden;
+	box-shadow: 0 1px 2px var(--shadow-subtle);
 }
 
 /* Alternating week colors - passed */
 .day.passed.odd-week {
-  background: var(--color-passed-odd);
+	background: var(--color-passed-odd);
 }
 
 .day.passed.even-week {
-  background: var(--color-passed-even);
+	background: var(--color-passed-even);
 }
 
 /* Alternating week colors - future */
 .day.future.odd-week {
-  background: var(--color-future-odd);
-  border: 1px solid var(--color-future-odd-border);
+	background: var(--color-future-odd);
+	border: 1px solid var(--color-future-odd-border);
 }
 
 .day.future.even-week {
-  background: var(--color-future-even);
-  border: 1px solid var(--color-future-even-border);
+	background: var(--color-future-even);
+	border: 1px solid var(--color-future-even-border);
 }
 
 /* Milestone days - background color applied inline via style attribute */
 
 /* Uncolored milestone days (milestones without a specified color) */
 .day.uncolored-milestone.passed.odd-week {
-  background: var(--color-milestone-passed-odd);
+	background: var(--color-milestone-passed-odd);
 }
 
 .day.uncolored-milestone.passed.even-week {
-  background: var(--color-milestone-passed-even);
+	background: var(--color-milestone-passed-even);
 }
 
 .day.uncolored-milestone.future {
-  background: var(--color-milestone-future);
-  border: 1px solid var(--color-milestone-future-border);
+	background: var(--color-milestone-future);
+	border: 1px solid var(--color-milestone-future-border);
 }
 
 .day.today.odd-week {
-  animation: pulse-bg-odd 4s ease-in-out infinite;
+	animation: pulse-bg-odd 4s ease-in-out infinite;
 }
 
 .day.today.even-week {
-  animation: pulse-bg-even 4s ease-in-out infinite;
+	animation: pulse-bg-even 4s ease-in-out infinite;
 }
 
 .day.today.uncolored-milestone {
-  animation: pulse-bg-milestone 4s ease-in-out infinite;
+	animation: pulse-bg-milestone 4s ease-in-out infinite;
 }
 
 @keyframes pulse-bg-odd {
-  0%, 100% { background: var(--color-passed-odd); border: 1px solid var(--color-passed-odd); color: var(--color-text-on-color); }
-  50% { background: var(--color-future-odd); border: 1px solid var(--color-future-odd-border); color: var(--color-text-primary); }
+	0%,
+	100% {
+		background: var(--color-passed-odd);
+		border: 1px solid var(--color-passed-odd);
+		color: var(--color-text-on-color);
+	}
+	50% {
+		background: var(--color-future-odd);
+		border: 1px solid var(--color-future-odd-border);
+		color: var(--color-text-primary);
+	}
 }
 
 @keyframes pulse-bg-even {
-  0%, 100% { background: var(--color-passed-odd); border: 1px solid var(--color-passed-odd); color: var(--color-text-on-color); }
-  50% { background: var(--color-future-even); border: 1px solid var(--color-future-even-border); color: var(--color-text-primary); }
+	0%,
+	100% {
+		background: var(--color-passed-odd);
+		border: 1px solid var(--color-passed-odd);
+		color: var(--color-text-on-color);
+	}
+	50% {
+		background: var(--color-future-even);
+		border: 1px solid var(--color-future-even-border);
+		color: var(--color-text-primary);
+	}
 }
 
 .date-label {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  text-align: center;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	font-weight: 500;
+	color: var(--color-text-primary);
+	text-align: center;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
 }
 
 .date-label:not(:only-child) {
-  margin-bottom: 2px;
+	margin-bottom: 2px;
 }
 
 .day.passed .date-label {
-  color: var(--color-text-on-color);
-  text-shadow: 0 1px 2px var(--shadow-text);
+	color: var(--color-text-on-color);
+	text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .day.milestone .date-label {
-  color: inherit;
-  text-shadow: 0 1px 2px var(--shadow-text);
+	color: inherit;
+	text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .annotation-container {
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  width: 100%;
-  height: 100%;
+	display: grid;
+	place-items: center;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
 }
 
 .annotation-text,
 .annotation-date {
-  grid-area: 1 / 1;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  text-align: center;
-  line-height: 1.2;
-  letter-spacing: -0.01em;
-  transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+	grid-area: 1 / 1;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	font-weight: 500;
+	color: var(--color-text-primary);
+	text-align: center;
+	line-height: 1.2;
+	letter-spacing: -0.01em;
+	transition:
+		transform 0.4s ease-in-out,
+		opacity 0.4s ease-in-out;
 }
 
 .annotation-text {
-  font-weight: 600;
+	font-weight: 600;
 }
 
 .annotation-text.visible,
 .annotation-date.visible {
-  transform: translateY(0);
-  opacity: 1;
+	transform: translateY(0);
+	opacity: 1;
 }
 
 .annotation-text.hidden {
-  transform: translateY(-1.5em);
-  opacity: 0;
+	transform: translateY(-1.5em);
+	opacity: 0;
 }
 
 .annotation-date.hidden {
-  transform: translateY(1.5em);
-  opacity: 0;
+	transform: translateY(1.5em);
+	opacity: 0;
 }
 
 .day.passed .annotation-text,
 .day.passed .annotation-date {
-  color: var(--color-text-on-color);
-  text-shadow: 0 1px 2px var(--shadow-text);
+	color: var(--color-text-on-color);
+	text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .day.milestone .annotation-text,
 .day.milestone .annotation-date {
-  color: inherit;
-  text-shadow: 0 1px 2px var(--shadow-text);
+	color: inherit;
+	text-shadow: 0 1px 2px var(--shadow-text);
 }
 
 .day.uncolored-milestone.passed .annotation-text,
 .day.uncolored-milestone.passed .annotation-date,
 .day.uncolored-milestone.passed .date-label {
-  color: var(--color-text-on-color);
+	color: var(--color-text-on-color);
 }
 
 .day.uncolored-milestone.future .annotation-text,
 .day.uncolored-milestone.future .annotation-date,
 .day.uncolored-milestone.future .date-label {
-  color: var(--color-subtle-text);
+	color: var(--color-subtle-text);
 }
 
 .day.today .date-label,
 .day.today .annotation-text,
 .day.today .annotation-date {
-  color: inherit;
+	color: inherit;
 }
 
 .info {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2rem;
-  padding: 12px 16px;
-  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 0.8rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  flex-shrink: 0;
-  position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 2rem;
+	padding: 12px 16px;
+	padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+	background: var(--color-surface);
+	border-top: 1px solid var(--color-border);
+	color: var(--color-text-secondary);
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	font-size: 0.8rem;
+	font-weight: 500;
+	letter-spacing: -0.01em;
+	flex-shrink: 0;
+	position: relative;
 }
 
 /* Long press feedback - animate opacity to hint "keep holding" */
 .day.pressing {
-  transform: scale(0.95);
-  animation: press-hint 0.4s ease-out forwards;
+	transform: scale(0.95);
+	animation: press-hint 0.4s ease-out forwards;
 }
 
 @keyframes press-hint {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-  100% {
-    opacity: 1;
-    filter: brightness(1.15);
-  }
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+	100% {
+		opacity: 1;
+		filter: brightness(1.15);
+	}
 }
 
 .day {
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  padding: 1px;
-  cursor: pointer;
+	transition:
+		transform 0.1s ease-out,
+		opacity 0.1s ease-out;
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+	padding: 1px;
+	cursor: pointer;
 }
 
 .day:active,
 .day.selected {
-  opacity: 0.6;
+	opacity: 0.6;
 }
 
 .day.highlighted {
-  box-shadow: 0 0 0 2px var(--highlight-color, var(--color-highlight-default)), 0 0 8px var(--highlight-color, var(--color-highlight-default));
-  background: var(--highlight-color, var(--color-highlight-default)) !important;
-  z-index: 1;
+	box-shadow:
+		0 0 0 2px var(--highlight-color, var(--color-highlight-default)),
+		0 0 8px var(--highlight-color, var(--color-highlight-default));
+	background: var(--highlight-color, var(--color-highlight-default)) !important;
+	z-index: 1;
 }
 
 /* Tooltip */
 .day-tooltip {
-  position: fixed;
-  background: var(--color-surface);
-  border: 2px solid var(--color-primary);
-  border-radius: 10px;
-  padding: 10px 14px;
-  box-shadow: 0 4px 16px var(--shadow-medium);
-  z-index: 100;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  pointer-events: none;
-  animation: tooltip-in 0.15s ease-out;
-  max-width: 280px;
+	position: fixed;
+	background: var(--color-surface);
+	border: 2px solid var(--color-primary);
+	border-radius: 10px;
+	padding: 10px 14px;
+	box-shadow: 0 4px 16px var(--shadow-medium);
+	z-index: 100;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+	pointer-events: none;
+	animation: tooltip-in 0.15s ease-out;
+	max-width: 280px;
 }
 
 .day-tooltip.has-emoji {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+	display: flex;
+	align-items: center;
+	gap: 12px;
 }
 
 .tooltip-emoji {
-  font-size: 28px;
-  line-height: 1;
-  flex-shrink: 0;
+	font-size: 28px;
+	line-height: 1;
+	flex-shrink: 0;
 }
 
 .tooltip-content {
-  flex: 1;
-  min-width: 0;
+	flex: 1;
+	min-width: 0;
 }
 
 @keyframes tooltip-in {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 .tooltip-date {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  margin-bottom: 2px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color-text-primary);
+	margin-bottom: 2px;
 }
 
 .tooltip-week {
-  font-size: 12px;
-  color: var(--color-text-tertiary);
-  font-weight: 500;
+	font-size: 12px;
+	color: var(--color-text-tertiary);
+	font-weight: 500;
 }
 
 .tooltip-annotation {
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	margin-top: 4px;
 }
 
 .tooltip-description {
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--color-text-tertiary);
-  margin-top: 6px;
-  line-height: 1.4;
+	font-size: 11px;
+	font-weight: 400;
+	color: var(--color-text-tertiary);
+	margin-top: 6px;
+	line-height: 1.4;
 }
 
 .countdown-timer {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid var(--color-border);
-  font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
-  font-size: 13px;
-  letter-spacing: 0.02em;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--color-border);
+	font-family: "SF Mono", "Menlo", "Monaco", "Consolas", monospace;
+	font-size: 13px;
+	letter-spacing: 0.02em;
 }
 
 .countdown-value {
-  font-weight: 600;
-  color: var(--color-text-primary);
+	font-weight: 600;
+	color: var(--color-text-primary);
 }
 
 .countdown-label {
-  font-weight: 400;
-  color: var(--color-text-tertiary);
-  margin-right: 6px;
+	font-weight: 400;
+	color: var(--color-text-tertiary);
+	margin-right: 6px;
 }
 
 .countdown-label:last-child {
-  margin-right: 0;
+	margin-right: 0;
 }
 
 /* Version popover */
 .version-popover {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--shadow-backdrop);
-  z-index: 200;
-  animation: fade-in 0.15s ease-out;
+	position: fixed;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--shadow-backdrop);
+	z-index: 200;
+	animation: fade-in 0.15s ease-out;
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .version-content {
-  background: var(--color-surface);
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 8px 32px var(--shadow-strong);
-  min-width: 240px;
-  max-width: 90vw;
-  animation: scale-in 0.15s ease-out;
+	background: var(--color-surface);
+	border-radius: 12px;
+	padding: 16px 20px;
+	box-shadow: 0 8px 32px var(--shadow-strong);
+	min-width: 240px;
+	max-width: 90vw;
+	animation: scale-in 0.15s ease-out;
 }
 
 @keyframes scale-in {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 .version-row {
-  display: flex;
-  gap: 12px;
-  padding: 6px 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+	display: flex;
+	gap: 12px;
+	padding: 6px 0;
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .version-row:not(:last-child) {
-  border-bottom: 1px solid var(--color-border);
+	border-bottom: 1px solid var(--color-border);
 }
 
 .version-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  min-width: 60px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--color-text-tertiary);
+	min-width: 60px;
 }
 
 .version-value {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--color-text-primary);
-  word-break: break-all;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--color-text-primary);
+	word-break: break-all;
 }
 
 /* View toggle button */
 .view-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  padding: 2px;
-  border-radius: 4px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: transparent;
+	border: none;
+	padding: 2px;
+	border-radius: 4px;
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	transition:
+		background 0.15s ease,
+		color 0.15s ease;
 }
 
 .view-toggle:hover {
-  background: var(--color-border);
+	background: var(--color-border);
 }
 
 .view-toggle:active {
-  background: var(--color-border);
-  color: var(--color-text-primary);
+	background: var(--color-border);
+	color: var(--color-text-primary);
 }
 
 .info-text {
-  cursor: pointer;
+	cursor: pointer;
 }
 
 .info-compact {
-  display: none;
+	display: none;
 }
 
 @media (max-width: 438px) {
-  .info-full {
-    display: none;
-  }
-  .info-compact {
-    display: inline;
-  }
+	.info-full {
+		display: none;
+	}
+	.info-compact {
+		display: inline;
+	}
 }
 
 /* Calendar View Styles */
 .weekly-view {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 }
 
 .weekly-view.landscape .weekly-body {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
 }
 
 .weekly-view.portrait .weekly-body-portrait {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  grid-template-rows: auto auto;
-  flex: 1;
-  align-content: center;
-  justify-content: center;
+	display: grid;
+	grid-template-columns: auto auto auto;
+	grid-template-rows: auto auto;
+	flex: 1;
+	align-content: center;
+	justify-content: center;
 }
 
 /* Unified grid for portrait - labels integrated into the grid */
 .weekly-unified-grid {
-  display: grid;
-  justify-self: center;
-  align-self: center;
-  max-height: 100%;
-  max-width: 100%;
-  /* grid-template and aspect-ratio set via inline style for dynamic row count */
+	display: grid;
+	justify-self: center;
+	align-self: center;
+	max-height: 100%;
+	max-width: 100%;
+	/* grid-template and aspect-ratio set via inline style for dynamic row count */
 }
 
 .weekly-unified-grid .weekly-day-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-tertiary);
-  font-weight: 500;
-  padding: 2px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-text-tertiary);
+	font-weight: 500;
+	padding: 2px 0;
 }
 
 .weekly-unified-grid .weekly-week-num {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 4px;
-  color: var(--color-text-tertiary);
-  font-weight: 400;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-right: 4px;
+	color: var(--color-text-tertiary);
+	font-weight: 400;
 }
 
 .weekly-unified-grid .weekly-month-label {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding-left: 4px;
-  color: var(--color-text-secondary);
-  font-weight: 600;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	padding-left: 4px;
+	color: var(--color-text-secondary);
+	font-weight: 600;
 }
 
 .weekly-corner {
-  /* Empty top-left corner */
+	/* Empty top-left corner */
 }
 
 .weekly-grid-wrapper {
-  display: flex;
-  flex-direction: column;
+	display: flex;
+	flex-direction: column;
 }
 
 /* Month labels - landscape (horizontal row at top) */
 .weekly-month-labels-row {
-  position: relative;
+	position: relative;
 }
 
 .weekly-month-labels-row .weekly-month-label {
-  position: absolute;
-  top: 0;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  white-space: nowrap;
-  transform: translateX(-50%);
+	position: absolute;
+	top: 0;
+	color: var(--color-text-secondary);
+	font-weight: 600;
+	white-space: nowrap;
+	transform: translateX(-50%);
 }
 
 /* Week numbers - landscape (horizontal row below months) */
 .weekly-week-nums-row {
-  position: relative;
+	position: relative;
 }
 
 .weekly-week-nums-row .weekly-week-num {
-  position: absolute;
-  top: 0;
-  color: var(--color-text-tertiary);
-  font-weight: 400;
-  white-space: nowrap;
-  transform: translateX(-50%);
+	position: absolute;
+	top: 0;
+	color: var(--color-text-tertiary);
+	font-weight: 400;
+	white-space: nowrap;
+	transform: translateX(-50%);
 }
 
 /* Week numbers - portrait (vertical column on left) */
 .weekly-week-nums-col {
-  position: relative;
-  flex-shrink: 0;
+	position: relative;
+	flex-shrink: 0;
 }
 
 .weekly-week-nums-col .weekly-week-num {
-  position: absolute;
-  right: 4px;
-  color: var(--color-text-tertiary);
-  font-weight: 400;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
+	position: absolute;
+	right: 4px;
+	color: var(--color-text-tertiary);
+	font-weight: 400;
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
 }
 
 /* Month labels - portrait (vertical column on right) */
 .weekly-month-labels-col {
-  position: relative;
-  flex-shrink: 0;
+	position: relative;
+	flex-shrink: 0;
 }
 
 .weekly-month-labels-col .weekly-month-label {
-  position: absolute;
-  left: 4px;
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
+	position: absolute;
+	left: 4px;
+	color: var(--color-text-secondary);
+	font-weight: 600;
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
 }
 
 /* Day labels - landscape (vertical column on left) */
 .weekly-day-labels {
-  display: flex;
-  flex-direction: column;
-  margin-right: 4px;
-  flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	margin-right: 4px;
+	flex-shrink: 0;
 }
 
 .weekly-day-labels .weekly-day-label {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  color: var(--color-text-tertiary);
-  font-weight: 500;
-  padding-right: 4px;
-  line-height: 1;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	color: var(--color-text-tertiary);
+	font-weight: 500;
+	padding-right: 4px;
+	line-height: 1;
 }
 
 /* Day labels - portrait (horizontal row at top) */
 .weekly-day-labels-row {
-  display: flex;
-  align-items: flex-end;
+	display: flex;
+	align-items: flex-end;
 }
 
 .weekly-day-labels-row .weekly-day-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-tertiary);
-  font-weight: 500;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--color-text-tertiary);
+	font-weight: 500;
 }
 
 /* Calendar grid */
 .weekly-grid {
-  display: grid;
+	display: grid;
 }
 
 /* Calendar cells */
 .weekly-cell {
-  border-radius: 2px;
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: pointer;
-  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-  aspect-ratio: 1;
+	border-radius: 2px;
+	touch-action: none;
+	user-select: none;
+	-webkit-user-select: none;
+	cursor: pointer;
+	transition:
+		transform 0.1s ease-out,
+		opacity 0.1s ease-out;
+	aspect-ratio: 1;
 }
 
 .weekly-cell:active:not(.empty),
 .weekly-cell.selected {
-  opacity: 0.6;
+	opacity: 0.6;
 }
 
 .weekly-cell.empty {
-  background: transparent;
-  cursor: default;
+	background: transparent;
+	cursor: default;
 }
 
 .weekly-cell.passed.odd-week {
-  background: var(--color-passed-odd);
+	background: var(--color-passed-odd);
 }
 
 .weekly-cell.passed.even-week {
-  background: var(--color-passed-even);
+	background: var(--color-passed-even);
 }
 
 .weekly-cell.future.odd-week {
-  background: var(--color-future-odd);
-  border: 1px solid var(--color-future-odd-border);
+	background: var(--color-future-odd);
+	border: 1px solid var(--color-future-odd-border);
 }
 
 .weekly-cell.future.even-week {
-  background: var(--color-future-even);
-  border: 1px solid var(--color-future-even-border);
+	background: var(--color-future-even);
+	border: 1px solid var(--color-future-even-border);
 }
 
 /* Uncolored milestone cells */
 .weekly-cell.uncolored-milestone.passed.odd-week {
-  background: var(--color-milestone-passed-odd);
+	background: var(--color-milestone-passed-odd);
 }
 
 .weekly-cell.uncolored-milestone.passed.even-week {
-  background: var(--color-milestone-passed-even);
+	background: var(--color-milestone-passed-even);
 }
 
 .weekly-cell.uncolored-milestone.future {
-  background: var(--color-milestone-future);
-  border: 1px solid var(--color-milestone-future-border);
+	background: var(--color-milestone-future);
+	border: 1px solid var(--color-milestone-future-border);
 }
 
 .weekly-cell.today.odd-week {
-  animation: pulse-bg-odd 4s ease-in-out infinite;
+	animation: pulse-bg-odd 4s ease-in-out infinite;
 }
 
 .weekly-cell.today.even-week {
-  animation: pulse-bg-even 4s ease-in-out infinite;
+	animation: pulse-bg-even 4s ease-in-out infinite;
 }
 
 .weekly-cell.today.uncolored-milestone {
-  animation: pulse-bg-milestone 4s ease-in-out infinite;
+	animation: pulse-bg-milestone 4s ease-in-out infinite;
 }
 
 @keyframes pulse-bg-milestone {
-  0%, 100% { background: var(--color-milestone-passed-odd); border: 1px solid var(--color-milestone-passed-odd); }
-  50% { background: var(--color-milestone-future); border: 1px solid var(--color-milestone-future-border); }
+	0%,
+	100% {
+		background: var(--color-milestone-passed-odd);
+		border: 1px solid var(--color-milestone-passed-odd);
+	}
+	50% {
+		background: var(--color-milestone-future);
+		border: 1px solid var(--color-milestone-future-border);
+	}
 }
 
 .weekly-cell.pressing {
-  transform: scale(0.9);
-  animation: press-hint 0.4s ease-out forwards;
+	transform: scale(0.9);
+	animation: press-hint 0.4s ease-out forwards;
 }
 
 .weekly-cell.highlighted {
-  box-shadow: 0 0 0 2px var(--highlight-color, var(--color-highlight-default)), 0 0 8px var(--highlight-color, var(--color-highlight-default));
-  background: var(--highlight-color, var(--color-highlight-default)) !important;
-  z-index: 1;
+	box-shadow:
+		0 0 0 2px var(--highlight-color, var(--color-highlight-default)),
+		0 0 8px var(--highlight-color, var(--color-highlight-default));
+	background: var(--highlight-color, var(--color-highlight-default)) !important;
+	z-index: 1;
 }
 
 /* View Transitions for trimester milestones */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.25s;
+	animation-duration: 0.25s;
 }
 
 /* Timeline View */
 .timeline-view {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 20px 60px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+	height: 100%;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 20px 60px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
 }
 
 /* Shared color text rules for all timeline labels */
 .colored > .timeline-label {
-  color: var(--color-text-on-color);
-  border-color: transparent;
+	color: var(--color-text-on-color);
+	border-color: transparent;
 }
 
 .color-orange > .timeline-label {
-  color: var(--color-orange-text);
+	color: var(--color-orange-text);
 }
 
 .color-gold > .timeline-label {
-  color: var(--color-gold-text);
+	color: var(--color-gold-text);
 }
 
 .color-salmon > .timeline-label {
-  color: var(--color-salmon-text);
+	color: var(--color-salmon-text);
 }
 
 .color-subtle > .timeline-label {
-  color: var(--color-subtle-text);
+	color: var(--color-subtle-text);
 }
 
 :not(.colored) > .timeline-label {
-  color: var(--color-text-secondary);
+	color: var(--color-text-secondary);
 }
 
 .timeline-content-landscape {
-  position: relative;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+	position: relative;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .timeline-milestones-landscape {
-  position: relative;
-  flex-shrink: 0;
-  overflow: visible;
-  margin-bottom: -20px; /* Extend into line area so stems reach the line */
+	position: relative;
+	flex-shrink: 0;
+	overflow: visible;
+	margin-bottom: -20px; /* Extend into line area so stems reach the line */
 }
 
 .timeline-line-area-landscape {
-  position: relative;
+	position: relative;
 }
 
 .timeline-milestone-landscape {
-  position: absolute;
-  bottom: 0;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  cursor: pointer;
+	position: absolute;
+	bottom: 0;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	cursor: pointer;
 }
 
 .timeline-months-landscape {
-  position: relative;
-  height: 20px;
-  flex-shrink: 0;
-  z-index: 10;
+	position: relative;
+	height: 20px;
+	flex-shrink: 0;
+	z-index: 10;
 }
 
 .timeline-month {
-  position: absolute;
-  transform: translateX(-50%);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--color-text-tertiary);
-  white-space: nowrap;
+	position: absolute;
+	transform: translateX(-50%);
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--color-text-tertiary);
+	white-space: nowrap;
 }
 
 .timeline-weeks-landscape {
-  position: relative;
-  height: 20px;
-  flex-shrink: 0;
-  margin-top: 8px;
+	position: relative;
+	height: 20px;
+	flex-shrink: 0;
+	margin-top: 8px;
 }
 
 .timeline-week {
-  position: absolute;
-  transform: translateX(-50%);
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--color-text-tertiary);
-  opacity: 0.7;
+	position: absolute;
+	transform: translateX(-50%);
+	font-size: 10px;
+	font-weight: 500;
+	color: var(--color-text-tertiary);
+	opacity: 0.7;
 }
 
 .timeline-milestone-landscape.selected .timeline-milestone-content-landscape {
-  opacity: 0.8;
+	opacity: 0.8;
 }
 
 .timeline-milestone-landscape.today .timeline-milestone-content-landscape {
-  animation: pulse-milestone-colored 2s ease-in-out infinite;
+	animation: pulse-milestone-colored 2s ease-in-out infinite;
 }
 
-.timeline-milestone-landscape.today:not(.colored) .timeline-milestone-content-landscape {
-  animation: pulse-milestone-uncolored 2s ease-in-out infinite;
+.timeline-milestone-landscape.today:not(.colored)
+	.timeline-milestone-content-landscape {
+	animation: pulse-milestone-uncolored 2s ease-in-out infinite;
 }
 
 .timeline-milestone-landscape.today .timeline-milestone-stem-landscape {
-  animation: pulse-stem-colored 2s ease-in-out infinite;
+	animation: pulse-stem-colored 2s ease-in-out infinite;
 }
 
-.timeline-milestone-landscape.today:not(.colored) .timeline-milestone-stem-landscape {
-  animation: pulse-stem-uncolored 2s ease-in-out infinite;
+.timeline-milestone-landscape.today:not(.colored)
+	.timeline-milestone-stem-landscape {
+	animation: pulse-stem-uncolored 2s ease-in-out infinite;
 }
 
 @keyframes pulse-milestone-colored {
-  0%, 100% {
-    background: var(--milestone-color);
-    border-color: var(--milestone-color);
-  }
-  50% {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-  }
+	0%,
+	100% {
+		background: var(--milestone-color);
+		border-color: var(--milestone-color);
+	}
+	50% {
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+	}
 }
 
 @keyframes pulse-milestone-uncolored {
-  0%, 100% {
-    background: var(--color-surface);
-    border-color: var(--color-border);
-  }
-  50% {
-    background: var(--color-primary);
-    border-color: var(--color-primary);
-  }
+	0%,
+	100% {
+		background: var(--color-surface);
+		border-color: var(--color-border);
+	}
+	50% {
+		background: var(--color-primary);
+		border-color: var(--color-primary);
+	}
 }
 
 @keyframes pulse-stem-colored {
-  0%, 100% {
-    background: var(--milestone-color);
-  }
-  50% {
-    background: var(--color-primary);
-  }
+	0%,
+	100% {
+		background: var(--milestone-color);
+	}
+	50% {
+		background: var(--color-primary);
+	}
 }
 
 @keyframes pulse-stem-uncolored {
-  0%, 100% {
-    background: var(--color-border);
-  }
-  50% {
-    background: var(--color-primary);
-  }
+	0%,
+	100% {
+		background: var(--color-border);
+	}
+	50% {
+		background: var(--color-primary);
+	}
 }
 
 .timeline-milestone-content-landscape {
-  background: var(--milestone-color, var(--color-surface));
-  border: 1px solid var(--milestone-color, var(--color-border));
-  border-radius: 8px;
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 2px 8px var(--shadow-subtle);
-  max-width: 120px;
-  position: relative;
-  z-index: 2;
+	background: var(--milestone-color, var(--color-surface));
+	border: 1px solid var(--milestone-color, var(--color-border));
+	border-radius: 8px;
+	padding: 6px 10px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	box-shadow: 0 2px 8px var(--shadow-subtle);
+	max-width: 120px;
+	position: relative;
+	z-index: 2;
 }
 
-.timeline-milestone-landscape.highlighted .timeline-milestone-content-landscape {
-  background: var(--highlight-color, var(--color-highlight-default));
-  border-color: var(--highlight-color, var(--color-highlight-default));
-  box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
+.timeline-milestone-landscape.highlighted
+	.timeline-milestone-content-landscape {
+	background: var(--highlight-color, var(--color-highlight-default));
+	border-color: var(--highlight-color, var(--color-highlight-default));
+	box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
 }
 
 .timeline-milestone-emoji {
-  font-size: 14px;
-  line-height: 1;
+	font-size: 14px;
+	line-height: 1;
 }
 
 .timeline-milestone-label {
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.2;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .timeline-milestone-stem-landscape {
-  width: 2px;
-  background: var(--milestone-color, var(--color-border));
-  flex-shrink: 0;
-  min-height: 10px;
-  z-index: 1;
+	width: 2px;
+	background: var(--milestone-color, var(--color-border));
+	flex-shrink: 0;
+	min-height: 10px;
+	z-index: 1;
 }
 
 .timeline-milestone-landscape.colored .timeline-milestone-stem-landscape {
-  background: var(--milestone-color);
+	background: var(--milestone-color);
 }
 
 .timeline-milestone-landscape.highlighted .timeline-milestone-stem-landscape {
-  background: var(--highlight-color, var(--color-highlight-default));
+	background: var(--highlight-color, var(--color-highlight-default));
 }
 
 .timeline-line-landscape {
-  position: relative;
-  height: 4px;
-  background: var(--color-border);
-  border-radius: 2px;
-  flex-shrink: 0;
+	position: relative;
+	height: 4px;
+	background: var(--color-border);
+	border-radius: 2px;
+	flex-shrink: 0;
 }
 
 .timeline-progress-landscape {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 2px;
-  transition: width 0.3s ease;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	background: var(--color-primary);
+	border-radius: 2px;
+	transition: width 0.3s ease;
 }
 
 .timeline-today-landscape {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  z-index: 10;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	cursor: pointer;
+	z-index: 10;
 }
 
 .timeline-today-dot {
-  width: 12px;
-  height: 12px;
-  background: var(--color-primary);
-  border: 2px solid var(--color-surface);
-  border-radius: 50%;
-  box-shadow: 0 2px 6px var(--shadow-medium);
-  animation: pulse-today 2s ease-in-out infinite;
+	width: 12px;
+	height: 12px;
+	background: var(--color-primary);
+	border: 2px solid var(--color-surface);
+	border-radius: 50%;
+	box-shadow: 0 2px 6px var(--shadow-medium);
+	animation: pulse-today 2s ease-in-out infinite;
 }
 
 .timeline-hover-dot-landscape {
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  cursor: pointer;
-  pointer-events: auto;
-  z-index: 5;
-  transition: transform 0.1s ease;
+	position: absolute;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	cursor: pointer;
+	pointer-events: auto;
+	z-index: 5;
+	transition: transform 0.1s ease;
 }
 
 .timeline-hover-dot-landscape.passed {
-  background: var(--color-primary);
+	background: var(--color-primary);
 }
 
 .timeline-hover-dot-landscape.future {
-  background: var(--color-text-tertiary);
+	background: var(--color-text-tertiary);
 }
 
 .timeline-hover-dot-landscape:hover {
-  transform: translate(-50%, -50%) scale(1.3);
+	transform: translate(-50%, -50%) scale(1.3);
 }
 
 @keyframes pulse-today {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.2);
+	}
 }
 
 /* Gantt section for range milestones - Landscape */
 .timeline-gantt-section-landscape {
-  position: relative;
-  flex-shrink: 0;
-  margin-top: 12px;
+	position: relative;
+	flex-shrink: 0;
+	margin-top: 12px;
 }
 
 .timeline-gantt-labels-landscape {
-  position: relative;
-  flex-shrink: 0;
-  overflow: visible;
-  margin-top: -2px;
+	position: relative;
+	flex-shrink: 0;
+	overflow: visible;
+	margin-top: -2px;
 }
 
 .timeline-gantt-item-landscape {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  transform: translateX(-50%);
-  cursor: pointer;
-  /* Stem is first child, label content is second - stem goes up */
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	transform: translateX(-50%);
+	cursor: pointer;
+	/* Stem is first child, label content is second - stem goes up */
 }
 
 .timeline-gantt-label-content-landscape {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  background: var(--bar-color, var(--color-surface-elevated));
-  border: 1px solid var(--bar-color, var(--color-border));
-  border-radius: 12px;
-  white-space: nowrap;
-  transition: opacity 0.15s ease;
-  position: relative;
-  z-index: 10;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	background: var(--bar-color, var(--color-surface-elevated));
+	border: 1px solid var(--bar-color, var(--color-border));
+	border-radius: 12px;
+	white-space: nowrap;
+	transition: opacity 0.15s ease;
+	position: relative;
+	z-index: 10;
 }
 
 .timeline-gantt-item-landscape:hover .timeline-gantt-label-content-landscape {
-  opacity: 0.85;
+	opacity: 0.85;
 }
 
-.timeline-gantt-item-landscape:not(.colored) .timeline-gantt-label-content-landscape {
-  background: var(--color-border);
-  border-color: var(--color-border);
+.timeline-gantt-item-landscape:not(.colored)
+	.timeline-gantt-label-content-landscape {
+	background: var(--color-border);
+	border-color: var(--color-border);
 }
 
-.timeline-gantt-item-landscape.highlighted .timeline-gantt-label-content-landscape {
-  box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
+.timeline-gantt-item-landscape.highlighted
+	.timeline-gantt-label-content-landscape {
+	box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
 }
 
 .timeline-gantt-label-emoji {
-  font-size: 14px;
-  line-height: 1;
+	font-size: 14px;
+	line-height: 1;
 }
 
 .timeline-gantt-label-text {
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.2;
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 1.2;
 }
 
 .timeline-gantt-stem-landscape {
-  width: 2px;
-  background: var(--bar-color, var(--color-border));
-  flex-shrink: 0;
+	width: 2px;
+	background: var(--bar-color, var(--color-border));
+	flex-shrink: 0;
 }
 
 .timeline-gantt-bars-landscape {
-  position: relative;
-  flex-shrink: 0;
+	position: relative;
+	flex-shrink: 0;
 }
 
 .timeline-gantt-bar-landscape {
-  position: absolute;
-  background: var(--bar-color, var(--color-border));
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
+	position: absolute;
+	background: var(--bar-color, var(--color-border));
+	border-radius: 4px;
+	cursor: pointer;
+	transition: opacity 0.15s ease;
 }
 
 .timeline-gantt-bar-landscape:hover {
-  opacity: 0.85;
+	opacity: 0.85;
 }
 
 .timeline-gantt-bar-landscape:not(.colored) {
-  background: var(--color-border);
+	background: var(--color-border);
 }
 
 .timeline-gantt-bar-landscape.highlighted {
-  box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
+	box-shadow: 0 0 8px var(--highlight-color, var(--color-highlight-default));
 }
 
 /* Portrait Timeline Layout */
 .timeline-view.portrait {
-  padding: 20px;
-  padding-top: 40px;
-  padding-left: 10px; /* Less padding on left to balance gantt labels */
+	padding: 20px;
+	padding-top: 40px;
+	padding-left: 10px; /* Less padding on left to balance gantt labels */
 }
 
 .timeline-content-portrait {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-  gap: 8px;
-  margin: 0 auto;
-  max-width: 100%;
+	display: flex;
+	flex-direction: row;
+	height: 100%;
+	gap: 8px;
+	margin: 0 auto;
+	max-width: 100%;
 }
 
 /* Mobile-specific adjustments for portrait timeline */
 @media (max-width: 500px) {
-  .timeline-view.portrait {
-    padding: 12px;
-    padding-top: 22px;
-    padding-bottom: 16px;
-    padding-left: 6px; /* Less padding on left to balance gantt labels */
-  }
+	.timeline-view.portrait {
+		padding: 12px;
+		padding-top: 22px;
+		padding-bottom: 16px;
+		padding-left: 6px; /* Less padding on left to balance gantt labels */
+	}
 
-  .timeline-milestone-content-portrait {
-    max-width: 70px;
-    padding: 3px 6px;
-    font-size: 10px;
-  }
+	.timeline-milestone-content-portrait {
+		max-width: 70px;
+		padding: 3px 6px;
+		font-size: 10px;
+	}
 
-  .timeline-milestone-content-portrait .timeline-milestone-emoji {
-    font-size: 10px;
-  }
+	.timeline-milestone-content-portrait .timeline-milestone-emoji {
+		font-size: 10px;
+	}
 
-  .timeline-milestone-content-portrait .timeline-milestone-label {
-    font-size: 10px;
-  }
+	.timeline-milestone-content-portrait .timeline-milestone-label {
+		font-size: 10px;
+	}
 
-  .timeline-gantt-label-portrait {
-    padding: 3px 6px;
-    font-size: 10px;
-  }
+	.timeline-gantt-label-portrait {
+		padding: 3px 6px;
+		font-size: 10px;
+	}
 
-  .timeline-weeks-portrait {
-    width: 18px;
-  }
+	.timeline-weeks-portrait {
+		width: 18px;
+	}
 
-  .timeline-weeks-portrait .timeline-week {
-    font-size: 9px;
-  }
+	.timeline-weeks-portrait .timeline-week {
+		font-size: 9px;
+	}
 
-  .timeline-months-portrait {
-    width: 24px;
-  }
+	.timeline-months-portrait {
+		width: 24px;
+	}
 
-  .timeline-months-portrait .timeline-month {
-    font-size: 9px;
-  }
+	.timeline-months-portrait .timeline-month {
+		font-size: 9px;
+	}
 }
 
 @media (max-width: 400px) {
-  .timeline-milestone-content-portrait {
-    max-width: 60px;
-  }
+	.timeline-milestone-content-portrait {
+		max-width: 60px;
+	}
 }
 
 .timeline-weeks-portrait {
-  position: relative;
-  width: 24px;
-  flex-shrink: 0;
-  height: 100%;
+	position: relative;
+	width: 24px;
+	flex-shrink: 0;
+	height: 100%;
 }
 
 .timeline-weeks-portrait .timeline-week {
-  position: absolute;
-  left: 0;
-  transform: translateY(-50%);
-  font-size: 10px;
-  color: var(--color-text-tertiary);
-  text-align: right;
-  width: 100%;
+	position: absolute;
+	left: 0;
+	transform: translateY(-50%);
+	font-size: 10px;
+	color: var(--color-text-tertiary);
+	text-align: right;
+	width: 100%;
 }
 
 .timeline-line-portrait {
-  position: relative;
-  width: 6px;
-  height: 100%;
-  background: var(--color-border);
-  border-radius: 3px;
-  flex-shrink: 0;
+	position: relative;
+	width: 6px;
+	height: 100%;
+	background: var(--color-border);
+	border-radius: 3px;
+	flex-shrink: 0;
 }
 
 .timeline-progress-portrait {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background: var(--color-primary);
-  border-radius: 3px;
-  transition: height 0.3s ease;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	background: var(--color-primary);
+	border-radius: 3px;
+	transition: height 0.3s ease;
 }
 
 .timeline-today-portrait {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  cursor: pointer;
-  z-index: 10;
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	cursor: pointer;
+	z-index: 10;
 }
 
 .timeline-hover-dot-portrait {
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  cursor: pointer;
-  pointer-events: auto;
-  z-index: 5;
-  transition: transform 0.1s ease;
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	cursor: pointer;
+	pointer-events: auto;
+	z-index: 5;
+	transition: transform 0.1s ease;
 }
 
 .timeline-hover-dot-portrait.passed {
-  background: var(--color-primary);
+	background: var(--color-primary);
 }
 
 .timeline-hover-dot-portrait.future {
-  background: var(--color-text-tertiary);
+	background: var(--color-text-tertiary);
 }
 
 .timeline-hover-dot-portrait:hover {
-  transform: translate(-50%, -50%) scale(1.3);
+	transform: translate(-50%, -50%) scale(1.3);
 }
 
 .timeline-months-portrait {
-  position: relative;
-  width: 32px;
-  flex-shrink: 0;
-  height: 100%;
-  z-index: 2;
+	position: relative;
+	width: 32px;
+	flex-shrink: 0;
+	height: 100%;
+	z-index: 2;
 }
 
 .timeline-months-portrait .timeline-month {
-  position: absolute;
-  left: 0;
-  transform: translateY(-50%);
-  font-size: 10px;
-  color: var(--color-text-secondary);
-  font-weight: 500;
+	position: absolute;
+	left: 0;
+	transform: translateY(-50%);
+	font-size: 10px;
+	color: var(--color-text-secondary);
+	font-weight: 500;
 }
 
 /* Portrait Milestones - positioned on the right with stems going left */
 .timeline-milestones-portrait {
-  position: relative;
-  flex-shrink: 0;
-  height: 100%;
-  margin-left: -48px; /* Pull container left through months column so stems touch the line */
+	position: relative;
+	flex-shrink: 0;
+	height: 100%;
+	margin-left: -48px; /* Pull container left through months column so stems touch the line */
 }
 
 .timeline-milestone-portrait {
-  position: absolute;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  cursor: pointer;
+	position: absolute;
+	transform: translateY(-50%);
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	cursor: pointer;
 }
 
 .timeline-milestone-content-portrait {
-  background: var(--milestone-color, var(--color-surface));
-  border: 1px solid var(--milestone-color, var(--color-border));
-  border-radius: 8px;
-  padding: 4px 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 2px 8px var(--shadow-subtle);
-  z-index: 2;
-  font-size: 11px;
-  max-width: 110px;
+	background: var(--milestone-color, var(--color-surface));
+	border: 1px solid var(--milestone-color, var(--color-border));
+	border-radius: 8px;
+	padding: 4px 8px;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	box-shadow: 0 2px 8px var(--shadow-subtle);
+	z-index: 2;
+	font-size: 11px;
+	max-width: 110px;
 }
 
 .timeline-milestone-content-portrait .timeline-milestone-emoji {
-  font-size: 12px;
+	font-size: 12px;
 }
 
 .timeline-milestone-content-portrait .timeline-milestone-label {
-  font-size: 11px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-  min-width: 0;
+	font-size: 11px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 1;
+	min-width: 0;
 }
 
 /* Emoji-only compact milestone (collapsed state) */
 .timeline-milestone-emoji-only {
-  background: var(--milestone-color, var(--color-surface));
-  border: 1px solid var(--milestone-color, var(--color-border));
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px var(--shadow-subtle);
-  z-index: 2;
+	background: var(--milestone-color, var(--color-surface));
+	border: 1px solid var(--milestone-color, var(--color-border));
+	border-radius: 50%;
+	width: 24px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-shadow: 0 2px 8px var(--shadow-subtle);
+	z-index: 2;
 }
 
 .timeline-milestone-emoji-only .timeline-milestone-emoji {
-  font-size: 12px;
-  line-height: 1;
+	font-size: 12px;
+	line-height: 1;
 }
 
 .timeline-milestone-portrait.colored .timeline-milestone-emoji-only {
-  border-color: transparent;
+	border-color: transparent;
 }
 
 .timeline-milestone-portrait:not(.colored) .timeline-milestone-emoji-only {
-  background: var(--color-surface);
+	background: var(--color-surface);
 }
 
 .timeline-milestone-portrait.selected .timeline-milestone-content-portrait {
-  opacity: 0.8;
+	opacity: 0.8;
 }
 
 .timeline-milestone-stem-portrait {
-  width: 16px;
-  height: 2px;
-  background: var(--milestone-color, var(--color-border));
-  flex-shrink: 0;
-  z-index: 1;
+	width: 16px;
+	height: 2px;
+	background: var(--milestone-color, var(--color-border));
+	flex-shrink: 0;
+	z-index: 1;
 }
 
 .timeline-milestone-portrait.colored .timeline-milestone-stem-portrait {
-  background: var(--milestone-color);
+	background: var(--milestone-color);
 }
 
 /* Portrait milestone today pulse animations */
 .timeline-milestone-portrait.today .timeline-milestone-content-portrait {
-  animation: pulse-milestone-colored 2s ease-in-out infinite;
+	animation: pulse-milestone-colored 2s ease-in-out infinite;
 }
 
-.timeline-milestone-portrait.today:not(.colored) .timeline-milestone-content-portrait {
-  animation: pulse-milestone-uncolored 2s ease-in-out infinite;
+.timeline-milestone-portrait.today:not(.colored)
+	.timeline-milestone-content-portrait {
+	animation: pulse-milestone-uncolored 2s ease-in-out infinite;
 }
 
 .timeline-milestone-portrait.today .timeline-milestone-stem-portrait {
-  animation: pulse-stem-colored 2s ease-in-out infinite;
+	animation: pulse-stem-colored 2s ease-in-out infinite;
 }
 
-.timeline-milestone-portrait.today:not(.colored) .timeline-milestone-stem-portrait {
-  animation: pulse-stem-uncolored 2s ease-in-out infinite;
+.timeline-milestone-portrait.today:not(.colored)
+	.timeline-milestone-stem-portrait {
+	animation: pulse-stem-uncolored 2s ease-in-out infinite;
 }
 
 /* Emoji-only pulse animations */
 .timeline-milestone-portrait.today .timeline-milestone-emoji-only {
-  animation: pulse-milestone-colored 2s ease-in-out infinite;
+	animation: pulse-milestone-colored 2s ease-in-out infinite;
 }
 
-.timeline-milestone-portrait.today:not(.colored) .timeline-milestone-emoji-only {
-  animation: pulse-milestone-uncolored 2s ease-in-out infinite;
+.timeline-milestone-portrait.today:not(.colored)
+	.timeline-milestone-emoji-only {
+	animation: pulse-milestone-uncolored 2s ease-in-out infinite;
 }
 
 /* Portrait Gantt */
 .timeline-gantt-portrait {
-  position: relative;
-  flex-shrink: 0;
-  height: 100%;
-  margin-right: -8px; /* Compensate for flex gap so stems touch the line */
+	position: relative;
+	flex-shrink: 0;
+	height: 100%;
+	margin-right: -8px; /* Compensate for flex gap so stems touch the line */
 }
 
 .timeline-gantt-item-portrait {
-  position: absolute;
-  right: 24px;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  cursor: pointer;
+	position: absolute;
+	right: 24px;
+	transform: translateY(-50%);
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	cursor: pointer;
 }
 
 .timeline-gantt-label-portrait {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: var(--bar-color, var(--color-border));
-  border: 1px solid var(--bar-color, var(--color-border));
-  border-radius: 12px;
-  white-space: nowrap;
-  z-index: 2;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: var(--bar-color, var(--color-border));
+	border: 1px solid var(--bar-color, var(--color-border));
+	border-radius: 12px;
+	white-space: nowrap;
+	z-index: 2;
 }
 
 .timeline-gantt-item-portrait:not(.colored) .timeline-gantt-label-portrait {
-  background: var(--color-border);
+	background: var(--color-border);
 }
 
 .timeline-gantt-bar-portrait {
-  position: absolute;
-  right: 24px;
-  width: 6px;
-  background: var(--bar-color, var(--color-border));
-  border-radius: 3px;
-  cursor: pointer;
+	position: absolute;
+	right: 24px;
+	width: 6px;
+	background: var(--bar-color, var(--color-border));
+	border-radius: 3px;
+	cursor: pointer;
 }
 
 .timeline-gantt-bar-portrait.colored {
-  background: var(--bar-color);
+	background: var(--bar-color);
 }
 
 .timeline-gantt-stem-portrait {
-  width: 16px;
-  height: 2px;
-  background: var(--bar-color, var(--color-border));
-  flex-shrink: 0;
-  z-index: 1;
+	width: 16px;
+	height: 2px;
+	background: var(--bar-color, var(--color-border));
+	flex-shrink: 0;
+	z-index: 1;
 }
