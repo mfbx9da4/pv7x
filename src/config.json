@@ -63,6 +63,13 @@
 			"color": "subtle"
 		},
 		{
+			"date": "2026-01-29",
+			"endDate": "2026-02-03",
+			"label": "Leandro Visiting",
+			"emoji": "👨‍💼",
+			"color": "gold"
+		},
+		{
 			"date": "2026-02-11",
 			"label": "Nuchal Scan",
 			"emoji": "🩺",
