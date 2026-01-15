@@ -50,6 +50,12 @@
 			"color": "subtle"
 		},
 		{
+			"date": "2026-01-20",
+			"label": "Test Event",
+			"emoji": "🧪",
+			"color": "subtle"
+		},
+		{
 			"date": "2026-01-23",
 			"label": "Blood Tests",
 			"emoji": "🩸",
@@ -132,6 +138,12 @@
 			"description": "8 - 11 May"
 		},
 		{
+			"date": "2026-05-22",
+			"label": "Charlie's Wedding",
+			"emoji": "💒",
+			"color": "pink"
+		},
+		{
 			"date": "2026-05-23",
 			"endDate": "2026-05-31",
 			"label": "May Half Term",
@@ -149,12 +161,6 @@
 		{
 			"date": "2026-06-07",
 			"label": "Dan & Bex Wedding",
-			"emoji": "💒",
-			"color": "pink"
-		},
-		{
-			"date": "2026-05-22",
-			"label": "Charlie's Wedding",
 			"emoji": "💒",
 			"color": "pink"
 		},
