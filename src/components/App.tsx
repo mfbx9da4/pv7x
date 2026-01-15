@@ -13,6 +13,7 @@ import { TimelineView } from "./TimelineView";
 import { InfoBar } from "./InfoBar";
 import { Tooltip } from "./Tooltip";
 import { LandingView } from "./LandingView";
+import { ConfigEditor } from "./ConfigEditor";
 import { useViewMode, getNextViewMode } from "../hooks/useViewMode";
 import { useContentSize } from "../hooks/useContentSize";
 import { CONFIG } from "../config";
@@ -175,10 +176,12 @@ export function App() {
 	const [showLanding, setShowLanding] = useState(() => {
 		return !localStorage.getItem(LANDING_SEEN_KEY);
 	});
+	const [showConfigEditor, setShowConfigEditor] = useState(false);
 
-	// CMD+; to toggle random milestones for testing
+	// Keyboard shortcuts
 	useEffect(() => {
 		const handleKeyDown = (e: KeyboardEvent) => {
+			// CMD+; to toggle random milestones for testing
 			if (e.metaKey && e.key === ";") {
 				e.preventDefault();
 				setRandomMilestones((prev) =>
@@ -186,6 +189,11 @@ export function App() {
 						? generateRandomMilestones(CONFIG.startDate, CONFIG.dueDate)
 						: null,
 				);
+			}
+			// CMD+E to toggle config editor
+			if (e.metaKey && e.key === "e") {
+				e.preventDefault();
+				setShowConfigEditor((prev) => !prev);
 			}
 		};
 		window.addEventListener("keydown", handleKeyDown);
@@ -399,6 +407,9 @@ export function App() {
 					annotationEmojis={annotationEmojis}
 					annotationDescriptions={annotationDescriptions}
 				/>
+			)}
+			{showConfigEditor && (
+				<ConfigEditor onClose={() => setShowConfigEditor(false)} />
 			)}
 		</div>
 	);
