@@ -5,7 +5,7 @@ const API_URL =
 		? "http://localhost:8787"
 		: "https://meanwhile-config-editor.dalberto-adler.workers.dev";
 
-const PIN_STORAGE_KEY = "meanwhile-config-pin";
+const PASSWORD_STORAGE_KEY = "meanwhile-config-password";
 
 type Message = {
 	role: "user" | "assistant";
@@ -18,21 +18,21 @@ type Props = {
 };
 
 export function ConfigEditor({ onClose }: Props) {
-	const [pin, setPin] = useState(() => localStorage.getItem(PIN_STORAGE_KEY) || "");
-	const [pinError, setPinError] = useState(false);
+	const [password, setPassword] = useState(() => localStorage.getItem(PASSWORD_STORAGE_KEY) || "");
+	const [passwordError, setPasswordError] = useState(false);
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [input, setInput] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
-	const isPinEntered = pin.length === 4;
+	const isPasswordEntered = password.length > 0;
 
 	useEffect(() => {
-		if (isPinEntered) {
+		if (isPasswordEntered) {
 			inputRef.current?.focus();
 		}
-	}, [isPinEntered]);
+	}, [isPasswordEntered]);
 
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -49,10 +49,10 @@ export function ConfigEditor({ onClose }: Props) {
 		return () => window.removeEventListener("keydown", handleKeyDown);
 	}, [onClose]);
 
-	const handlePinChange = (e: Event) => {
-		const value = (e.target as HTMLInputElement).value.replace(/\D/g, "").slice(0, 4);
-		setPin(value);
-		setPinError(false);
+	const handlePasswordChange = (e: Event) => {
+		const value = (e.target as HTMLInputElement).value;
+		setPassword(value);
+		setPasswordError(false);
 	};
 
 	const handleSubmit = async (e: Event) => {
@@ -68,14 +68,14 @@ export function ConfigEditor({ onClose }: Props) {
 			const response = await fetch(`${API_URL}/api/chat`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ pin, message: userMessage }),
+				body: JSON.stringify({ pin: password, message: userMessage }),
 			});
 
 			if (response.status === 401) {
-				// Invalid PIN - clear stored PIN
-				localStorage.removeItem(PIN_STORAGE_KEY);
-				setPin("");
-				setPinError(true);
+				// Invalid password - clear stored password
+				localStorage.removeItem(PASSWORD_STORAGE_KEY);
+				setPassword("");
+				setPasswordError(true);
 				setMessages((prev) => prev.slice(0, -1)); // Remove the user message
 				setInput(userMessage); // Restore input
 				return;
@@ -89,8 +89,8 @@ export function ConfigEditor({ onClose }: Props) {
 					{ role: "assistant", content: `Error: ${data.error}` },
 				]);
 			} else {
-				// PIN worked - store it
-				localStorage.setItem(PIN_STORAGE_KEY, pin);
+				// Password worked - store it
+				localStorage.setItem(PASSWORD_STORAGE_KEY, password);
 				setMessages((prev) => [
 					...prev,
 					{
@@ -120,21 +120,18 @@ export function ConfigEditor({ onClose }: Props) {
 					</button>
 				</div>
 
-				{!isPinEntered ? (
-					<div class="config-editor-pin">
-						<label>Enter PIN to continue</label>
+				{!isPasswordEntered ? (
+					<div class="config-editor-password">
+						<label>Enter password to continue</label>
 						<input
 							type="password"
-							inputMode="numeric"
-							pattern="[0-9]*"
-							maxLength={4}
-							value={pin}
-							onInput={handlePinChange}
-							placeholder="****"
+							value={password}
+							onInput={handlePasswordChange}
+							placeholder="password"
 							autoFocus
-							class={pinError ? "error" : ""}
+							class={passwordError ? "error" : ""}
 						/>
-						{pinError && <span class="pin-error">Invalid PIN</span>}
+						{passwordError && <span class="password-error">Invalid password</span>}
 					</div>
 				) : (
 					<>

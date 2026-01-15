@@ -1843,7 +1843,7 @@ body {
 	color: var(--color-text-primary);
 }
 
-.config-editor-pin {
+.config-editor-password {
 	padding: 40px 20px;
 	display: flex;
 	flex-direction: column;
@@ -1851,16 +1851,15 @@ body {
 	gap: 16px;
 }
 
-.config-editor-pin label {
+.config-editor-password label {
 	font-size: 14px;
 	color: var(--color-text-secondary);
 }
 
-.config-editor-pin input {
-	width: 120px;
-	font-size: 24px;
+.config-editor-password input {
+	width: 200px;
+	font-size: 16px;
 	text-align: center;
-	letter-spacing: 8px;
 	padding: 12px;
 	border: 2px solid var(--color-border);
 	border-radius: 8px;
@@ -1868,16 +1867,16 @@ body {
 	color: var(--color-text-primary);
 }
 
-.config-editor-pin input:focus {
+.config-editor-password input:focus {
 	outline: none;
 	border-color: var(--color-primary);
 }
 
-.config-editor-pin input.error {
+.config-editor-password input.error {
 	border-color: var(--color-red);
 }
 
-.pin-error {
+.password-error {
 	color: var(--color-red);
 	font-size: 12px;
 }
