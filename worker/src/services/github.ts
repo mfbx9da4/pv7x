@@ -9,6 +9,17 @@ type GitHubFileResponse = {
 	encoding: string;
 };
 
+// UTF-8 safe base64 encoding/decoding
+function utf8ToBase64(str: string): string {
+	return btoa(String.fromCharCode(...new TextEncoder().encode(str)));
+}
+
+function base64ToUtf8(base64: string): string {
+	const binary = atob(base64);
+	const bytes = new Uint8Array([...binary].map((c) => c.charCodeAt(0)));
+	return new TextDecoder().decode(bytes);
+}
+
 export async function getConfig(token: string): Promise<string> {
 	const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CONFIG_PATH}?ref=${BRANCH}`;
 
@@ -27,7 +38,7 @@ export async function getConfig(token: string): Promise<string> {
 	const data = (await response.json()) as GitHubFileResponse;
 
 	// GitHub returns base64 encoded content
-	const content = atob(data.content.replace(/\n/g, ""));
+	const content = base64ToUtf8(data.content.replace(/\n/g, ""));
 	return content;
 }
 
@@ -66,7 +77,7 @@ export async function commitConfig(
 		},
 		body: JSON.stringify({
 			message: `[Config Editor] ${commitMessage}`,
-			content: btoa(newContent),
+			content: utf8ToBase64(newContent),
 			sha: currentFile.sha,
 			branch: BRANCH,
 		}),
