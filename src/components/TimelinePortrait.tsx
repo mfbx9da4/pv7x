@@ -62,8 +62,12 @@ function measureTextWidth(text: string, font: string): number {
 	return ctx.measureText(text).width;
 }
 
+// Gap between milestones (2px padding on each side = 4px between items)
+const MILESTONE_GAP = 4;
+
 function overlapsY(a: LayoutInput, b: LayoutInput): boolean {
-	return !(a.top + a.height <= b.top || b.top + b.height <= a.top);
+	// Include gap in vertical overlap check
+	return !(a.top + a.height + MILESTONE_GAP <= b.top || b.top + b.height + MILESTONE_GAP <= a.top);
 }
 
 function layoutMilestonesCore<T extends LayoutInput>(
@@ -112,8 +116,8 @@ function layoutMilestonesCore<T extends LayoutInput>(
 
 			let x = 0;
 			for (const { start, end } of others) {
-				if (x + w <= start) break;
-				if (x < end) x = end;
+				if (x + w + MILESTONE_GAP <= start) break;
+				if (x < end + MILESTONE_GAP) x = end + MILESTONE_GAP;
 			}
 
 			base.left = x;
