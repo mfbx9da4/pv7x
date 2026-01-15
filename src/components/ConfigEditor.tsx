@@ -20,19 +20,21 @@ type Props = {
 export function ConfigEditor({ onClose }: Props) {
 	const [password, setPassword] = useState(() => localStorage.getItem(PASSWORD_STORAGE_KEY) || "");
 	const [passwordError, setPasswordError] = useState(false);
+	const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem(PASSWORD_STORAGE_KEY));
 	const [messages, setMessages] = useState<Message[]>([]);
 	const [input, setInput] = useState("");
 	const [loading, setLoading] = useState(false);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
-
-	const isPasswordEntered = password.length > 0;
+	const passwordInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
-		if (isPasswordEntered) {
+		if (isAuthenticated) {
 			inputRef.current?.focus();
+		} else {
+			passwordInputRef.current?.focus();
 		}
-	}, [isPasswordEntered]);
+	}, [isAuthenticated]);
 
 	useEffect(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -53,6 +55,13 @@ export function ConfigEditor({ onClose }: Props) {
 		const value = (e.target as HTMLInputElement).value;
 		setPassword(value);
 		setPasswordError(false);
+	};
+
+	const handlePasswordSubmit = (e: Event) => {
+		e.preventDefault();
+		if (password.trim()) {
+			setIsAuthenticated(true);
+		}
 	};
 
 	const handleSubmit = async (e: Event) => {
@@ -76,6 +85,7 @@ export function ConfigEditor({ onClose }: Props) {
 				localStorage.removeItem(PASSWORD_STORAGE_KEY);
 				setPassword("");
 				setPasswordError(true);
+				setIsAuthenticated(false);
 				setMessages((prev) => prev.slice(0, -1)); // Remove the user message
 				setInput(userMessage); // Restore input
 				return;
@@ -120,10 +130,11 @@ export function ConfigEditor({ onClose }: Props) {
 					</button>
 				</div>
 
-				{!isPasswordEntered ? (
-					<div class="config-editor-password">
+				{!isAuthenticated ? (
+					<form class="config-editor-password" onSubmit={handlePasswordSubmit}>
 						<label>Enter password to continue</label>
 						<input
+							ref={passwordInputRef}
 							type="password"
 							value={password}
 							onInput={handlePasswordChange}
@@ -131,8 +142,11 @@ export function ConfigEditor({ onClose }: Props) {
 							autoFocus
 							class={passwordError ? "error" : ""}
 						/>
+						<button type="submit" disabled={!password.trim()}>
+							Enter
+						</button>
 						{passwordError && <span class="password-error">Invalid password</span>}
-					</div>
+					</form>
 				) : (
 					<>
 						<div class="config-editor-messages">

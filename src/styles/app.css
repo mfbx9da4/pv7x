@@ -1876,6 +1876,21 @@ body {
 	border-color: var(--color-red);
 }
 
+.config-editor-password button {
+	padding: 10px 24px;
+	font-size: 14px;
+	background: var(--color-primary);
+	color: white;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+}
+
+.config-editor-password button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 .password-error {
 	color: var(--color-red);
 	font-size: 12px;
