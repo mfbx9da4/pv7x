@@ -1,187 +1,38 @@
-export const CONFIG = {
-	startDate: new Date(2025, 10, 20), // November 20, 2025
-	dueDate: new Date(2026, 7, 20), // August 20, 2026
-	todayEmoji: "📍",
-	milestones: [
-		{
-			date: new Date(2025, 10, 20),
-			label: "Start",
-			emoji: "🌱",
-			color: "blue",
-			description: "Start of first trimester",
-		},
-		{
-			date: new Date(2025, 11, 24),
-			label: "Discovery",
-			emoji: "🕵️‍♀️",
-			color: "gold",
-		},
-		{
-			date: new Date(2025, 11, 28),
-			label: "Hospital Scan",
-			emoji: "🏥",
-			color: "subtle",
-			description: "Confirmed heartbeat and normal implantation",
-		},
-		{
-			date: new Date(2026, 0, 6),
-			label: "Dr Rodin",
-			emoji: "👨‍⚕️",
-			color: "subtle",
-			description: "Given your history, a biological gift!",
-		},
-		{
-			date: new Date(2026, 0, 8),
-			label: "NHS Self Referral",
-			emoji: "📉",
-			color: "subtle",
-			description: "Chance of miscarriage now below 5%",
-		},
-		{
-			date: new Date(2026, 0, 12),
-			label: "León's Birthday",
-			emoji: "🎂",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 0, 19),
-			label: "Flu Jab",
-			emoji: "💉",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 0, 23),
-			label: "Blood Tests",
-			emoji: "🩸",
-			color: "salmon",
-			description:
-				"10 week blood tests which should reveal gender and any adverse genetic issues at The Fetal Medicine Centre",
-		},
-		{
-			date: new Date(2026, 0, 29),
-			label: "Yael's Birthday",
-			emoji: "🎂",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 1, 11),
-			label: "Nuchal Scan",
-			emoji: "🩺",
-			color: "salmon",
-		},
-		{
-			date: new Date(2026, 1, 12),
-			label: "Announce!",
-			emoji: "📢",
-			color: "blue",
-			description: "Start of second trimester",
-		},
-		{
-			date: new Date(2026, 1, 16),
-			endDate: new Date(2026, 1, 20),
-			label: "Secret Holiday",
-			emoji: "🤫",
-			color: "gold",
-			description: "Until 20 Feb",
-		},
-		{
-			date: new Date(2026, 2, 10),
-			label: "James' Baby Due",
-			emoji: "🐣",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 2, 15),
-			endDate: new Date(2026, 2, 20),
-			label: "Madrid Offsite",
-			emoji: "🇪🇸",
-			color: "gold",
-			description: "15 - 20 Mar",
-		},
-		{
-			date: new Date(2026, 2, 28),
-			endDate: new Date(2026, 3, 13),
-			label: "Easter Holidays",
-			emoji: "🏝️",
-			color: "subtle",
-			description: "School resumes 14 Apr",
-		},
-		{
-			date: new Date(2026, 2, 29),
-			label: "Vishal's Baby Due",
-			emoji: "🐣",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 3, 12),
-			label: "Engagement Party",
-			emoji: "🎉",
-			color: "orange",
-		},
-		{
-			date: new Date(2026, 3, 26),
-			label: "Seb's Baby Due",
-			emoji: "🐣",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 4, 8),
-			endDate: new Date(2026, 4, 11),
-			label: "Daniel's Stag",
-			emoji: "🎩",
-			color: "gold",
-			description: "8 - 11 May",
-		},
-		{
-			date: new Date(2026, 4, 23),
-			endDate: new Date(2026, 4, 31),
-			label: "May Half Term",
-			emoji: "🏝️",
-			color: "subtle",
-			description: "School resumes 1 June",
-		},
-		{
-			date: new Date(2026, 4, 28),
-			label: "Third Trimester",
-			emoji: "🤰",
-			color: "blue",
-			description: "Start of third trimester",
-		},
-		{
-			date: new Date(2026, 5, 7),
-			label: "Dan & Bex Wedding",
-			emoji: "💒",
-			color: "pink",
-		},
-		{
-			date: new Date(2026, 4, 22),
-			label: "Charlie's Wedding",
-			emoji: "💒",
-			color: "pink",
-		},
-		{
-			date: new Date(2026, 6, 1),
-			label: "Kry's Baby Due",
-			emoji: "🐣",
-			color: "subtle",
-		},
-		{
-			date: new Date(2026, 6, 12),
-			label: "Anakha's Wedding",
-			emoji: "💒",
-			color: "pink",
-		},
-		{
-			date: new Date(2026, 7, 13),
-			label: "C Section",
-			emoji: "🥗",
-			color: "salmon",
-			description: "Potential scheduled date of Caesarean section birth",
-		},
-		{ date: new Date(2026, 7, 20), label: "Due", emoji: "🐣", color: "red" },
-	],
+import configData from "./config.json";
+
+// Type for milestones in the JSON
+type MilestoneJSON = {
+	date: string;
+	endDate?: string;
+	label: string;
+	emoji: string;
+	color?: string;
+	description?: string;
 };
 
+// Type for the parsed config
+export type Milestone = {
+	date: Date;
+	endDate?: Date;
+	label: string;
+	emoji: string;
+	color?: string;
+	description?: string;
+};
+
+// Parse dates from JSON strings
+export const CONFIG = {
+	startDate: new Date(configData.startDate),
+	dueDate: new Date(configData.dueDate),
+	todayEmoji: configData.todayEmoji,
+	milestones: (configData.milestones as MilestoneJSON[]).map((m) => ({
+		...m,
+		date: new Date(m.date),
+		endDate: m.endDate ? new Date(m.endDate) : undefined,
+	})) as Milestone[],
+};
+
+// Derived exports (computed from config data)
 export const ANNOTATION_EMOJIS: Record<string, string> = {
 	Today: CONFIG.todayEmoji,
 	...Object.fromEntries(CONFIG.milestones.map((m) => [m.label, m.emoji])),

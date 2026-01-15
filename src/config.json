@@ -1,0 +1,187 @@
+{
+	"startDate": "2025-11-20",
+	"dueDate": "2026-08-20",
+	"todayEmoji": "📍",
+	"milestones": [
+		{
+			"date": "2025-11-20",
+			"label": "Start",
+			"emoji": "🌱",
+			"color": "blue",
+			"description": "Start of first trimester"
+		},
+		{
+			"date": "2025-12-24",
+			"label": "Discovery",
+			"emoji": "🕵️‍♀️",
+			"color": "gold"
+		},
+		{
+			"date": "2025-12-28",
+			"label": "Hospital Scan",
+			"emoji": "🏥",
+			"color": "subtle",
+			"description": "Confirmed heartbeat and normal implantation"
+		},
+		{
+			"date": "2026-01-06",
+			"label": "Dr Rodin",
+			"emoji": "👨‍⚕️",
+			"color": "subtle",
+			"description": "Given your history, a biological gift!"
+		},
+		{
+			"date": "2026-01-08",
+			"label": "NHS Self Referral",
+			"emoji": "📉",
+			"color": "subtle",
+			"description": "Chance of miscarriage now below 5%"
+		},
+		{
+			"date": "2026-01-12",
+			"label": "León's Birthday",
+			"emoji": "🎂",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-01-19",
+			"label": "Flu Jab",
+			"emoji": "💉",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-01-23",
+			"label": "Blood Tests",
+			"emoji": "🩸",
+			"color": "salmon",
+			"description": "10 week blood tests which should reveal gender and any adverse genetic issues at The Fetal Medicine Centre"
+		},
+		{
+			"date": "2026-01-29",
+			"label": "Yael's Birthday",
+			"emoji": "🎂",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-02-11",
+			"label": "Nuchal Scan",
+			"emoji": "🩺",
+			"color": "salmon"
+		},
+		{
+			"date": "2026-02-12",
+			"label": "Announce!",
+			"emoji": "📢",
+			"color": "blue",
+			"description": "Start of second trimester"
+		},
+		{
+			"date": "2026-02-16",
+			"endDate": "2026-02-20",
+			"label": "Secret Holiday",
+			"emoji": "🤫",
+			"color": "gold",
+			"description": "Until 20 Feb"
+		},
+		{
+			"date": "2026-03-10",
+			"label": "James' Baby Due",
+			"emoji": "🐣",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-03-15",
+			"endDate": "2026-03-20",
+			"label": "Madrid Offsite",
+			"emoji": "🇪🇸",
+			"color": "gold",
+			"description": "15 - 20 Mar"
+		},
+		{
+			"date": "2026-03-28",
+			"endDate": "2026-04-13",
+			"label": "Easter Holidays",
+			"emoji": "🏝️",
+			"color": "subtle",
+			"description": "School resumes 14 Apr"
+		},
+		{
+			"date": "2026-03-29",
+			"label": "Vishal's Baby Due",
+			"emoji": "🐣",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-04-12",
+			"label": "Engagement Party",
+			"emoji": "🎉",
+			"color": "orange"
+		},
+		{
+			"date": "2026-04-26",
+			"label": "Seb's Baby Due",
+			"emoji": "🐣",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-05-08",
+			"endDate": "2026-05-11",
+			"label": "Daniel's Stag",
+			"emoji": "🎩",
+			"color": "gold",
+			"description": "8 - 11 May"
+		},
+		{
+			"date": "2026-05-23",
+			"endDate": "2026-05-31",
+			"label": "May Half Term",
+			"emoji": "🏝️",
+			"color": "subtle",
+			"description": "School resumes 1 June"
+		},
+		{
+			"date": "2026-05-28",
+			"label": "Third Trimester",
+			"emoji": "🤰",
+			"color": "blue",
+			"description": "Start of third trimester"
+		},
+		{
+			"date": "2026-06-07",
+			"label": "Dan & Bex Wedding",
+			"emoji": "💒",
+			"color": "pink"
+		},
+		{
+			"date": "2026-05-22",
+			"label": "Charlie's Wedding",
+			"emoji": "💒",
+			"color": "pink"
+		},
+		{
+			"date": "2026-07-01",
+			"label": "Kry's Baby Due",
+			"emoji": "🐣",
+			"color": "subtle"
+		},
+		{
+			"date": "2026-07-12",
+			"label": "Anakha's Wedding",
+			"emoji": "💒",
+			"color": "pink"
+		},
+		{
+			"date": "2026-08-13",
+			"label": "C Section",
+			"emoji": "🥗",
+			"color": "salmon",
+			"description": "Potential scheduled date of Caesarean section birth"
+		},
+		{
+			"date": "2026-08-20",
+			"label": "Due",
+			"emoji": "🐣",
+			"color": "red"
+		}
+	]
+}

@@ -1,0 +1,8 @@
+name = "meanwhile-config-editor"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+# Environment variables (set via wrangler secret put)
+# PIN - 4-digit auth PIN
+# MISTRAL_API_KEY - Mistral AI API key
+# GITHUB_TOKEN - GitHub PAT with repo write access
