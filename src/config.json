@@ -98,12 +98,6 @@
 			"description": "15 - 20 Mar"
 		},
 		{
-			"date": "2026-03-16",
-			"label": "Test Event",
-			"emoji": "🧪",
-			"color": "subtle"
-		},
-		{
 			"date": "2026-03-28",
 			"endDate": "2026-04-13",
 			"label": "Easter Holidays",
