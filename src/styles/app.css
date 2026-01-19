@@ -1998,7 +1998,7 @@ body {
 	border-radius: 20px;
 	background: var(--color-background);
 	color: var(--color-text-primary);
-	font-size: 14px;
+	font-size: 16px; /* 16px minimum prevents iOS Safari auto-zoom on focus */
 }
 
 .config-editor-input input:focus {
