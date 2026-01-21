@@ -170,10 +170,15 @@ export function FillScreenView({
 								? { viewTransitionName: "today-marker" }
 								: {}),
 						...(day.color && day.color !== "subtle"
-							? {
-									background: `var(--color-${day.color})`,
-									color: `var(--color-${day.color}-text)`,
-								}
+							? day.isToday
+								? {
+										"--day-target-bg": `var(--color-${day.color})`,
+										"--day-target-color": `var(--color-${day.color}-text)`,
+									}
+								: {
+										background: `var(--color-${day.color})`,
+										color: `var(--color-${day.color}-text)`,
+									}
 							: {}),
 						...(highlightedDays.value.indices.has(day.index) &&
 						highlightedDays.value.color

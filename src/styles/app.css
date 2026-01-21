@@ -246,6 +246,10 @@ body {
 	animation: pulse-bg-milestone 4s ease-in-out infinite;
 }
 
+.day.today.milestone:not(.uncolored-milestone) {
+	animation: pulse-bg-colored 4s ease-in-out infinite;
+}
+
 @keyframes pulse-bg-odd {
 	0%,
 	100% {
@@ -867,6 +871,10 @@ body {
 	animation: pulse-bg-milestone 4s ease-in-out infinite;
 }
 
+.weekly-cell.today.milestone:not(.uncolored-milestone) {
+	animation: pulse-bg-colored 4s ease-in-out infinite;
+}
+
 @keyframes pulse-bg-milestone {
 	0%,
 	100% {
@@ -876,6 +884,20 @@ body {
 	50% {
 		background: var(--color-milestone-future);
 		border: 1px solid var(--color-milestone-future-border);
+	}
+}
+
+@keyframes pulse-bg-colored {
+	0%,
+	100% {
+		background: var(--color-passed-odd);
+		border: 1px solid var(--color-passed-odd);
+		color: var(--color-text-on-color);
+	}
+	50% {
+		background: var(--day-target-bg);
+		border: 1px solid var(--day-target-bg);
+		color: var(--day-target-color, var(--color-text-on-color));
 	}
 }
 

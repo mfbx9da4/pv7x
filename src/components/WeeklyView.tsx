@@ -213,7 +213,9 @@ export function WeeklyView({
 												gridColumn: weekIndex + 1,
 												gridRow: dayOfWeek + 1,
 												...(day.color && day.color !== "subtle"
-													? { background: `var(--color-${day.color})` }
+													? day.isToday
+														? { "--day-target-bg": `var(--color-${day.color})` }
+														: { background: `var(--color-${day.color})` }
 													: {}),
 												...(highlightedDays.value.indices.has(day.index) &&
 												highlightedDays.value.color
@@ -307,7 +309,9 @@ export function WeeklyView({
 													? { viewTransitionName: "today-marker" }
 													: {}),
 											...(day.color && day.color !== "subtle"
-												? { background: `var(--color-${day.color})` }
+												? day.isToday
+													? { "--day-target-bg": `var(--color-${day.color})` }
+													: { background: `var(--color-${day.color})` }
 												: {}),
 											...(highlightedDays.value.indices.has(day.index) &&
 											highlightedDays.value.color
